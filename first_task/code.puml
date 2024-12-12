@@ -1,0 +1,18 @@
+@startuml
+participant API_Gateway as "API Gateway"
+participant DeviceAPI as "API Управления Устройствами"
+participant CommandHandler as "Обработчик Команд"
+participant DeviceStateManager as "Менеджер Состояния Устройств"
+participant DeviceManagementDB as "БД Управления Устройствами"
+participant Kafka as "Кафка"
+
+User -> API_Gateway : "POST /device/on"
+API_Gateway -> DeviceAPI : "Запрос включения устройства"
+DeviceAPI -> CommandHandler : "Обработка команды"
+CommandHandler -> DeviceStateManager : "Включить устройство"
+DeviceStateManager -> DeviceManagementDB : "Обновление состояния устройства"
+DeviceStateManager -> Kafka : "Публикация события об изменении состояния"
+Kafka -> NotificationService : "Отправка уведомления о включении устройства"
+NotificationService -> User : "Уведомление об успешном включении устройства"
+
+@enduml

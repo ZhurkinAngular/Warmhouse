@@ -1,0 +1,25 @@
+@startuml
+!define RECTANGLE class
+
+RECTANGLE System as "Монолит" {
+  RECTANGLE DeviceManagement as "Управление устройствами"
+  RECTANGLE TemperatureMonitoring as "Мониторинг температуры"
+  RECTANGLE TemperatureRegulation as "Регулирование температуры"
+  RECTANGLE UserInterface as "Пользовательский интерфейс"
+}
+
+User --> UserInterface : "Удалённое управление температурой"
+UserInterface --> DeviceManagement : "Команды на управление температурой"
+UserInterface --> TemperatureMonitoring : "Запрос текущей температуры"
+TemperatureMonitoring --> DeviceManagement : "Данные о текущей температуре"
+TemperatureMonitoring --> TemperatureSensors : "Данные с датчиков"
+
+DeviceManagement --> TemperatureRegulation : "Заданная температура"
+TemperatureRegulation --> DeviceManagement : "Регулировка температуры"
+
+rectangle TemperatureSensors as "Датчики температуры" {
+}
+
+TemperatureSensors --> TemperatureMonitoring : "Текущие данные о температуре"
+
+@enduml

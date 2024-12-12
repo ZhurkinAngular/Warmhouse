@@ -1,0 +1,68 @@
+asyncapi: '2.0.0'
+info:
+  title: Heating Control System Async API
+  version: 1.0.0
+  description: Асинхронный API для управления отоплением и мониторинга температуры.
+
+servers:
+  production:
+    url: kafka
+    protocol: kafka
+
+channels:
+  temperature-measurement:
+    description: Канал для получения новых измерений температуры от устройств.
+    subscribe:
+      summary: Подписка на новые измерения температуры
+      operationId: newTemperatureMeasurement
+      message:
+        contentType: application/json
+        payload:
+          type: object
+          properties:
+            device_id:
+              type: string
+            temperature:
+              type: number
+              format: float
+            timestamp:
+              type: string
+              format: date-time
+
+  control-command-sent:
+    description: Канал для отправки команд управления устройствами.
+    publish:
+      summary: Публикация команды управления
+      operationId: controlCommandSent
+      message:
+        contentType: application/json
+        payload:
+          type: object
+          properties:
+            device_id:
+              type: string
+            command:
+              type: string
+            timestamp:
+              type: string
+              format: date-time
+
+  user-notification:
+    description: Канал для отправки уведомлений пользователям.
+    publish:
+      summary: Публикация уведомления для пользователя
+      operationId: userNotification
+      message:
+        contentType: application/json
+        payload:
+          type: object
+          properties:
+            user_id:
+              type: string
+            message:
+              type: string
+            event_type:
+              type: string
+            timestamp:
+              type: string
+              format: date-time

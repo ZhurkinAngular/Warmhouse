@@ -1,0 +1,202 @@
+openapi: 3.0.0
+info:
+  title: Heating Control System API
+  description: API для управления отоплением и мониторинга температуры.
+  version: 1.0.0
+servers:
+  - url: http://
+    description: Основной сервер API
+paths:
+  /devices/{id}:
+    get:
+      summary: Получить информацию об устройстве
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Идентификатор устройства
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Устройство найдено
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  type_id:
+                    type: string
+                  house_id:
+                    type: string
+                  serial_number:
+                    type: string
+                  status:
+                    type: string
+        '404':
+          description: Устройство не найдено
+        '500':
+          description: Ошибка сервера
+
+  /devices/{id}/turn-on:
+    post:
+      summary: Включить устройство
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Идентификатор устройства
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: string
+      responses:
+        '200':
+          description: Устройство успешно включено
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  device_id:
+                    type: string
+                  status:
+                    type: string
+        '404':
+          description: Устройство не найдено
+        '500':
+          description: Ошибка сервера
+
+  /houses/{id}/current-temperature:
+    get:
+      summary: Получить текущую температуру в доме
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Идентификатор дома
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Температура получена
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  house_id:
+                    type: string
+                  current_temperature:
+                    type: number
+                    format: float
+                  timestamp:
+                    type: string
+                    format: date-time
+        '404':
+          description: Дом не найден
+        '500':
+          description: Ошибка сервера
+
+  /houses/{id}/temperature-settings:
+    put:
+      summary: Обновить настройки температуры в доме
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Идентификатор дома
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                desired_temperature:
+                  type: number
+                  format: float
+                schedule:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      day:
+                        type: string
+                      start_time:
+                        type: string
+                        format: time
+                      end_time:
+                        type: string
+                        format: time
+      responses:
+        '200':
+          description: Настройки успешно обновлены
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  house_id:
+                    type: string
+                  desired_temperature:
+                    type: number
+                    format: float
+        '404':
+          description: Дом не найден
+        '400':
+          description: Некорректные данные запроса
+        '500':
+          description: Ошибка сервера
+
+  /users/{id}/notifications:
+    get:
+      summary: Получить уведомления пользователя
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Идентификатор пользователя
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Уведомления получены
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user_id:
+                    type: string
+                  notifications:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        notification_id:
+                          type: string
+                        message:
+                          type: string
+                        timestamp:
+                          type: string
+                          format: date-time
+        '404':
+          description: Пользователь не найден
+        '500':
+          description: Ошибка сервера

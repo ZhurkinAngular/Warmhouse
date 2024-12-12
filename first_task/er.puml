@@ -1,0 +1,109 @@
+@startuml
+
+entity "User" as user {
+  *id : bigint
+  --
+  name : String
+  email : String
+  phone_number : String
+  password_hash : String
+  role : String
+  created_at : timestamp
+  last_login : timestamp
+}
+
+entity "House" as house {
+  *id : bigint
+  --
+  user_id : bigint
+  address : String
+  num_of_rooms : Integer
+  square_meters : Float
+  created_at : timestamp
+  updated_at : timestamp
+}
+
+entity "Device" as device {
+  *id : bigint
+  --
+  type_id : bigint
+  house_id : bigint
+  serial_number : String
+  status : String
+  firmware_version : String
+  last_communication : timestamp
+  created_at : timestamp
+  updated_at : timestamp
+}
+
+entity "DeviceType" as deviceType {
+  *id : bigint
+  --
+  name : String
+  description : String
+  max_temperature : Float
+  min_temperature : Float
+  power_usage : Float
+  created_at : timestamp
+  updated_at : timestamp
+}
+
+entity "Module" as module {
+  *id : bigint
+  --
+  device_id : bigint
+  name : String
+  version : String
+  status : String
+  created_at : timestamp
+  updated_at : timestamp
+}
+
+entity "TelemetryData" as telemetry {
+  *id : bigint
+  --
+  device_id : bigint
+  temperature : Float
+  humidity : Float
+  timestamp : timestamp
+}
+
+entity "ControlCommand" as command {
+  *id : bigint
+  --
+  device_id : bigint
+  command_type : String
+  payload : String
+  timestamp : timestamp
+}
+
+entity "Event" as event {
+  *id : bigint
+  --
+  device_id : bigint
+  event_type : String
+  description : String
+  timestamp : timestamp
+}
+
+entity "Notification" as notification {
+  *id : bigint
+  --
+  user_id : bigint
+  event_id : bigint
+  message : String
+  status : String
+  created_at : timestamp
+}
+
+user ||--o{ house : "1:N"
+house ||--o{ device : "1:N"
+device ||--|| deviceType : "N:1"
+device ||--o{ module : "1:N"
+device ||--o{ telemetry : "1:N"
+device ||--o{ command : "1:N"
+device ||--o{ event : "1:N"
+event ||--o{ notification : "1:N"
+user ||--o{ notification : "1:N"
+
+@enduml

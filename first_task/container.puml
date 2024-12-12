@@ -1,0 +1,46 @@
+
+@startuml
+left to right direction
+
+actor User as "Пользователь"
+
+package "API Gateway" {
+  rectangle "API Gateway" as API_Gateway
+}
+
+package "Микросервисы" {
+  component TemperatureMonitoringService as TMS
+  component TemperatureRegulationService as TRS
+  component DeviceManagementService as DMS
+  component NotificationService as NS
+}
+
+package "Базы данных" {
+  database TempMonitoringDB as TMDB
+  database TempRegulationDB as TRDB
+  database DeviceManagementDB as DMDB
+  database NotificationDB as NDB
+}
+
+queue Kafka as "Кафка"
+
+User --> API_Gateway : "HTTP Запросы"
+API_Gateway --> TMS : "Запрос текущей температуры"
+TMS --> TMDB : "Чтение температуры"
+TMS --> "Кафка" : "Публикация данных о температуре"
+
+API_Gateway --> TRS : "Команды регулирования температуры"
+TRS --> TRDB : "Запись настроек"
+TRS --> DMS : "Команды управления устройствами"
+
+API_Gateway --> DMS : "Управление устройствами (вкл/выкл)"
+DMS --> DMDB : "Запись состояния устройства"
+DMS --> "Кафка" : "Публикация изменений состояния"
+
+TRS --> "Кафка" : "Публикация команд регулирования"
+
+"Кафка" --> NS : "События для уведомлений"
+NS --> NDB : "Запись уведомлений"
+NS --> User : "Отправка уведомлений"
+
+@enduml
