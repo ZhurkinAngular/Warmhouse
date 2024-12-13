@@ -7,8 +7,7 @@ Person(engineer, "Инженер")
 Container(apigw, "API GateWay", "Java")
 
 System_Boundary(c1, "Управление устройствами") {
-    Container(home_reg, "Регистратор", "Java", "Региструрует новые устройства")
-    Container(home_controller, "Контроллер устройст", "Java", "Управляет устройствами")
+    Container(home_controller, "Контроллер устройств", "Java", "Управляет устройствами")
     ContainerDb(devices_db, "Postgres", "Relational Database", "Хранение данных об устройствах")
 }
 System_Boundary(telemetry, "Мониторинг устройств") {
@@ -18,8 +17,7 @@ System_Boundary(telemetry, "Мониторинг устройств") {
   ContainerDb(telemetry_db, "MongoDB", "NoSQL", "Логирует все изменения с датчиков")
 }
 System_Boundary(notification, "Уведомления") {
-  Container(notification_push, "Отправка push", "java", "Позволяет отправлять уведомления push")
-  Container(notification_email, "Отправка email", "java", "Позволяет отправлять уведомления email")
+  Container(notification_send, "Отправка push, email, sms", "java", "Позволяет отправлять уведомления push, email, sms")
   ContainerDb(queue_db, "Message Queue", "RabbitMQ", "Очередь для отправки сообщений")
 }
 System_Boundary(auth, "Авторизация") {
@@ -33,8 +31,7 @@ Rel(device, apigw, "Отправка данных с устройства", "HTT
 Rel(client, apigw, "Управление устройствами, получение телеметрии, регистрация устройств", "HTTPS")
 Rel(engineer, apigw, "Администрирование", "HTTPS")
 
-Rel(apigw, home_controller, "Управление устройствами", "GRPC")
-Rel(apigw, home_reg, "Регистрация нового устройства", "GRPC")
+Rel(apigw, home_controller, "Управление и добавление новго устройства", "GRPC")
 Rel(apigw, teltmetry_controller, "Сбор данных с устройства", "GRPC")
 Rel(apigw, teltmetry_aggregate, "Получение статистики", "GRPC")
 Rel(apigw, auth_containter, "Авторизация", "GRPC")
@@ -42,10 +39,8 @@ Rel(apigw, auth_containter, "Авторизация", "GRPC")
 Rel(auth_containter, users_db, "Авторизация", "GRPC")
 Rel(auth_containter, notification, "Отправка ведомлений о входе/регистрации", "GRPC")
 
-Rel(notification_push, queue_db, "Очередь на отправку push", "GRPC")
-Rel(notification_email, queue_db, "Очередь на отправку email", "GRPC")
+Rel(notification_send, queue_db, "Очередь на отправку", "GRPC")
 
-Rel(home_reg, devices_db, "Добавление устройств", "GRPC")
 Rel(home_controller, devices_db, "Изменение состояний устройств", "GRPC")
 Rel(home_controller, device, "Изменение состояния устройства", "HTTPS")
 

@@ -2,28 +2,26 @@
 !include <C4/C4_Container>
 !include <C4/C4_Component>
 
-System_Boundary(c1, "Контроллер устройств") {
-  Component(registration, "registration", "Региструрует новые устройства")
-  Component(controller, "controller", "Обновляет данные об устройстве")
-  Component(controller_light, "controller_light", "Обновляет данные об устройстве")
-  Component(controller_warm, "controller_warm", "Обновляет данные об устройстве")
-  Component(delete, "delete", "Удаляет данные об устройстве")
+System_Boundary(c1, "Авторизация") {
+  Component(sign_in, "Sign In", "Spring MVC","Авторизует пользователя")
+  Component(security, "Security", "Spring bean", "Проверка токена")
+  Component(sign_on, "Sign On", "Spring MVC", "Регистрирует пользователя")
+  Component(reset_pass, "Reset password", "Spring MVC", "Регистрирует пользователя")
+  Component(email, "Email sender","Spring bean", "Формирование и отправка email")
 }
 
-ContainerDb(devices_db, "Postgres", "Relational Database", "Хранение данных об устройствах")
-Container_Ext(device_light, "Освещение", "устройства освещения")
-Container_Ext(device_warm, "Отопление", "устройства отопления")
 
+ContainerDb(users_db, "Postgres", "Relational Database", "Хранение данных о пользователе")
+Container_Ext(notification, "Уведомления", "Сервис отправки уведомлений push, email, sms")
 
-Rel(registration, devices_db, "Создание нового устройства", "GRPC")
-Rel(controller_light, devices_db, "Изменение устройства", "GRPC")
-Rel(controller_warm, devices_db, "Изменение устройства", "GRPC")
-Rel(delete, devices_db, "Удаляет устройства", "GRPC")
+Rel(reset_pass, security, "Проверка на безопасность", "")
+Rel(sign_in, security, "Проверка на безопасность", "")
+Rel(sign_on, security, "Проверка на безопасность", "")
 
-Rel(controller, controller_light, "Изменение устройства освещения", "GRPC")
-Rel(controller, controller_warm, "Изменение устройства отопления", "GRPC")
+Rel(reset_pass, email, "Отправка письма", "")
+Rel(sign_on, email, "Регистрация", "HTTPS")
+Rel(email, notification, "Отправка письма", "HTTPS")
 
-Rel(controller_light, device_light, "Изменение устройства освещения", "HTTPS")
-Rel(controller_warm, device_warm, "Изменение устройства отопления", "HTTPS")
+Rel(security, users_db, "Авторизация", "SQL/TCP")
 
 @enduml
