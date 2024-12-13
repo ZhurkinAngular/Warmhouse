@@ -1,0 +1,29 @@
+@startuml
+!include <C4/C4_Container>
+!include <C4/C4_Component>
+
+System_Boundary(c1, "Контроллер устройств") {
+  Component(registration, "registration", "Региструрует новые устройства")
+  Component(controller, "controller", "Обновляет данные об устройстве")
+  Component(controller_light, "controller_light", "Обновляет данные об устройстве")
+  Component(controller_warm, "controller_warm", "Обновляет данные об устройстве")
+  Component(delete, "delete", "Удаляет данные об устройстве")
+}
+
+ContainerDb(devices_db, "Postgres", "Relational Database", "Хранение данных об устройствах")
+Container_Ext(device_light, "Освещение", "устройства освещения")
+Container_Ext(device_warm, "Отопление", "устройства отопления")
+
+
+Rel(registration, devices_db, "Создание нового устройства", "GRPC")
+Rel(controller_light, devices_db, "Изменение устройства", "GRPC")
+Rel(controller_warm, devices_db, "Изменение устройства", "GRPC")
+Rel(delete, devices_db, "Удаляет устройства", "GRPC")
+
+Rel(controller, controller_light, "Изменение устройства освещения", "GRPC")
+Rel(controller, controller_warm, "Изменение устройства отопления", "GRPC")
+
+Rel(controller_light, device_light, "Изменение устройства освещения", "HTTPS")
+Rel(controller_warm, device_warm, "Изменение устройства отопления", "HTTPS")
+
+@enduml
