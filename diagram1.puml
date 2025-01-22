@@ -1,0 +1,18 @@
+@startuml
+!define C4Context
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+
+Person(user, "User", "Interacts with the system via web or mobile application")
+System(monolith, "Smart Home Monolith", "Centralized system managing smart devices and sensors")
+System_Ext(sensor, "Sensors", "Transmit data like temperature and motion to the monolith")
+System_Ext(device_controller, "Device Controllers", "Receive commands from the monolith to control physical devices")
+SystemDb(database, "PostgreSQL", "Stores device data and user information")
+System_Ext(api_gateway, "External APIs", "Used for notifications and third-party integrations")
+
+Rel(user, monolith, "Uses", "HTTPS/REST")
+Rel(sensor, monolith, "Sends data to")
+Rel(monolith, device_controller, "Sends commands to")
+Rel(monolith, database, "Reads from and writes to")
+Rel(monolith, api_gateway, "Interacts with", "REST")
+
+@enduml
