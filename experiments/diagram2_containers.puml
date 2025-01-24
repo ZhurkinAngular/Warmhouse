@@ -1,0 +1,158 @@
+@startuml
+!define C4Container
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+title Smart Home Ecosystem - Containers Level
+
+Person(user, "User", "End-user managing devices and scenarios.")
+System_Boundary(SmartHomeSystem, "Smart Home Ecosystem") {
+
+    Container(apiGateway, "API Gateway", "ASP.NET Core", "Entry point for all client requests, handles authentication and routing.")
+    Container(deviceManagement, "Device Management Service", "Java + Spring Boot", "Manages device registration, metadata, and statuses.")
+    Container(cameraStreaming, "Camera Streaming Service", "Node.js", "Manages video streams for connected cameras using protocols like RTSP or ONVIF.")
+    Container(heatingControl, "Heating Management Service", "Python + Flask", "Controls heating devices and manages thermostat settings.")
+    Container(lightingControl, "Lighting Control Service", "Go", "Manages lighting devices, scheduling, and control.")
+    Container(scenarioOrchestrator, "Scenario Orchestrator Service", "Kotlin + Spring Boot", "Manages user-defined automation scenarios and triggers.")
+    Container(integrationService, "Integration Service", "Java", "Handles integration with partner devices and external APIs.")
+    ContainerDb(deviceDb, "Devices DB", "PostgreSQL", "Stores device metadata and statuses.")
+    ContainerDb(scenariosDb, "Scenarios DB", "MongoDB", "Stores user-defined scenarios.")
+    ContainerDb(eventsStore, "Events Store", "Kafka", "Handles event-driven communication between services.")
+}
+
+Rel(user, apiGateway, "Interacts via mobile app or web UI", "HTTPS")
+Rel(apiGateway, deviceManagement, "Registers and manages devices", "HTTPS")
+Rel(deviceManagement, deviceDb, "Reads/writes device metadata", "JDBC")
+Rel(deviceManagement, eventsStore, "Publishes/consumes device events", "Kafka")
+Rel(apiGateway, cameraStreaming, "Requests stream URLs", "HTTPS")
+Rel(cameraStreaming, eventsStore, "Subscribes to device events", "Kafka")
+Rel(cameraStreaming, user, "Provides camera streams", "WebRTC")
+Rel(apiGateway, heatingControl, "Controls heating devices", "HTTPS")
+Rel(heatingControl, eventsStore, "Subscribes to device events", "Kafka")
+Rel(apiGateway, lightingControl, "Controls lighting devices", "HTTPS")
+Rel(lightingControl, eventsStore, "Subscribes to device events", "Kafka")
+Rel(apiGateway, scenarioOrchestrator, "Manages automation scenarios", "HTTPS")
+Rel(scenarioOrchestrator, eventsStore, "Triggers automation events", "Kafka")
+Rel(scenarioOrchestrator, scenariosDb, "Stores/retrieves scenarios", "JDBC")
+Rel(apiGateway, integrationService, "Handles external integrations", "HTTPS")
+
+@enduml
+
+@startuml
+!define C4Container
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+Person(webUser, "Пользователь", "Взаимодействует с системой умного дома через веб-приложение.")
+System_Boundary(system, "Умный дом") {
+    Container(apiGateway, "Kong API Gateway", "Kong", "Единая точка входа.")
+    Container(webApp, "Веб-приложение Умного Дома", "React + TypeScript", "Frontend приложение.")
+    'Container_Boundary(microservices, "Микросервисы") {
+        Container_Boundary(auth, "Атентификация") {
+            Container(authService, "Сервис аутентификации", "ASP.NET Core", "Аутентификация и авторизация")
+            ContainerDb(userDb, "База данных пользователей", "PostgreSQL", "База данных пользователей")
+        }
+        Container_Boundary(devices, "Управление устройствами") {
+            Container(deviceManagement, "Сервис управления устройствами", "Java + Spring Boot", "Управление регистрацией, метаданными и статусами устройств.")
+            ContainerDb(devicesDb, "База данных устройств", "PostgreSQL", "База данных устройств")
+        }
+        Container_Boundary(monitor, "Сервис мониторинга") {
+            Container(monitoringService, "Сервис мониторинга", "Python", "Сбор и агрегация данных")
+            ContainerDb(monitoringDb, "База данных мониторинга", "InfluxDB", "База данных телеметрии")
+        }
+
+        Container_Boundary(scenario, "Сервис сценариев") {
+            Container(scenarioService, "Сервис сценариев", "Node.js", "Управление сценариями")
+            ContainerDb(scenariosDb, "База данных сценариев", "MongoDB", "Хранит пользовательские сценарии и правила автоматизации.")
+        }
+        'Container(notificationService, "Сервис уведомлений", "Node.js", "Отправка уведомлений")
+        'Container(billingService, "Сервис биллинга", "Python", "Оплата и тарифы")
+        Container(heatingService, "Сервис отопления", "Java/Spring", "Управление отоплением")
+        Container(cameraStreaming, "Сервис потокового видео с камер", "Node.js", "Обрабатывает видеопотоки для подключенных камер.")
+        Container(lightingControl, "Сервис управления освещением", "Go", "Управление графиками и устройствами освещения.")
+        Container(gateControl, "Сервис управления воротами", "Rust", "Управление воротами и системой контроля доступа.")
+    }
+
+    Container(kafka, "Kafka", "Apache Kafka", "Шина событий для асинхронной связи между сервисами.")
+
+
+
+
+Rel(webUser, webApp, "Управляет устройствами и сценариями", "HTTPS")
+Rel(webApp, apiGateway, "Запросы API")
+Rel(apiGateway, authService, "Аутентификация")
+Rel(apiGateway, gateControl, "Управление воротами", "HTTP")
+Rel(apiGateway, monitoringService, "Мониторинг устройств", "HTTP")
+Rel(apiGateway, heatingService, "Управление отоплением")
+Rel(apiGateway, scenarioService, "Создание сценариев")
+Rel(apiGateway, deviceManagement, "Управление устройствами", "HTTP")
+Rel(apiGateway, lightingControl, "Управление освещением", "HTTP")
+Rel(apiGateway, cameraStreaming, "Потоки видео с камер", "HTTP")
+
+Rel(deviceManagement, kafka, "Публикует/потребляет события устройств", "Kafka")
+Rel(lightingControl, kafka, "Публикует/потребляет события освещения", "Kafka")
+Rel(gateControl, kafka, "Публикует/потребляет события ворот", "Kafka")
+Rel(heatingService, kafka, "Публикует/потребляет события отопления", "Kafka")
+Rel(scenarioService, kafka, "Запускает события автоматизации", "Kafka")
+
+Rel(scenarioService, scenariosDb, "Сохраняет правила автоматизации", "JDBC")
+Rel(monitoringService, monitoringDb, "Чтение/запись телеметрии")
+Rel(deviceManagement, devicesDb, "Сохраняет и извлекает метаданные устройств", "JDBC")
+Rel(authService, userDb, "Сохраняет и извлекает пользователей")
+
+Rel(cameraStreaming, webApp, "Доставляет видеопотоки", "WebRTC")
+
+@enduml
+
+@startuml
+!define C4Container
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+title Smart Home Ecosystem - Containers Level
+
+Person(webUser, "User", "Interacts with the smart home system via the web application.")
+
+System_Boundary(SmartHomeSystem, "Smart Home Ecosystem") {
+
+    Container(webApp, "Smart Home Web App", "React + TypeScript", "Frontend application for managing devices and scenarios.")
+    Container(apiGateway, "Kong API Gateway", "Kong", "Handles authentication, routing, and external API requests.")
+    Container_Boundary(microservices, "Микросервисы") {
+        Container(deviceManagement, "Device Management Service", "Java + Spring Boot", "Manages registration, metadata, and statuses of devices.")
+        Container(cameraStreaming, "Camera Streaming Service", "Node.js", "Handles video streams for connected cameras.")
+        Container(heatingControl, "Heating Control Service", "Python + Flask", "Manages heating devices and thermostats.")
+        Container(lightingControl, "Lighting Control Service", "Go", "Controls lighting schedules and devices.")
+        Container(gateControl, "Gate Control Service", "Rust", "Manages gates and access controls.")
+        Container(scenarioOrchestrator, "Scenario Orchestrator Service", "Kotlin + Spring Boot", "Handles user-defined automation scenarios.")
+    }
+    Container(kafka, "Kafka", "Apache Kafka", "Event bus for asynchronous communication between services.")
+    Container_Boundary(databases, "Базы данных"){
+        ContainerDb(devicesDb, "Devices DB", "PostgreSQL", "Stores device metadata, statuses, and configurations.")
+        ContainerDb(scenariosDb, "Scenarios DB", "MongoDB", "Stores user-created scenarios and automation rules.")
+    }
+
+}
+Rel(webUser, webApp, "Manages devices and scenarios", "HTTPS")
+Rel(webApp, apiGateway, "Routes user requests", "HTTPS")
+Rel(apiGateway, deviceManagement, "Manages devices", "HTTP")
+Rel(deviceManagement, devicesDb, "Stores and retrieves device metadata", "JDBC")
+Rel(deviceManagement, kafka, "Publishes/consumes device events", "Kafka")
+Rel(apiGateway, cameraStreaming, "Streams camera feeds", "HTTP")
+Rel(cameraStreaming, kafka, "Subscribes to device events", "Kafka")
+Rel(cameraStreaming, webApp, "Delivers video streams", "WebRTC")
+Rel(apiGateway, heatingControl, "Manages heating devices", "HTTP")
+Rel(heatingControl, kafka, "Publishes/consumes heating events", "Kafka")
+Rel(apiGateway, lightingControl, "Manages lighting", "HTTP")
+Rel(lightingControl, kafka, "Publishes/consumes lighting events", "Kafka")
+Rel(apiGateway, gateControl, "Manages gates", "HTTP")
+Rel(gateControl, kafka, "Publishes/consumes gate events", "Kafka")
+Rel(apiGateway, scenarioOrchestrator, "Manages automation scenarios", "HTTP")
+Rel(scenarioOrchestrator, kafka, "Triggers automation events", "Kafka")
+Rel(scenarioOrchestrator, scenariosDb, "Stores automation rules", "JDBC")
+Rel(deviceManagement, heatingControl, "Controls heating devices directly", "HTTP/Standard protocols")
+Rel(deviceManagement, lightingControl, "Controls lighting devices directly", "HTTP/Standard protocols")
+Rel(deviceManagement, gateControl, "Controls gate devices directly", "HTTP/Standard protocols")
+Rel(deviceManagement, cameraStreaming, "Handles camera connections", "HTTP/Standard protocols")
+
+@enduml
+
+
+
+

@@ -1,0 +1,59 @@
+@startuml
+!define C4Container
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+Person(webUser, "Пользователь", "Взаимодействует с системой умного дома через веб-приложение.")
+System_Boundary(system, "Умный дом") {
+    Container(apiGateway, "Kong API Gateway", "Kong", "Единая точка входа.")
+    Container(webApp, "Веб-приложение Умного Дома", "React + TypeScript", "Frontend приложение.")
+    'Container_Boundary(microservices, "Микросервисы") {
+        Container_Boundary(auth,"Сервис аутентификации") {
+            Container(authService, "Сервис аутентификации", "ASP.NET Core", "Аутентификация и авторизация")
+            ContainerDb(userDb, "База данных пользователей", "PostgreSQL", "База данных пользователей")
+        }
+        Container_Boundary(devices, "Управление устройствами") {
+            Container(deviceManagement, "Сервис управления устройствами", "Java + Spring Boot", "Управление регистрацией, метаданными и статусами устройств.")
+            ContainerDb(devicesDb, "База данных устройств", "PostgreSQL", "База данных устройств")
+        }
+        Container_Boundary(monitor, "Сервис мониторинга") {
+            Container(monitoringService, "Сервис мониторинга", "Python", "Сбор и агрегация данных")
+            ContainerDb(monitoringDb, "База данных мониторинга", "InfluxDB", "База данных телеметрии")
+        }
+
+        Container_Boundary(scenario, "Сервис сценариев") {
+            Container(scenarioService, "Сервис сценариев", "Node.js", "Управление сценариями")
+            ContainerDb(scenariosDb, "База данных сценариев", "MongoDB", "Хранит пользовательские сценарии и правила автоматизации.")
+        }
+        'Container(notificationService, "Сервис уведомлений", "Node.js", "Отправка уведомлений")
+        'Container(billingService, "Сервис биллинга", "Python", "Оплата и тарифы")
+        Container(heatingService, "Сервис отопления", "Java/Spring", "Управление отоплением")
+        Container(cameraStreaming, "Сервис потокового видео с камер", "Node.js", "Обрабатывает видеопотоки для подключенных камер.")
+        Container(lightingControl, "Сервис управления освещением", "Go", "Управление графиками и устройствами освещения.")
+        Container(gateControl, "Сервис управления воротами", "Rust", "Управление воротами и системой контроля доступа.")
+        Container(kafka, "Kafka", "Apache Kafka", "Шина событий для асинхронной связи между сервисами.")
+    }
+
+    Rel(webUser, webApp, "Управляет устройствами и сценариями", "HTTPS")
+    Rel(webApp, apiGateway, "Запросы API")
+    Rel(apiGateway, authService, "Аутентификация")
+    Rel(apiGateway, gateControl, "Управление воротами", "HTTP")
+    Rel(apiGateway, monitoringService, "Мониторинг устройств", "HTTP")
+    Rel(apiGateway, heatingService, "Управление отоплением")
+    Rel(apiGateway, scenarioService, "Создание сценариев")
+    Rel(apiGateway, deviceManagement, "Управление устройствами", "HTTP")
+    Rel(apiGateway, lightingControl, "Управление освещением", "HTTP")
+    Rel(apiGateway, cameraStreaming, "Потоки видео с камер", "HTTP")
+
+    Rel(deviceManagement, kafka, "Публикует/потребляет события устройств", "Kafka")
+    Rel(lightingControl, kafka, "Публикует/потребляет события освещения", "Kafka")
+    Rel(gateControl, kafka, "Публикует/потребляет события ворот", "Kafka")
+    Rel(heatingService, kafka, "Публикует/потребляет события отопления", "Kafka")
+    Rel(scenarioService, kafka, "Запускает события автоматизации", "Kafka")
+
+    Rel(scenarioService, scenariosDb, "Сохраняет правила автоматизации")
+    Rel(monitoringService, monitoringDb, "Чтение/запись телеметрии")
+    Rel(deviceManagement, devicesDb, "Сохраняет и извлекает метаданные устройств")
+    Rel(authService, userDb, "Сохраняет и извлекает пользователей")
+    Rel(cameraStreaming, webApp, "Доставляет видеопотоки", "WebRTC")
+
+@enduml
