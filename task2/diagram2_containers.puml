@@ -27,9 +27,9 @@ System_Boundary(system, "Умный дом") {
         'Container(notificationService, "Сервис уведомлений", "Node.js", "Отправка уведомлений")
         'Container(billingService, "Сервис биллинга", "Python", "Оплата и тарифы")
         Container(heatingService, "Сервис отопления", "Java/Spring", "Управление отоплением")
-        Container(cameraStreaming, "Сервис потокового видео с камер", "Node.js", "Обрабатывает видеопотоки для подключенных камер.")
-        Container(lightingControl, "Сервис управления освещением", "Go", "Управление графиками и устройствами освещения.")
-        Container(gateControl, "Сервис управления воротами", "Rust", "Управление воротами и системой контроля доступа.")
+        Container(cameraStreaming, "Сервис потокового видео с камер", "Node.js", "Управляет видеопотоком для подключенных камер.")
+        Container(lightingControl, "Сервис управления освещением", "Go", "Управление устройствами освещения.")
+        Container(gateControl, "Сервис управления воротами", "Rust", "Управление воротами.")
         Container(kafka, "Kafka", "Apache Kafka", "Шина событий для асинхронной связи между сервисами.")
     }
 
@@ -45,9 +45,9 @@ System_Boundary(system, "Умный дом") {
     Rel(apiGateway, cameraStreaming, "Потоки видео с камер", "HTTP")
 
     Rel(deviceManagement, kafka, "Публикует/потребляет события устройств", "Kafka")
-    Rel(lightingControl, kafka, "Публикует/потребляет события освещения", "Kafka")
-    Rel(gateControl, kafka, "Публикует/потребляет события ворот", "Kafka")
-    Rel(heatingService, kafka, "Публикует/потребляет события отопления", "Kafka")
+    'Rel(lightingControl, kafka, "Публикует/потребляет события освещения", "Kafka")
+    'Rel(gateControl, kafka, "Публикует/потребляет события ворот", "Kafka")
+    'Rel(heatingService, kafka, "Публикует/потребляет события отопления", "Kafka")
     Rel(scenarioService, kafka, "Запускает события автоматизации", "Kafka")
 
     Rel(scenarioService, scenariosDb, "Сохраняет правила автоматизации")
