@@ -58,7 +58,7 @@
 
 ### 5. Визуализация контекста системы — диаграмма С4
 
-[Диаграмма контекста](task1\diagram-context.puml)
+[Диаграмма контекста](https://github.com/vbaglay/architecture-sprint-3/blob/sprint_3/task1/diagram-context.puml)
 
 # Задание 2. Проектирование микросервисной архитектуры
 
