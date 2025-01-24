@@ -60,7 +60,7 @@
 
 [Диаграмма контекста PUML](https://github.com/vbaglay/architecture-sprint-3/blob/sprint_3/task1/diagram-context.puml)
 
-[Диаграмма контекста PNG](https://github.com/vbaglay/architecture-sprint-3/blob/sprint_3/out/task1/diagram-context/diagram-context.png)
+[Диаграмма контекста PNG](https://github.com/vbaglay/architecture-sprint-3/blob/sprint_3/task1/diagram-context.png)
 
 # Задание 2. Проектирование микросервисной архитектуры
 
@@ -70,13 +70,13 @@
 
 [Диаграмма контейнеров PUML](https://github.com/vbaglay/architecture-sprint-3/blob/sprint_3/task2/diagram2_containers.puml)
 
-[Диаграмма контейнеров PNG](https://github.com/vbaglay/architecture-sprint-3/blob/sprint_3/out/task2/diagram2_containers/Container.png)
+[Диаграмма контейнеров PNG](https://github.com/vbaglay/architecture-sprint-3/blob/sprint_3/task2/Container.png)
 
 **Диаграмма компонентов (Components)**
 
 [Диаграмма компонентов PUML](https://github.com/vbaglay/architecture-sprint-3/blob/sprint_3/task2/diagram2_components.puml)
 
-[Диаграмма компонентов PNG](https://github.com/vbaglay/architecture-sprint-3/blob/sprint_3/out/task2/diagram2_components/diagram2_components.png)
+[Диаграмма компонентов PNG](https://github.com/vbaglay/architecture-sprint-3/blob/sprint_3/task2/diagram2_components.png)
 
 **Диаграмма кода (Code)**
 
