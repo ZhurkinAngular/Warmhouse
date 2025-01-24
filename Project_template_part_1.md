@@ -58,7 +58,8 @@
 
 ### 5. Визуализация контекста системы — диаграмма С4
 
-[Диаграмма контекста](https://github.com/vbaglay/architecture-sprint-3/blob/sprint_3/task1/diagram-context.puml)
+[Диаграмма контекста PUML](https://github.com/vbaglay/architecture-sprint-3/blob/sprint_3/task1/diagram-context.puml)
+[Диаграмма контекста PNG](https://github.com/vbaglay/architecture-sprint-3/blob/sprint_3/task1/diagram-context.png)
 
 # Задание 2. Проектирование микросервисной архитектуры
 
@@ -66,7 +67,8 @@
 
 **Диаграмма контейнеров (Containers)**
 
-[Диаграмма контейнеров](https://github.com/vbaglay/architecture-sprint-3/blob/sprint_3/task2/diagram2_containers.puml)
+[Диаграмма контейнеров PUML](https://github.com/vbaglay/architecture-sprint-3/blob/sprint_3/task2/diagram2_containers.puml)
+[Диаграмма контейнеров PNG](https://github.com/vbaglay/architecture-sprint-3/blob/sprint_3/task2/Container.png)
 
 **Диаграмма компонентов (Components)**
 
