@@ -1,0 +1,25 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+Container_Boundary(monolith, "Целевая архитектура") {
+  Component(deviceService, "Device Management Service", "Java", "Управление устройствами")
+  Component(heatingService, "Heating Control Service", "Java", "Управление отоплением")
+  Component(monitoringService, "Monitoring Service", "Java", "Сбор и отображение телеметрии")
+  Component(notificationService, "Notification Service", "Java", "Уведомления")
+  Component(userService, "User Management Service", "Java", "Аутентификация и управление пользователями")
+  Component(integrationService, "Integration Service", "Java", "Взаимодействие с внешними системами")
+}  
+
+System_Boundary(User, "Пользователи и устройства") {
+  Person(user, "Пользователь")
+  System(smartDevice, "Умное устройство")
+}
+
+user --> deviceService: Управление устройствами
+user --> heatingService: Управление отоплением
+deviceService --> smartDevice: Отправка команд
+smartDevice --> monitoringService: Передача телеметрии
+monitoringService --> heatingService: Анализ данных
+heatingService --> notificationService: Отправка предупреждений
+notificationService --> user: Уведомления
+user --> userService: Аутентификация
+@enduml
