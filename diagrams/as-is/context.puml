@@ -9,5 +9,4 @@ System_Ext(extSystemAlias, "Датчики температуры")
 Rel(personAlias, containerAlias, "Управление отоплением", "Просмотр и управление температу через веб-интерфейс")
 Rel(containerAlias, extSystemAlias, "Мониторинг температуры")
 
-SHOW_LEGEND()
 @enduml

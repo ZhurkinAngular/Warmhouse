@@ -1,0 +1,33 @@
+@startuml
+!include <C4/C4_Container>
+
+Person(clients, "Clients", "Веб-приложение или мобильное приложение")
+System_Boundary(c1, "Теплый дом") {
+  System(apiGateway, "API Gateway", "Центральная точка входа для всех запросов\n REST API")
+  System(authService, "Authentication Service", "Авторизация и аутентификация")
+  System(automationService, "Automation Service", "Управляет сценариями и автоматизацией")
+  System(telemetryService, "Telemetry Service", "Собирает и хранит данные с устройств")
+  System(integrationService, "Integration Service", "Обеспечивает подключение устройств партнёров")
+  System(configurationService, "Configuration Service", "Хранит конфигурации устройств и сценариев")
+  System(notificationService, "Notification Service", "Отправляет уведомления пользователям через различные каналы")
+}
+
+System_Ext(devices, "Устройства умного дома")
+System_Ext(fcm, "Firebase Cloud Messaging")
+System_Ext(email, "Email")
+System_Ext(sms, "SMS")
+
+Rel(clients, apiGateway, "","", "Запросы контента через браузер или мобильное приложение")
+Rel(apiGateway, authService, "", "", "Запросы на авторизацию и аутентификацию")
+Rel(configurationService, automationService, "", "Создание и редактирование сценариев")
+Rel(automationService, devices, "", "","Запускает сценарии по событиям или расписанию")
+Rel(apiGateway, telemetryService, "", "", "Запросы на получение телеметрии")
+Rel(apiGateway, integrationService, "", "", "Запросы на подключение партнерских устройств")
+Rel(apiGateway, configurationService, "", "","Запросы на создание и редактирование сценариев и автоматизацию")
+Rel(apiGateway, notificationService, "", "", "Запросы на получение отправленных уведомлений")
+Rel(telemetryService, devices, "", "", "Собирает телеметрию с утройств")
+Rel(notificationService, fcm, "", "", "Отправка пушей")
+Rel(notificationService, email, "", "", "Отправка писем")
+Rel(notificationService, sms, "", "", "Отправка СМС")
+
+@enduml
