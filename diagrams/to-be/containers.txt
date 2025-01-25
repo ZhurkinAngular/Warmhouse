@@ -1,0 +1,65 @@
+@startuml
+!include <C4/C4_Container>
+
+Person(clients, "Clients", "Веб-приложение или мобильное приложение")
+
+Container(apiGateway, "API Gateway", "Центральная точка входа для всех запросов\n REST API")
+
+System_Boundary(c1, "Authentication Service") {
+  Container(authService, "Authentication Service\n (golang)", "Авторизация и аутентификация")
+  ContainerDb(dbAuth, "PostgreSQL", "БД")
+  Rel(authService, dbAuth, "", "", "")
+  Rel(apiGateway, authService, "", "", "Запросы на авторизацию и аутентификацию")
+}
+
+System_Boundary(c2, "Automation Service") {
+  Container(automationService, "Automation Service\n (golang)", "Управляет сценариями и автоматизацией")
+  ContainerDb(dbAuto, "MongoDB", "БД")
+  Rel(automationService, dbAuto, "", "", "")
+}
+
+System_Boundary(c3, "Configuration Service") {
+  Container(configurationService, "Configuration Service\n (golang)", "Хранит конфигурации устройств и сценариев")
+  ContainerDb(dbConfig, "MongoDB", "БД")
+  Rel(configurationService, dbConfig, "", "", "")
+  Rel(configurationService, automationService, "", "Создание и редактирование сценариев")
+}
+
+System_Boundary(c4, "Telemetry Service") {
+  Container(telemetryService, "Telemetry Service\n (golang)", "Собирает и хранит данные с устройств")
+  ContainerDb(dbTelemetry, "Redis", "Кеширование телеметрии")
+  Rel(telemetryService, dbTelemetry, "", "", "")
+}
+
+System_Boundary(c5, "Notification Service") {
+  Container(notificationService, "Notification Service\n (golang)", "Отправляет уведомления пользователям через различные каналы")
+  ContainerDb(dbNotify, "MongoDB", "Хранение уведомлений")
+  Rel(notificationService, dbNotify, "", "", "")
+}
+
+System_Boundary(c6, "Integration Service") {
+  Container(integrationService, "Integration Service", "Предоставляет API для работы с устройствами партнёров")
+}
+
+
+System_Ext(devices, "Устройства умного дома")
+System_Ext(fcm, "Firebase Cloud Messaging")
+System_Ext(email, "Email")
+System_Ext(sms, "SMS")
+System(kafka, "Kafka", "Брокер сообщений")
+
+Rel(clients, apiGateway, "","", "Запросы контента через браузер или мобильное приложение")
+Rel(automationService, integrationService, "", "","Запускает сценарии по событиям или расписанию")
+Rel(apiGateway, telemetryService, "", "", "Запросы на получение телеметрии")
+Rel(apiGateway, configurationService, "", "","Запросы на создание и редактирование сценариев и автоматизацию")
+Rel(apiGateway, notificationService, "", "", "Запросы на получение отправленных уведомлений")
+Rel(configurationService, integrationService, "", "", "Передача конфигурации")
+Rel(telemetryService, integrationService, "", "", "Собирает телеметрию с утройств")
+Rel(integrationService, devices, "", "websocket, stream, rest api", "Взаимодействие с партнерскими устройствами")
+Rel(notificationService, fcm, "", "", "Отправка пушей")
+Rel(notificationService, email, "", "", "Отправка писем")
+Rel(notificationService, sms, "", "", "Отправка СМС")
+Rel(automationService, kafka, "", "", "Отправка уведомлений в очередь")
+Rel(kafka, notificationService, "", "", "Обработка уведомлений из очереди")
+
+@enduml
