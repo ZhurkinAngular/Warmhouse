@@ -1,0 +1,47 @@
+@startuml
+!include <C4/C4_Container>
+
+Person(user, "Пользователь", "Управляет экосистемой, подключает устройства, создаёт сценарии")
+
+System_Boundary(service, "Система Умный дом") {
+    Container(api_gateway, "API Gateway", "Nginx", "Маршрутизация и обработка запросов")
+    Container(service_auth, "Авторизация", "Spring Boot, Java", "Управление пользователями и аутентификация")
+
+    System_Boundary(devices, "Управление устройствами") {
+        Container(service_device_management, "Управление устройствами", "Spring Boot, Java", "Подключение и управление устройствами")
+        ContainerDb(devices_db, "Device DB", "PostgreSQL", "Хранение информации об устройствах")
+    }
+
+    System_Boundary(telemetry, "Телеметрия") {
+        Container(service_telemetry, "Телеметрия", "Spring Boot, Java", "Сбор и хранение данных с устройств")
+        ContainerDb(telemetry_db, "Telemetry DB", "TimescaleDB", "Хранение телеметрических данных")
+    }
+
+    Container(service_notifications, "Уведомления", "Spring Boot, Java", "Push-уведомления и события")
+    Container(message_bus, "Шина данных", "Kafka", "Асинхронное взаимодействие между сервисами")
+}
+
+System_Boundary(externals, "Внешние сервисы") {
+    System_Ext(ext_notification, "Firebase Cloud Messaging", "Push-уведомления")
+    System_Ext(ext_device_cloud, "Устройства партнеров", "Взаимодействие с устройствами партнёров через стандартные протоколы")
+}
+
+Rel(user, api_gateway, "Взаимодействие через веб/мобильное приложение", "HTTPS")
+
+Rel(api_gateway, service_auth, "Аутентификация и авторизация", "HTTPS")
+Rel(api_gateway, service_device_management, "Добавление/управление устройствами", "HTTPS")
+Rel(api_gateway, service_telemetry, "Запрос данных", "HTTPS")
+Rel(api_gateway, service_notifications, "Отправка уведомлений", "HTTPS")
+
+Rel(service_notifications, ext_notification, "Отправка уведомлений", "HTTPS")
+
+Rel(service_device_management, ext_device_cloud, "Взаимодействие с устройствами партнёров", "MQTT/Zigbee")
+Rel(service_telemetry, ext_device_cloud, "Получение данных с устройств", "MQTT/Zigbee")
+
+Rel(service_device_management, message_bus, "Публикация событий")
+Rel(service_telemetry, message_bus, "Передача телеметрии")
+Rel(message_bus, service_notifications, "Триггер уведомлений")
+
+Rel(service_device_management, devices_db, "Сохранение устройств")
+Rel(service_telemetry, telemetry_db, "Хранение телеметрии")
+@enduml

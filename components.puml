@@ -1,0 +1,21 @@
+@startuml
+!include <C4/C4_Component>
+
+Container_Boundary(service_device_management, "Микросервис Управления устройствами") {
+    Component(api, "API", "Spring Boot, Java", "Обрабатывает входящие запросы от API Gateway")
+    Component(command_handler, "Обработчик команд", "Java", "Обрабатывает команды управления устройствами")
+    Component(device_state_manager, "Менеджер состояния устройств", "Java", "Поддерживает текущее состояние устройств в памяти")
+    ComponentDb(devices_db, "Device DB", "PostgreSQL", "Хранит данные об устройствах")
+    Component(event_publisher, "Публикация событий событий", "Java", "Публикует события в шину данных (Kafka)")
+}
+
+System_Ext(ext_device_cloud, "Устройства партнёров", "Взаимодействие через MQTT/Zigbee")
+System(message_bus, "Шина данных (Kafka)", "Асинхронное взаимодействие")
+
+Rel(api, command_handler, "Передача команд управления устройствами", "HTTP")
+Rel(command_handler, device_state_manager, "Обновление состояния устройств", "In-memory")
+Rel(command_handler, ext_device_cloud, "Управление устройствами партнёров", "MQTT/Zigbee")
+Rel(device_state_manager, devices_db, "Чтение/запись данных об устройствах",)
+Rel(command_handler, event_publisher, "Публикация событий", "Kafka")
+Rel(event_publisher, message_bus, "Публикация событий", "Kafka")
+@enduml

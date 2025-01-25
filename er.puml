@@ -1,0 +1,57 @@
+@startuml
+entity "Пользователь" as User{
+    * id : UUID [PK]
+    --
+    * email : String
+    * password_hash : String
+    * name : String
+    * role : String
+}
+
+entity "Дом" as House{
+    * id : UUID [PK]
+    --
+    * name : String
+    * address : String
+    * user_id : UUID [FK]
+}
+
+entity "Устройство"  as Device{
+    * id : UUID [PK]
+    --
+    * serial_number : String
+    * status : String
+    * type_id : UUID [FK]
+    * house_id : UUID [FK]
+    * is_partner : Boolean
+}
+
+entity "Тип устройства"  as DeviceType{
+    * id : UUID [PK]
+    --
+    * name : String
+    * protocol : String
+}
+
+entity "Телеметрия" as Telemetry{
+    * id : UUID [PK]
+    --
+    * timestamp : DateTime
+    * data : JSON
+    * device_id : UUID [FK]
+}
+
+entity "Устройство партнёра" as DevicePartner{
+    * id : UUID [PK]
+    --
+    * partner_name : String
+    * protocol : String
+    * config : JSON
+}
+
+User ||--o{ House : "владеет"
+House ||--o{ Device : "содержит"
+Device ||--|> DeviceType : "относится к"
+Device ||--o{ Telemetry : "генерирует"
+Device }o--|| DevicePartner : "может быть"
+@enduml

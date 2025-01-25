@@ -1,0 +1,23 @@
+@startuml
+actor User
+participant "API Gateway" as Api
+participant "Command Handler" as Handler
+participant "Device State Manager" as StateManager
+participant "Protocol Adapter" as Adapter
+participant "Device DB" as DB
+
+User -> Api: POST /devices/{id}/power-on
+Api -> Handler: handlePowerOnCommand(deviceId)
+Handler -> StateManager: getDeviceState(deviceId)
+StateManager -> DB: SELECT state FROM devices WHERE id = deviceId
+DB --> StateManager: state = OFF
+StateManager --> Handler: state = OFF
+Handler -> Adapter: sendPowerOnCommand(deviceId)
+Adapter -> Device: send MQTT/Zigbee command
+Device --> Adapter: ACK
+Adapter --> Handler: Success
+Handler -> StateManager: updateDeviceState(deviceId, ON)
+StateManager -> DB: UPDATE devices SET state = ON WHERE id = deviceId
+Handler --> Api: Success
+Api --> User: 200 OK
+@enduml

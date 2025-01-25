@@ -1,0 +1,17 @@
+@startuml
+!include <C4/C4_Container>
+
+Person(client, "Клиент")
+Person(engineer, "Инженер")
+
+System_Boundary(c1, "Система «Тёплый дом»") {
+    Container(web_app, "Монолитное приложение", "Java, Postgres", "Управление отоплением, контроль температуры")
+    Container(tmpdevice, "Контроллер отопления", "Управление температурой", "Изменение температуры")
+    Container(sensor, "Датчик температуры", "Сенсор", "Отправляет данные о текущей температуре в систему")
+}
+
+Rel(client, web_app, "Включает/выключает отопление", "HTTPS")
+Rel(engineer, web_app, "Устанавливает и конфигурирует устройства", "HTTPS")
+Rel(web_app, tmpdevice, "Включает/выключает реле, изменяет температуру", "HTTPS")
+Rel(web_app, sensor, "Получает данные о температуре", "HTTPS")
+@enduml
