@@ -31,6 +31,7 @@ System_Boundary(system, "Умный дом") {
         Container(lightingControl, "Сервис управления освещением", "Go", "Управление устройствами освещения.")
         Container(gateControl, "Сервис управления воротами", "Rust", "Управление воротами.")
         Container(kafka, "Kafka", "Apache Kafka", "Шина событий для асинхронной связи между сервисами.")
+        Container(iothub, "Kafka", "Apache Kafka", "IOT Hub - ingestion events bus. Принимает входящий поток телеметрии с устройств")
     }
 
     Rel(webUser, webApp, "Управляет устройствами и сценариями", "HTTPS")
@@ -49,7 +50,7 @@ System_Boundary(system, "Умный дом") {
     'Rel(gateControl, kafka, "Публикует/потребляет события ворот", "Kafka")
     'Rel(heatingService, kafka, "Публикует/потребляет события отопления", "Kafka")
     Rel(scenarioService, kafka, "Запускает события автоматизации", "Kafka")
-
+    Rel(monitoringService, iothub, "Потребляет телеметрию устройств")
     Rel(scenarioService, scenariosDb, "Сохраняет правила автоматизации")
     Rel(monitoringService, monitoringDb, "Чтение/запись телеметрии")
     Rel(deviceManagement, devicesDb, "Сохраняет и извлекает метаданные устройств")

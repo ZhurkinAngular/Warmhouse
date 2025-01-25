@@ -1,0 +1,77 @@
+@startuml
+!define C4ERD
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+title SmartHouse System ERD
+
+package "Device Management Service" {
+    entity Device {
+        * id: UUID [PK]
+        ---
+        * name: String
+        * type: String
+        * manufacturer: String
+        * status: String
+        * activationDate: DateTime
+        * userId: UUID [FK -> User.id]
+    }
+
+    entity DeviceMetadata {
+        * id: UUID [PK]
+        ---
+        * deviceId: UUID [FK -> Device.id]
+        * firmwareVersion: String
+        * supportedProtocols: String
+        * lastUpdate: DateTime
+    }
+}
+
+package "Scenario Service" {
+    entity Scenario {
+        * id: UUID [PK]
+        ---
+        * name: String
+        * description: String
+        * schedule: String
+        * userId: UUID [FK -> User.id]
+    }
+
+    entity ScenarioDevice {
+        * id: UUID [PK]
+        ---
+        * scenarioId: UUID [FK -> Scenario.id]
+        * deviceId: UUID [FK -> Device.id]
+    }
+}
+
+package "Heating Service" {
+    entity Command {
+        * id: UUID [PK]
+        ---
+        * deviceId: UUID [FK -> Device.id]
+        * commandType: String
+        * payload: String
+        * status: String
+        * issuedAt: DateTime
+        * completedAt: DateTime
+    }
+}
+
+package "User Management Service" {
+    entity User {
+        * id: UUID [PK]
+        ---
+        * name: String
+        * email: String
+        * passwordHash: String
+        * createdAt: DateTime
+    }
+}
+
+' Relationships
+User ||--o{ Device : "owns devices"
+Device ||--o{ DeviceMetadata : "has metadata"
+User ||--o{ Scenario : "creates scenarios"
+Scenario ||--o{ ScenarioDevice : "has devices"
+Device ||--o{ Command : "receives commands"
+@enduml

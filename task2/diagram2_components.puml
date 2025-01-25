@@ -22,12 +22,13 @@ ContainerDb(monitoringDb, "База данных мониторинга", "Influ
 Container(metrics, "Prometheus и Grafana")
 
 System_Ext(monitorDeviceServices,  "HeatService, GateControl, LightControl, etc..")
+Container(mkafka,"Kafka", "IOT Hub, шина куда все девайсы шлют телеметрию")
 Container_Boundary(monitor, "Сервис мониторинга") {
     Component(reportController, "Device reports controller","Телеметрия подключенных устройств.")
-    Component(consumer, "EventsConsumer")
+    Component(consumer, "EventsConsumer","Вычитывает из шины и раскладывает в БД для процессинга")
     Component(analisys, "Analitycal Engine","Процессинг отчетов")
     Component(repository, "Repository layer", "Data access logic")
-    ComponentQueue(mkafka,"Kafka")
+    'ComponentQueue(mkafka,"Kafka")
 
     Rel(analisys, metrics, "Sends telemetry")
     Rel(reportController, analisys, "Uses")
@@ -36,7 +37,7 @@ Container_Boundary(monitor, "Сервис мониторинга") {
     Rel(consumer, mkafka, "Subscribes")
     Rel(repository, monitoringDb, "Read/Write")
 }
-Rel(monitor, monitorDeviceServices, "Send request","http")
+
 
 System_Ext(scenDeviceServices, "HeatService, GateControl, LightControl, etc..")
 ContainerDb(scenariosDb, "База данных сценариев", "MongoDB", "Хранит пользовательские сценарии и правила автоматизации.")
@@ -44,7 +45,7 @@ Container_Boundary(scenario, "Сервис сценариев") {
     Component(scenarioController, "Scenario controller","Создание сценариев")
     Component(schedulerController, "Sheduler controller","Планировщик")
     Component(appLogic, "Application layer","Слой бизнес-логики")
-    Component(worker,"Scenario Handler", "Обработчик сценариев")
+    Component(worker,"BackgroundWorker", "Обработчик сценариев")
     Component(repoScen, "Repository layer", "Data access logic")
 
     Rel(scenarioController, appLogic, "Uses")

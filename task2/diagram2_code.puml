@@ -1,0 +1,72 @@
+@startuml
+!define C4Component
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+title Сервис сценариев - Class Diagram
+
+package "Scenario Service" {
+    class ScenarioController {
+        + CreateScenario(request: ScenarioRequest): void
+        + EditScenario(id: Guid, request: ScenarioRequest): void
+        + GetScenarios(): List<Scenario>
+    }
+
+    class SchedulerController {
+        + ScheduleScenario(id: Guid, time: DateTime): void
+        + TriggerScenario(id: Guid): void
+    }
+
+    class ApplicationLayer {
+        + HandleScenarioCreation(request: ScenarioRequest): Scenario
+        + HandleScenarioEdit(id: Guid, request: ScenarioRequest): Scenario
+        + ScheduleScenario(id: Guid, time: DateTime): void
+        + ExecuteScenario(id: Guid): void
+    }
+
+    class RepositoryLayer {
+        + SaveScenario(scenario: Scenario): void
+        + GetScenarioById(id: Guid): Scenario
+        + GetAllScenarios(): List<Scenario>
+        + GetPlannedTasks(): List<Scenario>
+    }
+
+    class BackgroundWorker {
+        <<Worker>>
+        + ProcessPlannedTasks(): void
+        + ExecuteScenario(scenario: Scenario): void
+    }
+
+    class Scenario {
+        - Id: Guid
+        - Name: String
+        - Actions: List<Action>
+        - Schedule: DateTime?
+    }
+
+    class Action {
+        - Type: String
+        - Parameters: Map<String, String>
+    }
+}
+
+package "External" {
+    class DeviceService {
+        + SendCommand(action: Action): void
+    }
+}
+
+package "Database" {
+    class MongoDB {
+        + Save(document: Object): void
+        + Find(query: Object): List<Object>
+    }
+}
+
+ScenarioController --> ApplicationLayer : uses
+SchedulerController --> ApplicationLayer : uses
+ApplicationLayer --> RepositoryLayer : reads/writes scenarios
+BackgroundWorker --> RepositoryLayer : reads planned tasks
+BackgroundWorker --> DeviceService : sends commands
+RepositoryLayer --> MongoDB : reads/writes scenarios
+
+@enduml
