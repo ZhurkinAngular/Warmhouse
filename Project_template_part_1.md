@@ -80,8 +80,13 @@
 
 **Диаграмма кода (Code)**
 
-Добавьте одну диаграмму или несколько.
+[Диаграмма кода PUML](https://github.com/vbaglay/architecture-sprint-3/blob/sprint_3/task2/diagram2_code.puml)
+
+[Диаграмма кода PNG](https://github.com/vbaglay/architecture-sprint-3/blob/sprint_3/task2/diagram2_code.png)
 
 # Задание 3. Разработка ER-диаграммы
 
-Добавьте сюда ER-диаграмму. Она должна отражать ключевые сущности системы, их атрибуты и тип связей между ними.
+[Диаграмма кода PUML](https://github.com/vbaglay/architecture-sprint-3/blob/sprint_3/task2/diagram2_erd.puml)
+
+[Диаграмма кода PNG](https://github.com/vbaglay/architecture-sprint-3/blob/sprint_3/task2/diagram2_erd.png)
+
