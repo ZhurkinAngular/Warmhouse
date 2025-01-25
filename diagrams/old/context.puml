@@ -1,0 +1,13 @@
+@startuml
+!include <C4/C4_Container>
+
+Person(personAlias, "Clients", "Пользователи сервиса")
+System(containerAlias, "software system", "монолит компании Теплый дом, Java")
+System_Ext(extSystemAlias, "Датчики температуры")
+
+
+Rel(personAlias, containerAlias, "Управление отоплением", "Просмотр и управление температу через веб-интерфейс")
+Rel(containerAlias, extSystemAlias, "Мониторинг температуры")
+
+SHOW_LEGEND()
+@enduml
