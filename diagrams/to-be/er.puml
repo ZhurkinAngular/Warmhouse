@@ -1,0 +1,67 @@
+@startuml
+title SmartHome Temperature Core Service ERD Diagram
+
+top to bottom direction
+
+entity User {
+    id: guid <<PK>>
+    --
+    fullName: string
+    phone: string
+    password (hash): string
+    role: string
+}
+
+entity Role {
+    id: guid <<PK>>
+    --
+    name: string
+    desc: string
+}
+
+entity UserIdHouseId {
+    id: guid <<PK>>
+    --
+    userId: guid <<FK>>
+    houseId: guid <<FK>>
+}
+
+entity House {
+    id: guid <<PK>>
+    --
+    name: string
+    userId: string
+    address: string
+}
+
+entity DeviceType {
+    id: guid <<PK>>
+    ---
+    name: string
+    service: string
+}
+
+entity Device {
+    serial_number: guid <<PK>>
+    house_id: guid <<FK>>
+    device_type_id: guid <<FK>>
+    --
+    name: string
+}
+
+entity Metrics {
+    id: guid <<PK>>
+    device_serial_number: guid <<FK>>
+    --
+    timestamp: dateTime
+    value: string
+}
+
+User -- Role 
+User }-- UserIdHouseId
+UserIdHouseId --{ House
+House --{ Device
+Device }-- DeviceType
+Metrics }-- Device
+
+@enduml

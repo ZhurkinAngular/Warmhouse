@@ -1,0 +1,41 @@
+@startuml
+class ConfigController {
+  +void createConfig(ConfigDTO dto)
+  +void findAllConfig()
+  +void findOneConfig(String id)
+  +void updateOneConfig(String id)
+  +void deleteOneConfig(String id)
+}
+
+class ConfigService {
+  +void createConfig(ConfigDTO dto)
+  +void findAllConfig()
+  +void findOneConfig(String id)
+  +void updateOneConfig(String id)
+  +void deleteOneConfig(String id)
+}
+
+class ConfigRepository {
+  +void createConfig(ConfigDTO dto)
+  +void findAllConfig()
+  +void findOneConfig(String id)
+  +void updateOneConfig(String id)
+  +void deleteOneConfig(String id)
+}
+
+class ConfigDTO {
+  +String name
+  +String params
+}
+
+class ConfigEntity {
+  +String id
+  +String name
+  +Datetime created_at
+  +Datetime updated_at
+  +String params
+}
+
+ConfigController --  ConfigService : uses
+ConfigService -- ConfigRepository : uses
+@enduml
