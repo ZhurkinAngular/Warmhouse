@@ -2,6 +2,15 @@
 !include <C4/C4_Container>
 
 Person(clients, "Clients", "Веб-приложение или мобильное приложение")
+Person(help, "Support service", "Веб-приложение для Службы поддержки")
+Person(sales, "Sales department", "Веб-приложение для Отдела продаж")
+
+System_Ext(devices, "Устройства умного дома")
+System_Ext(fcm, "Firebase Cloud Messaging")
+System_Ext(email, "Email")
+System_Ext(sms, "SMS")
+System(kafka, "Kafka", "Брокер сообщений")
+System_Ext(extPaymentProviders, "Payment providers")
 
 Container(apiGateway, "API Gateway", "Центральная точка входа для всех запросов\n REST API")
 
@@ -41,25 +50,57 @@ System_Boundary(c6, "Integration Service") {
   Container(integrationService, "Integration Service", "Предоставляет API для работы с устройствами партнёров")
 }
 
+System_Boundary(c7, "Order Service") {
+  Container(orderService, "Order Service\n (golang)", "Сервис заказов")
+  ContainerDb(dbOrderRedis, "Redis", "Хранение заказов")
+  ContainerDb(dbOrder, "MongoDB", "Хранение заказов")
+  Rel(orderService, dbOrderRedis, "", "", "")
+  Rel(orderService, dbOrder, "", "", "")
+}
 
-System_Ext(devices, "Устройства умного дома")
-System_Ext(fcm, "Firebase Cloud Messaging")
-System_Ext(email, "Email")
-System_Ext(sms, "SMS")
-System(kafka, "Kafka", "Брокер сообщений")
+System_Boundary(c8, "Billing Service") {
+  Container(billingService, "Billing Service\n (golang)", "Сервис заказов")
+  ContainerDb(dbBilling, "MongoDB", "Хранение транзакций")
+  Rel(billingService, dbBilling, "", "", "")
+}
+
+System_Boundary(c9, "Analytics Service") {
+  Container(analyticsService, "Analytics Service\n (golang)", "Сервис аналитики и отчетов")
+  ContainerDb(dbAnalytics, "Clickhouse", "Хранение метрик")
+  Rel(analyticsService, dbAnalytics, "", "", "")
+}
+
+
+System_Boundary(c10, "As-Is Service") {
+  Container(aclService, "ACL Service\n (Java)", "Anti-Corruption Layer сервис")
+  Container(monolith, "software system", "Монолит компании Теплый дом, Java")
+  ContainerDb(db, "PostgreSQL", "Хранение данных")
+  Rel(aclService, monolith, "", "", "")
+  Rel(monolith, db, "", "", "")
+}
+
 
 Rel(clients, apiGateway, "","", "Запросы контента через браузер или мобильное приложение")
+Rel(help, apiGateway, "","", "Запросы контента через браузер")
+Rel(sales, apiGateway, "", "", "Запросы контента через браузер")
 Rel(automationService, integrationService, "", "","Запускает сценарии по событиям или расписанию")
 Rel(apiGateway, telemetryService, "", "", "Запросы на получение телеметрии")
 Rel(apiGateway, configurationService, "", "","Запросы на создание и редактирование сценариев и автоматизацию")
 Rel(apiGateway, notificationService, "", "", "Запросы на получение отправленных уведомлений")
+Rel(apiGateway, aclService, "", "", "Запросы к текущей системе")
+Rel(apiGateway, orderService, "", "", "Запросы к сервису заказов")
+Rel(apiGateway, billingService, "", "", "Запросы к сервису биллинга")
+Rel(apiGateway, analyticsService, "", "", "Запросы к сервису аналитики")
+Rel(orderService, billingService, "", "", "Обмен данных между заказами и биллингом")
 Rel(configurationService, integrationService, "", "", "Передача конфигурации")
 Rel(telemetryService, integrationService, "", "", "Собирает телеметрию с утройств")
-Rel(integrationService, devices, "", "websocket, stream, rest api", "Взаимодействие с партнерскими устройствами")
+Rel(integrationService, devices, "", "популярные протоколы умного дома", "Взаимодействие с партнерскими устройствами")
 Rel(notificationService, fcm, "", "", "Отправка пушей")
 Rel(notificationService, email, "", "", "Отправка писем")
 Rel(notificationService, sms, "", "", "Отправка СМС")
 Rel(automationService, kafka, "", "", "Отправка уведомлений в очередь")
+Rel(billingService, kafka, "", "", "Отправка данных в кафку")
 Rel(kafka, notificationService, "", "", "Обработка уведомлений из очереди")
+Rel(billingService, extPaymentProviders, "", "", "Платежи")
 
 @enduml
