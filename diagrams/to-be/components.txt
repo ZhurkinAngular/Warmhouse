@@ -1,0 +1,40 @@
+@startuml
+!include <C4/C4_Container>
+!include <C4/C4_Component>
+
+
+Container(apiGateway, "API Gateway", "Центральная точка входа для всех запросов\n REST API")
+
+Container_Boundary(cb1, "Configuration Service") {
+  Component(configController, "Config controller", "Контроллер для работы с конфигурациями")
+  Component(configService, "Config service", "Бизнес-логика для работы с конфигурациями")
+  Component(configRepository, "Config repository", "Репозиторий для работы с конфигурациями")
+  Component(scriptController, "Script controller", "Контроллер для работы со сценариями")
+  Component(scriptService, "Script service", "Бизнес-логика для работы со сценариями")
+  Component(scriptRepository, "Script repository", "Репозиторий для работы со сценариями")
+  Rel(configController, configService, "", "", "uses")
+  Rel(configService, configRepository, "", "", "uses")
+  Rel(scriptController, scriptService, "", "", "uses")
+  Rel(scriptService, scriptRepository, "", "", "uses")
+}
+
+ContainerDb(dbConfig, "MongoDB", "БД")
+
+System_Boundary(c2, "Automation Service") {
+  Container(automationService, "Automation Service\n (golang)", "Управляет сценариями и автоматизацией")
+}
+
+
+System_Boundary(c3, "Integration Service") {
+  Container(integrationService, "Integration Service", "Предоставляет API для работы с устройствами партнёров")
+}
+
+Rel(automationService, integrationService, "", "","Запускает сценарии по событиям или расписанию")
+Rel(apiGateway, cb1, "http/json", "запросы к сервису")
+Rel(cb1, automationService, "", "", "Передача конфигурации")
+Rel(cb1, integrationService, "", "", "Передача конфигурации")
+Rel(configRepository, dbConfig, "", "", "crud ops")
+Rel(scriptRepository, dbConfig, "", "", "crud ops")
+
+
+@enduml
