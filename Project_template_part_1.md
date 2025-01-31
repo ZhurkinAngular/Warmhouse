@@ -38,7 +38,7 @@
 
 ### 5. Визуализация контекста системы — диаграмма С4
 
-```markdown
+```plantuml
 @startuml
 !includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml
 
@@ -60,7 +60,7 @@ Rel(service, devices, "Operate external devices", "HTTP")
 
 **Диаграмма контейнеров (Containers)**
 
-```markdown
+```plantuml
 @startuml
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
 Person(user, "User")
@@ -106,7 +106,7 @@ Rel(sensor, devicesService, "Publish events")
 
 **Диаграмма компонентов (Components)**
 
-```markdown
+```plantuml
 @startuml
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
 
@@ -127,7 +127,7 @@ Rel(service, consumer, "Service consumes (reads) messages")
 
 **Диаграмма кода (Code)**
 
-```markdown
+```plantuml
 @startuml
 class DevicesService {
     + linkDevice(id: Uint): void
@@ -185,7 +185,7 @@ EventsConsumer --> DevicesService : Send event on subscription
 
 # Задание 3. Разработка ER-диаграммы
 
-```markdown
+```plantuml
 @startuml
 entity User {
     * id : Uint
