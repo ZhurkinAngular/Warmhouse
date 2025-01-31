@@ -38,7 +38,7 @@
 
 ### 5. Визуализация контекста системы — диаграмма С4
 
-```plantuml
+
 @startuml
 !includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml
 
@@ -54,13 +54,13 @@ Rel(publicInterface, service, "Generate and send to service requests for user's 
 Rel(service, database, "CRUD service-important info", "TCP, SSL")
 Rel(service, devices, "Operate external devices", "HTTP")
 @enduml
-```
+
 
 # Задание 2. Проектирование микросервисной архитектуры
 
 **Диаграмма контейнеров (Containers)**
 
-```plantuml
+
 @startuml
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
 Person(user, "User")
@@ -102,11 +102,11 @@ Container_Ext(sensor, "Sensors")
 Rel(sensor, devicesService, "Publish events")
 
 @enduml
-```
+
 
 **Диаграмма компонентов (Components)**
 
-```plantuml
+
 @startuml
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
 
@@ -123,11 +123,11 @@ Rel(controller, service, "operations on devices")
 Rel(service, database, "CRUD")
 Rel(service, consumer, "Service consumes (reads) messages")
 @enduml
-```
+
 
 **Диаграмма кода (Code)**
 
-```plantuml
+
 @startuml
 class DevicesService {
     + linkDevice(id: Uint): void
@@ -181,11 +181,11 @@ EventsProducer --> EventsConsumer: Message Queue
 DevicesService --> EventsConsumer : Subscribe
 EventsConsumer --> DevicesService : Send event on subscription
 @enduml
-```
+
 
 # Задание 3. Разработка ER-диаграммы
 
-```plantuml
+
 @startuml
 entity User {
     * id : Uint
@@ -244,4 +244,4 @@ DeviceEvent ||--o{ DeviceController
 User ||--o{ DeviceEvent
 DeviceCommand ||--o{ DeviceController
 @enduml
-```
+
