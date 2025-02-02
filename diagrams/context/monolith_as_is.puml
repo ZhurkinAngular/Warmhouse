@@ -1,0 +1,19 @@
+@startuml
+title SmartHome Monolith As-Is Context Diagram
+
+top to bottom direction
+
+!include https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml
+
+Person(connection_specialist, "Connection specialist", "A connection specialist configuring heating system to connect to the SmartHome System")
+Person(user, "User", "A user of the smart-home heating system")
+
+System(smart_home_system, "SmartHome System", "System managing smart-home heating system.")
+
+System_Ext(heating_system, "Heating system", "Heating sensors and controller at every house")
+
+Rel(connection_specialist, smart_home_system, "Configure and make a connection of heating system to SmartHome System")
+Rel(user, smart_home_system, "Turn on/off heating system.\nGet/Set temperature.")
+Rel(smart_home_system, heating_system, "Get/Set temerature.")
+
+@enduml
