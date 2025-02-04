@@ -1,0 +1,71 @@
+@startuml
+
+entity User {
+}
+
+entity Device {
+    * id : int
+    --
+    + name : string
+    + type : string
+    + mac : string
+}
+
+entity DeviceRegistrationCommand {
+    * id : int
+    --
+    + deviceID : int
+}
+
+entity DeviceConfiguration {
+    * id : int
+    --
+    + deviceID : int
+    - config : string
+}
+
+entity DeviceEnableCommand {
+    * id : int
+    --
+    + deviceID : int
+    + name : string
+    + config : string
+}
+
+entity DeviceMetric {
+     * id : int
+    --
+    + deviceID : int
+    + name : string
+    + type : string
+    + value : int
+}
+
+
+entity Alert {
+    * id : int
+    --
+    + deviceID : int
+    + previousValue : int
+    + currentValue : int
+}
+
+entity Notification {
+    * id : int
+    --
+    + deviceID : int
+    + previousValue : int
+    + currentValue : int
+    + text : int 
+}
+
+
+Device ||--|{ DeviceRegistrationCommand
+Device ||--|| DeviceConfiguration
+DeviceEnableCommand }|--|| Device
+Device ||--|{ DeviceMetric
+DeviceMetric }o--o{ Alert
+Alert }o--o{ Notification
+Notification }o--o{ User
+
+@enduml

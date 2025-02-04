@@ -1,0 +1,37 @@
+@startuml
+
+title Диаграмма компонентов для сервиса сбора данных с датчиков системы
+
+class MetricService {
+    +process(metric: Metric): Alert
+}
+
+class MetricRepository {
+    +save(metric: Metric): void
+}
+
+class AlertService {
+    +process(alert: Alert): void    
+}
+
+class Metric {
+    -deviceId: int
+    -name: string
+    -type: string
+    -currentValue: int
+}
+
+class Alert {
+    - deviceId: int
+    - metricName: string
+    - metricType: string
+    - previousValue: int
+    - currentValue: int
+}
+
+MetricService o-- Metric : "использует"
+MetricRepository o-- Metric : "использует"
+MetricService --> Alert : "выдает"
+AlertService o-- Alert : "использует" 
+
+@enduml

@@ -1,0 +1,55 @@
+@startuml
+!include <C4/C4_Container>
+
+Person(user, "Пользователь")
+Person(engineer, "Инженер")
+
+Container(apigw, "API Gateway", "Java")
+
+Rel(user, apigw, "Регистрация нового устройства, мониторинг и управление состоянием, просмотр статистики", "HTTP")
+Rel(engineer, apigw, "Администрирование", "HTTP")
+
+System_Ext(device1, "Устройство умного дома 1")
+System_Ext(device2, "Устройство умного дома 2")
+System_Ext(device3, "Устройство умного дома 3")
+
+System_Boundary(device_registry, "Управление устройствами") {
+    Container(devices_service, "Сервис управления устройствами", "Java", "Регистрирует и удаляет устройства умного дома")
+    ContainerDb(devices_db, "PostgreSQL", "Database")
+    Rel(devices_service, devices_db, "Сохранение устройства в БД")
+}
+
+Rel(apigw, devices_service, "Регистрация нового устройства", "HTTP")
+Rel(devices_service, device1, "Изменение состояния устройства", "HTTP")
+Rel(devices_service, device2, "Изменение состояния устройства", "HTTP")
+Rel(devices_service, device3, "Изменение состояния устройства", "HTTP")
+
+
+ContainerDb(telemetry_queue, "Message Queue", "RabbitMQ", "Значения датчиков")
+Rel(device1, telemetry_queue, "Отправка значений датчиков", "AMQP")
+Rel(device2, telemetry_queue, "Отправка значений датчиков", "AMQP")
+Rel(device3, telemetry_queue, "Отправка значений датчиков", "AMQP")
+
+System_Boundary(telemetry, "Мониторинг устройств") {
+  Container(telemetry_service, "Сервис сбора данных с датчиков системы", "Java", "Собирает и сохраняет данные со всех датчиков в системе")
+  ContainerDb(telemetry_db, "PostgreSQL", "Database")
+  Rel(telemetry_service, telemetry_db, "Сохранение данных с датчиков в БД")
+}
+
+Rel(telemetry_service, telemetry_queue, "Получение значений датчиков", "AMQP")
+
+System_Boundary(notification, "Пользовательские уведомления") {
+  Container(notification_service, "Сервис генерации уведомлений", "Java", "Уведомляет пользователя об изменениях в системе")
+  ContainerDb(notification_db, "PostgreSQL", "Database")
+  Rel(notification_service, notification_db, "Сохранение алертов в БД")
+}
+
+ContainerDb(alert_queue, "Message Queue", "RabbitMQ", "Алерты")
+Rel(telemetry_service, alert_queue, "Отправка алертов", "AMQP")
+Rel(notification_service, alert_queue, "Получение алертов", "AMQP")
+
+ContainerDb(notification_queue, "Message Queue", "RabbitMQ", "Отправка уведомлений пользователю")
+Rel(notification_service, notification_queue, "Отправка уведомлений", "AMQP")
+Rel(user, notification_queue, "Получение уведомлений", "AMQP")
+
+@enduml

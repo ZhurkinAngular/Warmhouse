@@ -1,0 +1,27 @@
+@startuml
+!include <C4/C4_Component>
+
+title Диаграмма компонентов сервиса сбора данных с датчиков системы
+
+Component(metric_consumer, "Metric Consumer", "Java")
+Component(metric_service, "Metric Service", "Java")
+Component(metric_repository, "Device Repository", "Java")
+Component(alert_service, "Alert Service", "Java")
+Component(alert_producer, "Alert Producer", "Java")
+ComponentDb(database, "Database", "PostgreSQL")
+Component_Ext(device, "Device")
+
+ComponentQueue(metric_queue, "Очередь значений датчиков", "AMQP")
+ComponentQueue(alert_queue, "Очередь алертов", "AMQP")
+
+Rel(device, metric_queue, "Отправляет значения датчиков")
+Rel(metric_consumer, metric_queue, "Получает значения датчиков")
+
+Rel(metric_consumer, metric_service, "Обрабатывает новые значения с датчиков")
+Rel(metric_service, metric_repository, "Сохраняет значения в БД")
+Rel(metric_repository, database, "Выполняет запись")
+Rel(metric_service, alert_service, "Уведомляет об изменениях")
+Rel(alert_service, alert_producer, "Генерирует алерт")
+Rel(alert_producer, alert_queue, "Отправляет алерт")
+
+@enduml

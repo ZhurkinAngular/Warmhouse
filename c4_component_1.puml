@@ -1,0 +1,17 @@
+@startuml
+!include <C4/C4_Component>
+
+title Диаграмма компонентов сервиса регистрации устройств
+
+Component(registration_service, "Registration Service", "Java")
+Component(updating_service, "Updating Service", "Java")
+Component(device_repository, "Device Repository", "Java")
+ComponentDb(database, "Database", "PostgreSQL")
+Component_Ext(device, "Device")
+
+Rel(device, registration_service, "Регистрируется")
+Rel(registration_service, updating_service, "Создаёт команду на включение устройства")
+Rel(registration_service, device_repository, "Записывает в хранилище обновленное устройство")
+Rel(device_repository, database, "Выполняет запись")
+Rel(updating_service,device, "Включает устройство")
+@enduml

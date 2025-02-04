@@ -1,0 +1,27 @@
+@startuml
+
+title Диаграмма компонентов для сервиса управления устройствами
+
+class RegistrationService {
+    +register(deviceId: int, deviceName: string, deviceType: string): ActivationData
+    +activate(activationData: ActivationData): boolean
+}
+
+class Device {
+    -id: int
+    -name: string
+    -type: string
+    -mac: string
+}
+
+class ActivationData {
+    - device: Device
+    - status: string
+    - wiFiPassword: string
+}
+
+RegistrationService o-- Device : "использует"
+RegistrationService --> ActivationData : "выдает"
+ActivationData *-- Device : "имеет"
+
+@enduml

@@ -1,0 +1,26 @@
+@startuml
+!include <C4/C4_Component>
+
+title Диаграмма компонентов сервиса генерации уведомлений
+
+Person(user, "Пользователь")
+
+Component(alert_consumer, "Alert Consumer", "Java")
+Component(alert_service, "Alert Service", "Java")
+Component(alert_repository, "Alert Repository", "Java")
+Component(notification_service, "Notification Service", "Java")
+Component(notification_producer, "Notification Producer", "Java")
+ComponentDb(database, "Database", "PostgreSQL")
+
+ComponentQueue(alert_queue, "Очередь алертов", "AMQP")
+ComponentQueue(notification_queue, "Очередь нотификаций", "AMQP")
+
+Rel(alert_consumer, alert_queue, "Получает алерты")
+Rel(alert_consumer, alert_service, "Обрабатывает алерты")
+Rel(alert_service, alert_repository, "Сохраняет алерты в БД")
+Rel(alert_repository, database, "Выполняет запись")
+Rel(alert_service, notification_service, "Уведомляет об изменениях")
+Rel(notification_service, notification_producer, "Генерирует нотификацию")
+Rel(notification_producer, notification_queue, "Отправляет нотификацию")
+Rel(user, notification_queue, "Пользователь получает уведомление")
+@enduml
