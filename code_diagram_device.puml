@@ -1,0 +1,44 @@
+@startuml
+class DeviceController {
+    +getDevices(userId: UUID): List<Device>
+    +addDevice(userId: UUID, serialNumber: String, name: String): Device
+    +updateDevice(userId: UUID, name: String): void
+    +removeDevice(userId: UUID, deviceId: UUID): void
+}
+
+class ScenarioController {
+    +getScenarios(userId: UUID, deviceId: UUID): List<Scenario>
+    +addScenario(userId: UUID, deviceId: UUID, name: String, config: Map<String, Object>): Scenario
+    +updateScenario(userId: UUID, scenarioId: UUID, name: String, config: Map<String, Object>): void
+    +removeScenario(userId: UUID, scenarioId: UUID): void
+}
+
+class Device {
+    +id: UUID
+    +userId: UUID
+    +name: String
+    +serialNumber: String
+    +registeredAt: DateTime
+    +deviceType: DeviceType
+}
+
+class DeviceType {
+    +id: UUID
+    +name: String
+    +description: String
+    +availableScenarioTypes: List<Scenario>
+}
+
+class Scenario {
+    +id: UUID
+    +deviceId: UUID
+    +config: Map<String, Object>
+    +device: Device
+}
+
+DeviceController ..> Device : управляет
+ScenarioController ..> Scenario : управляет
+Device ..> DeviceType : имеет
+Scenario ..> Device : принадлежит
+Scenario ..> DeviceType : предоставляет
+@enduml

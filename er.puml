@@ -1,0 +1,56 @@
+@startuml
+
+entity User {
+    -id: UUID
+    -username: String
+    -email: String
+    -passwordHash: String
+    -devices: List<Device>
+    -estates: List<Estate>
+}
+
+entity Estate {
+    -id: UUID
+    -userId: UUID
+    -name: String
+    -loc: Float
+    -lat: Float
+}
+
+entity Device {
+    -id: UUID
+    -estateId: UUID
+    -name: String
+    -serialNumber: String
+    -registeredAt: DateTime
+    -scenarios: List<Scenario>
+}
+
+entity Scenario {
+    -id: UUID
+    -deviceId: UUID
+    -config: Map<String, Object>
+}
+
+entity TelemetryData {
+    -id: UUID
+    -deviceId: UUID
+    -timestamp: DateTime
+    -data: Map<String, Object>
+}
+
+entity Report {
+    - id: UUID
+    - userId: UUID
+    - estateId: UUID
+    - telemetryData: <DateTime, Map<String, Object>>
+}
+
+User --> Estate : имеет 1:E
+Estate --> Device : имеет 1:D
+Device --> Scenario : имеет 1:S
+Device --> TelemetryData : отноcятся D:T
+User --> Report : имеет 0:UR
+Report --> TelemetryData : отноcятся R:T
+
+@endtuml

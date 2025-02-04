@@ -1,0 +1,33 @@
+@startuml
+title Smart Home Component Diagram - User
+
+top to bottom direction
+
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+Person(user, "User", "A user of the Smart Home system with personal account")
+System_Ext(email_system, "Email system", "The internal exchange e-mail system")
+
+ContainerDb(user_db, "Database", "Postgres", "Stores user data")
+Container_Boundary(user_boundary, "User") {
+    Component(registration, "Registration Controller", "Spring Controller", "Allows users to register and recover access via email")
+    Component(sign, "Sign Controller", "Spring Controller", "Allows users to register and sign in/out. Allows users to recover access via email.")
+    Component(estate, "Estate Controller", "Spring Controller", "Allows users to manage estate")
+    Component(email, "Email Component", "Spring Bean", "Provide functionality to send e-mails to users")
+    Component(user_repo, "User Repository", "Spring Repository", "Provide functionality to registration, sing, etc.")
+    Component(estate_repo, "Estate Repository", "Spring Repository", "Provide functionality to manage estate")
+}
+
+Rel(user, registration, "Uses", "HTTPS")
+Rel(registration, user_repo, "Uses")
+Rel(user_repo, user_db, "Read and write", "Sync, JDBC")
+Rel(registration, email, "Uses")
+Rel(email, email_system, "Uses", "Sync, SMTP")
+Rel(user, sign, "Uses", "HTTPS")
+Rel(sign, user_repo, "Uses")
+Rel_Left(email_system, user, "Sends e-mail to")
+Rel(user, estate, "Uses")
+Rel(estate, estate_repo, "Uses")
+Rel(estate_repo, user_db, "Read and write", "Sync, JDBC")
+
+@enduml

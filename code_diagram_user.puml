@@ -1,0 +1,56 @@
+@startuml
+class RegistrationController {
+    +register(username: String, email: String, password: String): User
+    +requestPasswordReset(email: String): void
+    +resetPassword(resetToken: String, newPassword: String): void
+}
+
+class SignController {
+    +login(username: String, password: String): TokenPair
+    +refresh(refreshToken: String): AccessToken
+    +logout(refreshToken: String): void
+}
+
+class AccountController {
+    +getEstates(userId: UUID): List<Estate>
+    +addEstate(userId: UUID, name: String, loc: Float, lat: Float): Estate
+    +updateEstate(userId: UUID, estateId: UUID, name: String, loc: Float, lat: Float): void
+    +removeEstate(userId: UUID, estateId: UUID): void
+}
+
+class User {
+    +id: UUID
+    +username: String
+    +email: String
+    +passwordHash: String
+    +createdAt: DateTime
+    +devices: List<Device>
+    +estates: List<Estate>
+}
+
+class TokenPair {
+    +accessToken: String
+    +refreshToken: String
+    +expiresIn: Int
+}
+
+class AccessToken {
+    +accessToken: String
+    +expiresIn: Int
+}
+
+class Estate {
+    +id: UUID
+    +userId: UUID
+    +name: String
+    +loc: Float
+    +lat: Float
+}
+
+RegistrationController ..> User : управляет
+SignController ..> TokenPair : возвращает
+SignController ..> AccessToken : возвращает
+AccountController ..> Estate: управляет
+AccountController ..> User: управляет
+User ..> Estate : принадлежит
+@enduml

@@ -1,0 +1,23 @@
+@startuml
+title Smart Home Component Diagram - Monitoring
+
+top to bottom direction
+
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+Person(user, "User", "A user of the Smart Home system with personal account")
+
+Container_Boundary(monitoring_boundary, "Monitoring") {
+    Component(monitoring, "Monitoring Controller", "Spring Controller", "Allow admins manage settings of scraper")
+    Component(consumer, "Kafka consumer", "Spring Component", "Allow admins manage settings of scraper")
+    Component(repo, "Telemetry Repo", "Spring Repository", "Layout data control")
+}
+ContainerQueue(kafka, "Broker Message", "Stores raw data from sensors")
+ContainerDb(db, "Storage aggregates", "Stores data from sensors")
+
+Rel(user, monitoring, "Uses")
+Rel(monitoring, consumer, "Uses")
+Rel(monitoring, repo, "Uses")
+Rel(consumer, kafka, "Read")
+Rel(repo, db, "Read and write")
+@enduml

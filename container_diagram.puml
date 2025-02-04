@@ -1,0 +1,61 @@
+@startuml
+title Smart Home Component Diagram
+
+top to bottom direction
+
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+!define DEVICONS https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/master/devicons
+!define FONTAWESOME https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/master/font-awesome-5
+!include DEVICONS/angular.puml
+!include DEVICONS/dotnet.puml
+!include DEVICONS/java.puml
+!include DEVICONS/database.puml
+!include FONTAWESOME/server.puml
+!include FONTAWESOME/envelope.puml
+
+
+Person(user, "User", "A user of the Smart Home system with personal account")
+
+System_Ext(email_system, "Email system", "The internal exchange e-mail system", "envelope")
+
+System_Boundary(shs, "SmartHome System"){
+    Container(web_app, "Web Application", "Java, Spring MVC", "System for managing device settings and collecting telemetry", "angular")
+    Container(gateway, "API Gateway", "Kongo", "Allows different clients(web, mobile, etc.) use to suitable API")
+
+    Container(user_api, "User API", "Java, Spring MVC, Tomcat 7.x", "Allows users to register, sign in/out and recover access via email and manage estate", "java")
+    ContainerDb(user_db, "Relational Database", "Postgres 13", "Stores user data", "database")
+
+    Container(device_api, "Device API", "Java, Spring MVC, Tomcat 7.x", "Allows users to add, delete devices and setup scenarios.", "java")
+    ContainerDb(device_db, "Relational Database", "Postgres 13", "Stores device data and scenarios data", "database")
+
+    Container(monitoring_api, "Monitoring API", "Java, Spring MVC, Tomcat 7.x", "Allows users to view telemetry data and reports", "java")
+    ContainerDb(monitoring_db, "Relational Database", "Postgres 13", "Stores aggregated telemetry data", "database")
+
+    Container(scrape_api, "Scrape API", "Java, Spring MVC, Tomcat 7.x", "Used to collect data from sensors to kafka and apply command to update scenarios", "java")
+    ContainerQueue(kafka, "Kafka", "Java, Spring MVC, Tomcat 7.x", "Stores raw telemetry data from sensors")
+}
+
+System_Ext(sensor, "Sensor", "Device which receive commands and store current metrics from local environment")
+
+Rel(user, web_app, "Uses", "HTTPS")
+Rel(web_app, gateway, "Uses", "HTTPS")
+
+Rel(gateway, user_api, "Uses", "HTTPS")
+Rel(user_api, user_db, "Read and write", "Sync, JDBC")
+Rel(user_api, email_system, "Sends e-mail using", "Sync, SMPT")
+Rel_Left(email_system, user, "Sends e-mail to")
+
+Rel(gateway, device_api, "Uses", "HTTPS")
+Rel(device_api, device_db, "Read and write", "Sync, JDBC")
+Rel(device_api, sensor, "Update scenario", "Sync, JDBC")
+
+Rel(gateway, monitoring_api, "Uses", "HTTPS")
+Rel(monitoring_api, monitoring_db, "Read and write", "Sync, JDBC")
+Rel(monitoring_api, kafka, "Read data", "Async, JSON/Binary")
+
+Rel(gateway, scrape_api, "Uses", "HTTPS")
+Rel(scrape_api, kafka, "Write data", "Async, JSON/Binary")
+Rel(scrape_api, sensor, "Read data", "Async, JSON/Binary")
+
+@enduml

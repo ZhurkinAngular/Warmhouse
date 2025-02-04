@@ -1,0 +1,19 @@
+@startuml
+title Smart Home Component Diagram - Scraper
+
+top to bottom direction
+
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+Container_Boundary(scraper_boundary, "Scraper") {
+    Component(scraper, "Scraper Bean", "Spring Component", "Allow admins manage settings of scraper")
+    Component(producer, "Kafka Producer", "Spring Component", "Collect data from sensor and send it to kafka")
+}
+ContainerQueue(kafka, "Broker Message", "Stores raw data from sensors")
+Container_Ext(sensor, "Sensor", "Provide current metrics from local environment")
+
+Rel(scraper, sensor, "Uses", "sync")
+Rel(scraper, producer, "Uses")
+Rel(producer, kafka, "Uses", "async")
+
+@enduml

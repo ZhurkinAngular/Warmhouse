@@ -1,0 +1,24 @@
+@startuml
+title Smart Home Component Diagram - Device
+
+top to bottom direction
+
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+Person(user, "User", "A user of the Smart Home system with personal account")
+
+ContainerDb(device_db, "Database", "Relational Database Schema", "Stores device data")
+Container_Boundary(device_boundary, "Device") {
+    Component(device, "Device Controller", "Spring Controller", "Allows users to manage devices and (un)link devices to estate")
+    Component(scenario, "Scenario Controller", "Spring Controller", "Allows users to manage scenarios data")
+    Component(device_repo, "Device Repository", "Spring Repository", "Provide functionality to manage devices data")
+    Component(scenario_repo, "Scenario Repository", "Spring Repository", "Provide functionality to manage devices data")
+}
+
+Rel(user, device, "Uses")
+Rel(user, scenario, "Uses")
+Rel(scenario, scenario_repo, "Uses")
+Rel(device, device_repo, "Uses")
+Rel(device_repo, device_db, "Uses", "Sync, JDBC")
+Rel(scenario_repo, device_db, "Uses", "Sync, JDBC")
+@enduml

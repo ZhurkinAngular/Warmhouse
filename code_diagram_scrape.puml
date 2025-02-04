@@ -1,0 +1,21 @@
+@startuml
+class ScrapeBean {
+    +collectMetrics(deviceId: UUID): MetricData
+    +pushMetricsToKafka(deviceId: UUID, metricData: MetricData): void
+}
+
+class MetricData {
+    -id: UUID
+    -deviceId: UUID
+    -timestamp: DateTime
+    -metrics: Map<String, Object>
+}
+
+class KafkaProducer {
+    +send(topic: String, data: Object): void
+}
+
+ScrapeBean --> MetricData : собирает
+ScrapeBean --> KafkaProducer : использует для отгрузки
+KafkaProducer --> MetricData : отправляет данные
+@enduml
