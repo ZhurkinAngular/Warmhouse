@@ -1,0 +1,64 @@
+@startuml
+title ER Diagram
+
+!define Table(name) class name as "name" << (T,#FFAAAA) >>
+'bold - primary key sql constraint
+!define primary(x) <b>x</b>
+'italic - unique key sql constraint
+!define unique(x) <i>x</i>
+'underlined - not null sql constraint
+!define nnull(x) <u>x</u>
+
+Table(Device) {
+    primary(id) int
+    nnull(device_type) int foreign key DeviceType
+    nnull(house) int foreign key House
+    nnull(ip_address) int foreign key IPTable
+    nnull(in_port) int
+    nnull(out_port) int
+}
+
+Table(DeviceType) {
+    primary(id) int
+    nnull(unique(value)) string
+}
+
+Table(IPTable) {
+    primary(id) int
+    nnull(unique(value)) string
+}
+
+Table(House) {
+    primary(id) int
+    nnull(address) string
+    nnull(user) int foreign key User
+}
+
+Table(User) {
+    primary(id) int
+    nnull(unique(login)) string
+    nnull(password) string
+}
+
+Table(AuthTokens) {
+    primary(id) int
+    nnull(unique(token)) string
+    nnull(user) int foreign key User
+    nnull(expires_at) datetime
+}
+
+Table(Telemetry) {
+    primary(id) int
+    nnull(device_id) int foreign key Device
+    nnull(timestamp) long
+    nnull(data) str
+}
+
+Device }|-- Telemetry: ONE-TO-MANY
+User ||-- AuthTokens: ONE-TO-ONE
+User ||-- House: ONE-TO-ONE
+User }|-- Device: ONE-TO-MANY
+IPTable }|-- Device: ONE-TO-MANY
+DeviceType }|-- Device: ONE-TO-MANY
+
+@enduml
