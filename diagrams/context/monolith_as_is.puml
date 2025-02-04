@@ -10,10 +10,13 @@ Person(user, "User", "A user of the smart-home heating system")
 
 System(smart_home_system, "SmartHome System", "System managing smart-home heating system.")
 
+ComponentDb(database, "DB", "PostgreSQL")
+
 System_Ext(heating_system, "Heating system", "Heating sensors and controller at every house")
 
 Rel(connection_specialist, smart_home_system, "Configure and make a connection of heating system to SmartHome System")
 Rel(user, smart_home_system, "Turn on/off heating system.\nGet/Set temperature.")
 Rel(smart_home_system, heating_system, "Get/Set temerature.")
+Rel(smart_home_system, database, "Upload/Select user heating parameters")
 
 @enduml
