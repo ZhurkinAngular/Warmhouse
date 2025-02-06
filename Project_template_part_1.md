@@ -48,16 +48,16 @@
 
 **Диаграмма контейнеров (Containers)**
 
-Добавьте диаграмму.
+[Ссылка на Microservice To-Be C4 Container Diagram](diagrams/container/Container.puml)
 
 **Диаграмма компонентов (Components)**
 
-Добавьте диаграмму для каждого из выделенных микросервисов.
+[Ссылка на Microservice To-Be C4 Container Diagram](diagrams/component/Component.puml)
 
 **Диаграмма кода (Code)**
 
-Добавьте одну диаграмму или несколько.
+[Ссылка на Microservice To-Be C4 Container Diagram](diagrams/code/Code.puml)
 
 # Задание 3. Разработка ER-диаграммы
 
-Добавьте сюда ER-диаграмму. Она должна отражать ключевые сущности системы, их атрибуты и тип связей между ними.
+[Ссылка на Microservice ER Diagram](diagrams/er/diagram.puml)
