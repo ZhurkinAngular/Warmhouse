@@ -52,11 +52,11 @@
 
 **Диаграмма компонентов (Components)**
 
-[Ссылка на Microservice To-Be C4 Container Diagram](diagrams/component/Component.puml)
+[Ссылка на Microservice To-Be C4 Component Diagram](diagrams/component/Component.puml)
 
 **Диаграмма кода (Code)**
 
-[Ссылка на Microservice To-Be C4 Container Diagram](diagrams/code/Code.puml)
+[Ссылка на Microservice To-Be C4 Code Diagram](diagrams/code/Code.puml)
 
 # Задание 3. Разработка ER-диаграммы
 
