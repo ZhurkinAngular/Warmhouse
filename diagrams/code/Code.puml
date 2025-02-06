@@ -1,0 +1,60 @@
+@startuml
+title SmartHome Microservices To-Be Heating System Code Diagram
+
+top to bottom direction
+
+class SensorDataGetterService {
+  +List[DeviceInfo] deivces
+  +KafkaConnector kafka_connection
+  +json getTelemetryData(DeviceInfo)
+  +void produce(TelemetryData, str topic_name)
+  +DeviceInfo consume(str topic_name)
+}
+
+class UserResponseHeatingProcessingService {
+  +KafkaConnector kafka_connection
+  +json getTemperature(int device_id)
+  +json setTemperature(int device_id, int value)
+  +TelemetryData consume(str topic_name)
+  +DeviceInfo consume(str topic_name)
+}
+
+class KafkaBrokerConfig {
+  int id
+  ...
+}
+
+class KafkaConnector {
+  +KafkaBrokerConfig broker_config
+  +KafkaConnector getConnection()
+  +void produce(data, str topic_name)
+  +data consume(str topic_name)
+}
+
+class DataFactory {
+  +DeviceInfo buildDeviceInfo(device_info_data)
+  +TelemetryData buildTelemetryData(telemetry_data)
+}
+
+class DeviceInfo {
+  +int id
+  +str ip_address
+  +int port
+}
+
+class TelemetryData {
+  +int id
+  +int timestamp
+  +int device_id
+  +json value
+}
+
+KafkaConnector --> KafkaBrokerConfig : uses
+SensorDataGetterService --> KafkaConnector: consume devices, produce telemetry
+UserResponseHeatingProcessingService --> KafkaConnector: consume telemetry
+UserResponseHeatingProcessingService --> DataFactory: uses
+SensorDataGetterService --> DataFactory: uses
+DataFactory --> DeviceInfo: build
+DataFactory --> TelemetryData: build
+
+@enduml

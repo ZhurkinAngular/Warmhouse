@@ -38,6 +38,8 @@ Table(User) {
     primary(id) int
     nnull(unique(login)) string
     nnull(password) string
+    nnull(email) string
+    nnull(full_name) string
 }
 
 Table(AuthTokens) {

@@ -1,0 +1,52 @@
+@startuml
+title SmartHome Microservices To-Be Container Diagram
+
+top to bottom direction
+
+!include https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml
+
+Person(user, "User", "A user of the smart-home")
+
+System_Boundary(SmartHomeSensors, "SmartHome sensors") {
+    System_Ext(heating_sensors, "User Heating sensors and controller", "")
+    System_Ext(lighting_sensors, "User Lighting sensors and controller", "")
+    System_Ext(locking_sensors, "User Locking sensors and controller", "")
+    System_Ext(video_sensors, "User Video sensors and controller", "")
+}
+
+System_Boundary(SmartHomeSystem, "SmartHome system") {
+    Container(api_gateway, "API Gateway", "Routing queries.")
+
+    Container(managing_system, "Managing system", "Add/remove/configure smart-home system")
+    SystemQueue(kafka, "Kafka", "New/updated configured devices, telemetry data")
+
+    Container(heating_system, "Heating system", "Turn-on/off heating system, get/set temperature.")
+    Container(lighting_system, "Lighting system", "Turn-on/off lighting system.")
+    Container(locking_system, "Locking system", "Lock-in/out locking system.")
+    Container(video_system, "Video system", "Turn-on/off video system")
+
+    ComponentDb(user_device_db, "User device configuration", "PostgreSQL")
+    ComponentDb(nas, "Network Atached Storage", "NAS")
+}
+
+Rel(user, api_gateway, "Configure/Monitor SmartHome System")
+Rel(api_gateway, managing_system, "")
+Rel(api_gateway, heating_system, "")
+Rel(api_gateway, lighting_system, "")
+Rel(api_gateway, locking_system, "")
+Rel(api_gateway, video_system, "")
+Rel(api_gateway, video_system, "")
+Rel(managing_system, user_device_db, "Add user registration info, user device configuration")
+Rel(managing_system, kafka, "Produce user device configuration update")
+Rel(heating_system, kafka, "Consume/Produce")
+Rel(video_system, kafka, "Consume/Produce")
+Rel(lighting_system, kafka, "Consume/Produce")
+Rel(locking_system, kafka, "Consume/Produce")
+Rel(video_system, kafka, "Consume/Produce")
+Rel(video_system, nas, "Save video files")
+Rel_U(heating_system, heating_sensors, "Get/Set temperature")
+Rel_U(lighting_system, lighting_sensors, "Turn on/off")
+Rel_U(locking_system, locking_sensors, "Lock-in/out")
+Rel_U(video_system, video_sensors, "Turn on (get streaming data)/ turn-off, ")
+
+@enduml
