@@ -1,0 +1,51 @@
+@startuml
+
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+Person(user, "Пользователь", "Пользователь приложения")
+
+Container_Boundary(DeviceService, "Управление устройствами") {
+    Container(deviceService, "Сервис управления устройствами", "Управление устройствами")
+    ContainerDb(deviceDatabase, "База данных устройств", "Postgres", "База данных для хранения данных об устройствах")
+}
+Rel(deviceService, deviceDatabase, " ")
+
+Container_Boundary(MonitorService, "Мониторинг устройств") {
+    Container(monitorService, "Сервис мониторинга устройств", "Мониторинг устройств")
+    ContainerDb(monitorDatabase, "База данных мониторинга устройств", "Postgres", "База данных для хранения данных о состоянии устройств")
+}
+Rel(monitorService, monitorDatabase, " ")
+
+Container_Boundary(UserService, "Пользователи") {
+    Container(userService, "Сервис пользователей", "Сервис управления пользователями")
+    ContainerDb(userDatabase, "База данных пользователей", "Postgres", "База данных для хранения пользователей")
+}
+Rel(userService, userDatabase, " ")
+
+Container_Boundary(ProcessService, "Взаимодействие с устройствами") {
+    Container(processService, "Сервис взаимодействия с внешними устройствами", "Сервис взаимодействия с внешними устройствами")
+    ContainerDb(processDatabase, "База данных взаимодействия", "Postgres", "База данных для хранения данных о взаимодействиях")
+}
+
+Container(commandKafka, "Очередь команд", "Kafka")
+Container(stateKafka, "Очередь состояний", "Kafka")
+Container(webApp, "Приложение")
+Container(apiGateway, "API Gateway")
+System_Ext(extUserDevices, "Пользовательские устройства", "Пользовательские устройства")
+
+Rel(webApp, apiGateway, " ")
+Rel(user, webApp, " ")
+Rel(apiGateway, userService, "Запрос на регистрацию")
+Rel(apiGateway, monitorService, "Получения состояния устройства")
+Rel(apiGateway, deviceService, "Запрос на выполнение команды или добавления устройства")
+
+
+Rel(deviceService, commandKafka, "Отправка команды")
+Rel(commandKafka, processService, "Получение команды")
+Rel(processService, extUserDevices, "Выполнение команды")
+Rel(extUserDevices, processService, "Получение данных об изменении состояния")
+
+Rel(processService, stateKafka, "Отправка события об изменении данных")
+Rel(stateKafka, monitorService, "Получение события об изменении данных")
+
+@enduml

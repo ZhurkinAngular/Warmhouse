@@ -1,0 +1,56 @@
+@startuml
+
+class DeviceType {
+    long id
+    String name
+}
+
+class DeviceState {
+    long id
+    String name
+}
+
+class DeviceConfig {
+    String configuration
+}
+
+class Command {
+    String command
+}
+
+class Event {
+    String json
+}
+
+class Device {
+ + long id
+ + name
+ + DeviceType type
+ + DeviceState state
+ + long owner
+ + DeviceConfig config
+}
+
+class DeviceService {
+    registerDevice(device : Device)
+    sendCommandToDevice(device : Device, command: Command)
+}
+
+class DeviceRepository {
+    save(device : Device)
+}
+
+class KafkaService {
+    void produce(event : Event)
+    Event consume()
+}
+
+Device --> DeviceType : "Использует"
+Device --> DeviceState : "Использует"
+Device --> DeviceConfig : "Использует"
+DeviceService --> DeviceRepository : "CRUD операции"
+DeviceService --> Device : "Использует"
+DeviceService --> Command : "Использует"
+KafkaService --> Event : "Использует"
+DeviceService --> KafkaService : "Отправляет команды"
+@enduml

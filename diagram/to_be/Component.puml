@@ -1,0 +1,22 @@
+@startuml
+
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+Container(api, "API Gateway")
+ContainerDb(deviceDatabase, "Управление устройствами", "Postgres", "База данных для управления устройствами")
+
+Container_Boundary(DeviceService, "Управление устройствами") {
+    Component(deviceController, "Device Controller", "Контролер управления девайсами")
+    Component(deviceService, "Device Service", "Сервис для работы с устройствами")
+    Rel(deviceController, deviceService, " ")
+    Component(deviceRepository, "Device Repository", "Репозиторий для работы с устройствами")
+    Rel(deviceService, deviceRepository ," ")
+}
+
+Rel(api, deviceController, "REST")
+Rel(deviceRepository, deviceDatabase, " ")
+
+Component(commandQueue, "Command Queue", "Очередь для отправки команд")
+Rel(deviceService, commandQueue, " ")
+
+@enduml

@@ -1,0 +1,49 @@
+@startuml
+
+
+entity User {
+    * id : bigint <<generated>>
+    * name : varchar
+    * surname : varchar
+    second_name : varchar
+    * created_at : timestamp
+    * updated_at : timestamp
+}
+
+entity House {
+    * id : bigint <<generated>>
+    * address : text
+    * created_at : timestamp
+    * updated_at : timestamp
+}
+
+entity DeviceType {
+    * id : bigint <<generated>>
+    * type : varchar
+}
+
+entity DeviceState {
+    * id : bigint <<generated>>
+    * state : varchar
+}
+
+entity Device {
+    * id : bigint <<generated>>
+    * name : varchar
+    * type_id : bigint <<FK>>
+    * ip_address : varchar
+    * mac_address : varchar
+    * house_id : bigint <<FK>>
+    * serial_number : varchar
+    * state_id : bigint <<FK>>
+    * config : jsonb
+    * created_at : timestamp
+    * updated_at : timestamp
+}
+
+User --|> House: "has"
+DeviceType --|> Device: has
+DeviceState --|> Device: has
+House --|> Device: has
+
+@enduml
