@@ -1,0 +1,79 @@
+@startuml
+
+class User{
+    Uint id
+    String name
+    String email
+    String Role
+    Membership membership
+    List<House> houses
+    void register()
+    void login()
+    void addHouse()
+    void removeHouse()
+}
+
+class Membership{
+    String type
+    Uint DeviceMaxNum
+    Uint UseMemToSaveVideo
+    Date startDate
+    Date endDate
+    void active()
+    void cancle()
+    void buyMem()
+    void changeTarif()
+}
+
+class Payment{
+    Double amount
+    Date date
+    void processPayment()
+}
+
+class House{
+    Uint house_id
+    List <Place> places
+    void addPlace()
+    void removePlace()
+}
+
+class Place{
+    Uint place_id
+    List <Device> devices
+    void addDevice()
+    void removeDevice()
+}
+
+class Device{
+    uint device_id
+    uint device_type
+    boolean deviceEnable
+    boolean deviceOn
+    List <Event> events
+    List <Rules> rules
+    void getDeviceConfig()
+    void setDeviceConfig()
+    void setEvent()
+    void setRule()
+}
+
+class Event{
+    Uint device_type
+    void updateConfig()
+}
+
+class Rule{
+    Uint device_type
+    void updateConfig()
+}
+
+User -- Membership
+Membership -- Payment
+User --|{ House
+Place }|-- House
+Device }|-- Place
+Device }|-- Event
+Device }|-- Rule
+
+@enduml
