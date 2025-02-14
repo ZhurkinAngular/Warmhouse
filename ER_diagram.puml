@@ -1,0 +1,91 @@
+@startuml
+
+!define primary_key(x) <b>x</b>
+!define foreign_key(x) <u>x</u>
+
+entity "User" as User {
+    primary_key(id) : UUID
+    --
+    name : string
+    email : string
+    password_hash : string
+    phone: string
+    created_at : datetime
+    updated_at : datetime
+}
+
+entity "UserHouse" as UserHouse {
+    primary_key(id) : UUID
+    --
+    foreign_key(user_id): UUID
+    foreign_key(house_id): UUID
+    user_role: string
+    created_at : datetime
+}
+
+entity "House" as House {
+    primary_key(id) : UUID
+    --
+    name : string
+    adress: string
+}
+
+entity "Place" as Place {
+    primary_key(id) : UUID
+    --
+    foreign_key(house_id): UUID
+    name : string
+    floor: int
+}
+
+entity "Device" as Device {
+    primary_key(id) : UUID
+    --
+    foreign_key(place_id))): UUID
+    foreign_key(device_type_id)): UUID
+    foreign_key(rule_id)): UUID
+    foreign_key(event_id)): UUID
+    name : string
+    status: boolean
+    manufacturer: string
+    serial_number: string
+    properties: json
+    config: json
+}
+
+entity "DeviceType" as DeviceType {
+    primary_key(id) : UUID
+    --
+    name : string
+    manufacturer: string
+    properties: json
+}
+
+entity "Event" as Event {
+    primary_key(id) : UUID
+    --
+    foreign_key(device_id): UUID
+    timestamp: datetime
+    name : string
+    event_type: string
+    event_value: float
+}
+
+entity "Rule" as Rule {
+    primary_key(id) : UUID
+    --
+    name : string
+    condition: string
+    action: string
+}
+
+UserHouse }|-- House
+UserHouse }|-- User
+Device }|-- DeviceType
+Place }|-- House
+Device }|-- Place
+Event }|-- Device
+Device }|-- Rule
+
+@enduml
+

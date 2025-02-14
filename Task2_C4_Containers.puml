@@ -1,0 +1,274 @@
+@startuml
+title "Тёплый дом" диаграмма контейнеров
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+Person(user, "User", "A user of the system")
+
+System(WarmHouseSystem, "Warm House System", "device management, device data collection, payment")
+Container_Boundary(WarmHouseSystem, "Warm House System"){
+    Container(WebApp, "Web Application", "Java, Spring", "Handles user interactions")
+    Container(MobileApp, "Mobile Application", "Kotlin, Swift", "Allows users to control devices in their home. Receive data from devices")
+    Container(PaymentService, "Payment Service", "Node.js", "Processes payments")
+    Container(Database, "Database", "PostgreSQL", "Store user data, device data")
+}
+
+System_Ext(api, "External Devices")
+System_Ext(bank, "Bank System", "External bank for processing payments")
+System_Ext(notificationService, "Notification Service", "Provides users notificating")
+
+Rel(user, WebApp, "Uses the system")
+Rel(WebApp,PaymentService,"Processes payment requests")
+Rel(PaymentService,bank,"Processes payments")
+Rel(WebApp,Database,"Reads/Writes user data")
+Rel(MobileApp,Database,"Reads/Writes user data")
+Rel(WebApp,api,"Extracts device data")
+Rel(WebApp,notificationService,"Send message")
+
+@enduml
+
+
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+Person(user, "User")
+
+Container(mobileApp, "Mobile App")
+Container(apiGateway, "API Gateway")
+
+System_Boundary(SmartHomeSystem, "Smart Devices System") {
+    Container(devicesService, "Devices Service", "Controls external physical devices")
+    Container(userService, "User Service", "Controls users")
+    Container(deviceMonitoringService, "Devices Sensors Monitor", "Service for monitoring sensors")
+    Container(notificationService, "Notification Service", "Provides users notificating")
+
+    ContainerDb(devicesServiceDB, "Devices DB", "Postgres", "Stores info about devices")
+    ContainerDb(userServiceDB, "Users DB", "Postgres", "Stores info about users")
+    ContainerDb(deviceMonitoringServiceDB, "Sensors Monitoring DB", "Postgres", "Stores info about sensors events")
+    ContainerDb(notificationServiceDB, "Notifications DB", "Postgres", "Stores info about notifications")
+
+    Container(queue, "Message Queue", "Kafka")
+}
+
+Rel(user, mobileApp, "Interaction")
+Rel(mobileApp, apiGateway, "Send request")
+Rel(apiGateway, devicesService, "Redirect")
+Rel(apiGateway, userService, "Redirect")
+Rel(apiGateway, deviceMonitoringService, "Redirect")
+Rel(apiGateway, notificationService, "Redirect")
+
+Rel(devicesService, devicesServiceDB, "CRUD")
+Rel(userService, userServiceDB, "CRUD")
+Rel(deviceMonitoringService, deviceMonitoringServiceDB, "CRUD")
+Rel(notificationService, notificationServiceDB, "CRUD")
+
+Rel(devicesService, queue, "Publish")
+Rel(deviceMonitoringService, queue, "Publish")
+Rel(notificationService, queue, "Subscribed")
+
+Container_Ext(sensor, "Sensors")
+Rel(sensor, devicesService, "Publish events")
+@enduml
+
+@startuml
+!include <C4/C4_Container>
+
+Person(client, "Клиент")
+Person(engineer, "Инженер")
+
+Container(apigw, "API GateWay", "Java")
+
+System_Boundary(c1, "Управление устройствами") {
+    Container(home_controller, "Контроллер устройств", "Java", "Управляет устройствами")
+    ContainerDb(devices_db, "Postgres", "Relational Database", "Хранение данных об устройствах")
+}
+System_Boundary(telemetry, "Мониторинг устройств") {
+  Container(teltmetry_controller, "Сбора данных с устройств", "java", "Обрабатывает данные с устройств")
+  Container(teltmetry_aggregate, "Аггрегат данных", "java", "Например история изменения температуры")
+  ContainerDb(telemetry_qdb, "Message Queue", "RabbitMQ", "Очередь сбора статистики")
+  ContainerDb(telemetry_db, "MongoDB", "NoSQL", "Логирует все изменения с датчиков")
+}
+System_Boundary(notification, "Уведомления") {
+  Container(notification_send, "Отправка push, email, sms", "java", "Позволяет отправлять уведомления push, email, sms")
+  ContainerDb(queue_db, "Message Queue", "RabbitMQ", "Очередь для отправки сообщений")
+}
+System_Boundary(auth, "Авторизация") {
+  Container(auth_containter, "Авторизация", "Oauth", "Авторизует пользователя и обрабатывает доступы")
+  ContainerDb(users_db,"Postgres", "Relational Database", "Хранит данные о пользователях")
+}
+
+System_Ext(device, "Устройство умного дома")
+
+Rel(device, apigw, "Отправка данных с устройства", "HTTPS")
+Rel(client, apigw, "Управление устройствами, получение телеметрии, регистрация устройств", "HTTPS")
+Rel(engineer, apigw, "Администрирование", "HTTPS")
+
+Rel(apigw, home_controller, "Управление и добавление новго устройства", "GRPC")
+Rel(apigw, teltmetry_controller, "Сбор данных с устройства", "GRPC")
+Rel(apigw, teltmetry_aggregate, "Получение статистики", "GRPC")
+Rel(apigw, auth_containter, "Авторизация", "GRPC")
+
+Rel(auth_containter, users_db, "Авторизация", "GRPC")
+Rel(auth_containter, notification, "Отправка ведомлений о входе/регистрации", "GRPC")
+
+Rel(notification_send, queue_db, "Очередь на отправку", "GRPC")
+
+Rel(home_controller, devices_db, "Изменение состояний устройств", "GRPC")
+Rel(home_controller, device, "Изменение состояния устройства", "HTTPS")
+
+Rel(teltmetry_controller, telemetry_db, "Сохранение данных", "GRPC")
+Rel(teltmetry_aggregate, telemetry_qdb, "Обработка данных из очереди", "GRPC")
+Rel(telemetry_qdb, telemetry_db, "Забирает данные для аггрегатов", "GRPC")
+
+Rel(notification, client, "Отправка уведомлений", "HTTPS")
+
+@enduml
+
+@startuml
+title Smart Home Container Diagram
+
+top to bottom direction
+
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml
+
+Person(user, "Пользователь", "Пользователь системы Smart House")
+System(SmartHomeSystem, "Smart Home", "")
+
+Container_Boundary(SmartHomeSystem, "Smart Home") {
+  Container(WebApp, "Web Application", "Java, Spring", "Веб-приложение")
+  Container(Kafka, "Message broker", "Kafka", "Брокер сообщений")
+
+  Container_Boundary(Heating, "Heating"){
+    Container(HeatService, "Сервис: Управление отоплением", "Включение, выключение, контроль температуры")
+    Container(HeatDatabase, "Heating Database", "PostgreSQL", "Хранения данных отопительных приборов")
+  }
+
+  Container_Boundary(Telemetry, "Telemetry"){
+    Container(HeatMonitoring, "Сервис: Мониторинг температуры", "Мониторинг температуры")
+    Container(TelemetryDatabase, "Telemetry Database", "PostgreSQL", "Хранение данных температурных датчиков")
+  }
+
+  Container_Boundary(Doors, "Doors"){
+    Container(DoorsService, "Сервис: управление воротами", "Открытие, закрытие ворот")
+    Container(DoorsDatabase, "Doors Database", "PostgreSQL", "Хранение данных ворот")
+  }
+
+  Container_Boundary(Light, "Light"){
+    Container(LightService, "Сервис: управление освещением", "Вкключение, выключение осветительных приборов")
+    Container(LightDatabase, "Light Database", "PostgreSQL", "Хранение данных освещения")
+  }
+
+  Container_Boundary(Video, "Video"){
+    Container(VideoService, "Сервис: видеонаблюдение", "видеосъека объектов наблюдения")
+    Container(VideoDatabase, "Video Database", "PostgreSQL", "Хранение данных видеонаблюдения")
+  }
+
+
+}
+
+System_Ext(HeatingSystem, "Устройства отопления", "Управляемое отопительное оборудование")
+System_Ext(TemperatureSensor, "Телеметрия", "Датчики приборов")
+System_Ext(DoorSystem, "Ворота", "Приборы управление воротами")
+System_Ext(LightSystem, "Свет", "Приборы управление светом")
+System_Ext(VideoSystem, "Видеонаблюдением", "Система видеонаблюдения")
+
+Rel(user, WebApp, "Uses the system")
+Rel(WebApp, Kafka,"")
+Rel(Kafka, WebApp, "")
+
+Rel(HeatService, WebApp,"")
+Rel(HeatMonitoring,WebApp,"")
+Rel(DoorsService,WebApp,"")
+Rel(LightService,WebApp,"")
+Rel(VideoService, WebApp,"")
+
+Rel(HeatService, Kafka,"")
+Rel(HeatService, HeatDatabase,"")
+Rel(HeatDatabase, HeatService,"")
+
+Rel(HeatMonitoring, Kafka,"")
+Rel(HeatMonitoring, TelemetryDatabase,"")
+Rel(TelemetryDatabase, HeatMonitoring,"")
+
+Rel(DoorsService, Kafka,"")
+Rel(DoorsService, DoorsDatabase,"")
+Rel(DoorsDatabase, DoorsService,"")
+
+Rel(LightService, Kafka,"")
+Rel(LightService, LightDatabase,"")
+Rel(LightDatabase, LightService,"")
+
+Rel(VideoService, Kafka,"")
+Rel(VideoService, VideoDatabase,"")
+Rel(VideoDatabase, VideoService,"")
+
+
+Rel(WebApp, LightSystem, "")
+Rel(WebApp, VideoSystem,"")
+Rel( WebApp, DoorSystem,,"")
+Rel(TemperatureSensor, WebApp,"")
+Rel(WebApp, HeatingSystem,"")
+@enduml
+
+@startuml
+title "Теплый Дом" Container Diagram
+
+top to bottom direction
+
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml
+
+Person(user, "User", "A user of the tepliydom")
+Person(admin, "Administrator", "An administrator managing the system")
+
+System(TepliyDom, "Tepliy Dom")
+System(webApp, "Web application", "Provides all the functionality of tepliydom to customers via  their web browser")
+
+System_Ext(externalDevices, "External devices", "Devices connected by user")
+System_Ext(SmartDevices, "Third-Party Sensors", "External API for fitness data integration")
+
+Container_Boundary(TepliyDom, "") {
+  Container(ApiGateway, "API Gateway", "Kong", "Handles incoming requests")
+  SystemQueue(Queue, "Kafka Queue", "Kafka brokers. Pub/Sub model")
+
+  Container(DeviceManagement, "DeviceManagementService", "Java, Spring", "Manages devices")
+  Container(DeviceScenario, "DeviceScenarioService", "Java, Spring", "Manages Device Scenario")
+  Container(Monitoring, "MonitoringService", "Java, Spring", "Provides device monitoring")
+  Container(UsersManagement, "UserManagementService", "Java, Spring", "Manages Users")
+  Container(TechSupport, "TechnicalSupportService", "Java, Spring", "Manages support tickets")
+  Container(SensorTelemetryService, "SensorTelemetryService", "Java, Spring", "Manages support device telemetry")
+
+  ContainerDb(DeviceManagementDataBase, "DataBase", "PostgreSQL", "Stores device information")
+  ContainerDb(DeviceScenarioDataBase, "DataBase", "PostgreSQL", "Stores scenario information")
+  ContainerDb(MonitoringDataBase, "DataBase", "GreenPlum", "Stores analytics reports")
+  ContainerDb(UsersManagementDataBase, "DataBase", "PostgreSQL", "Stores users information")
+  ContainerDb(TechSupportDataBase, "DataBase", "MongoDB", "Stores support tickets")
+  ContainerDb(SensorTelemetryServiceDatabase, "DataBase", "MongoDB", "Stores device telemetry information")
+}
+
+
+Rel(user, webApp, "Visits teplyidom.com", "HTTPS")
+Rel(admin, webApp, "Visits teplyidom.com", "HTTPS")
+Rel(SmartDevices, ApiGateway, "Makes API calls", "JSON/HTTPS")
+Rel(webApp, ApiGateway, "Makes API calls", "JSON/HTTPS")
+
+Rel(ApiGateway, Queue, "Reads from and writes to", "JSON/ASYNC")
+Rel(ApiGateway, DeviceManagement, "Makes API calls to", "JSON/HTTP")
+Rel(ApiGateway, DeviceScenario, "Makes API calls to", "JSON/HTTP")
+Rel(ApiGateway, UsersManagement, "Makes API calls to", "JSON/HTTP")
+Rel(ApiGateway, Monitoring, "Makes API calls to", "JSON/HTTP")
+Rel(ApiGateway, TechSupport, "Makes API calls to", "JSON/HTTP")
+Rel(ApiGateway, SensorTelemetryService, "Makes API calls to", "JSON/HTTP")
+
+Rel(DeviceManagement, Queue, "Reads from and writes to", "JSON/ASYNC")
+Rel(DeviceScenario, Queue, "Reads from and writes to", "JSON/ASYNC")
+Rel(Monitoring, Queue, "Writes to", "JSON/ASYNC")
+
+Rel(DeviceManagement, DeviceManagementDataBase, "Reads/Writes data", "SQL/TCP")
+Rel(DeviceScenario, DeviceScenarioDataBase, "Reads/Writes data", "SQL/TCP")
+
+Rel(DeviceManagement, externalDevices, "Run commands on device", "HTTPS")
+
+Rel(UsersManagement, UsersManagementDataBase, "Reads/Writes data", "SQL/TCP")
+Rel(Monitoring, MonitoringDataBase, "Reads/Writes data", "SQL/TCP")
+
+Rel(TechSupport, TechSupportDataBase, "Reads/Writes data", "SQL/TCP")
+Rel(SensorTelemetryService, SensorTelemetryServiceDatabase, "Reads/Writes data", "SQL/TCP")
+@enduml

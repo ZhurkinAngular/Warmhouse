@@ -1,0 +1,38 @@
+@startuml
+title FitLife Membership Management Code Diagram
+
+top to bottom direction
+
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml
+
+class User {
+  +String name
+  +String email
+  +List<Membership> memberships
+  +void register()
+  +void login()
+}
+
+class Membership {
+  +String type
+  +Date startDate
+  +Date endDate
+  +void activate()
+  +void cancel()
+}
+
+class Schedule {
+  +Date date
+  +String activity
+  +void addActivity()
+  +void removeActivity()
+}
+
+User "1" -- "0..*" Membership : has
+Membership "1" -- "0..*" Schedule : includes
+
+@endumlИтоги
+Подход «Документация как код» позволяет поддерживать актуальность и согласованность документации с кодом проекта.
+Чтобы эффективно создавать документацию и управлять ею, можно использовать инструменты PlantUML и MkDocs. С их помощью удобно визуализировать архитектуру и автоматизировать процессы.
+Большим преимуществом этих инструментов является возможность интеграции с моделью С4 и системами контроля версий.
+В следующем уроке уже со знанием диаграмм PlantUML мы обсудим паттерны проектирования микросервисов.

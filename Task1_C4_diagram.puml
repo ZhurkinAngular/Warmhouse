@@ -1,0 +1,22 @@
+@startuml
+title "Тёплый дом" диаграмма контекста
+
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml
+
+Person(user, "Пользователь","Пользователь системы 'Тёплый дом'")
+Person(engineer, "Инженер", "Инженер компании 'Тёплый дом' по установке датчиков")
+Person(admin, "Администратор", "Тех.поддержка компании 'Тёплый дом'")
+
+System_Boundary(TH, "Система Теплый Дом") {
+    Container(web_app, "Монолитное приложение", "Java, Postgres")
+}
+
+System(sensor, "Датчик температуры")
+System(relay, "Реле управления")
+
+Rel(user, web_app, "Вкл/выкл отопления, установка температуры, получение текущей температуры", "HTTPS")
+Rel(engineer, web_app, "Добавление новых датчиков", "HTTPS")
+Rel(admin, web_app, "Помощь при возникновении неполадок", "HTTPS")
+Rel(web_app, relay, "Вкл/выкл устройства, установка температуры", "HTTPS")
+Rel(web_app, sensor, "Получение данных с датчика", "HTTPS")
+@enduml

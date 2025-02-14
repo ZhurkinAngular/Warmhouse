@@ -1,0 +1,59 @@
+@startuml
+title "Тёплый дом" диаграмма контейнеров
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml
+
+Person(user, "User", "A user of the system")
+
+Container(Devices, "Sensors and other devices") {
+    Component(TempSensor, "TemperatureSensor")
+    Component(Cameras, "Cameras")
+    Component(OtherSensors, "Other Sensors")
+}
+
+Container(Relay, "Relay and other devices") {
+    Component(TempRelay, "TemperatureRelay")
+    Component(Light, "LightRelay")
+    Component(OtherRelay, "Other Relay")
+}
+
+Container(UserInteraction, "User Interaction") {
+    Component(APIGateway, "APIGateway", "Handles API requests")
+    Component(WebApp, "WebApp", "Web app for users")
+    Component(MobileApp, "Mobile App", "Web app for users")
+}
+
+System(MessageBroker, "Message Broker")
+Container_Boundary(MessageBroker, "Message Broker"){
+    Container(Kafka, "Kafka", "Broker for handling messages")
+}
+
+Container(DataProcessor, "Data Processor") {
+    Component(DataProc, "Data Processor", "Processes incoming data ")
+    Component(EventStore, "EventStore", "Stores Events")
+}
+
+Container(NAA, "Notification and Analysis") {
+    Component(NotificationService, "Data Processor", "Sends Notifications ")
+    Component(AnalisticsService, "AnalisticsService", "")
+}
+
+Rel(TempSensor, Kafka, "Send data")
+Rel(Cameras, Kafka, "Send data")
+Rel(OtherSensors, Kafka, "Display data")
+Rel(APIGateway, MobileApp, "Display data")
+Rel(APIGateway, WebApp, "Display data")
+Rel(user, APIGateway, "Requests")
+Rel(APIGateway, Kafka,)
+Rel(Kafka, APIGateway,)
+Rel(Kafka, Light,)
+Rel(Kafka, TempRelay,)
+Rel(Kafka, OtherRelay,)
+Rel(DataProc, EventStore, "Save event")
+Rel(DataProc, Kafka,"Publish processed data")
+Rel(Kafka, DataProc, "")
+Rel(NotificationService, user, "")
+Rel(Kafka, NotificationService,"")
+Rel(AnalisticsService, EventStore, "")
+Rel(Kafka, AnalisticsService,"")
+
+@enduml
