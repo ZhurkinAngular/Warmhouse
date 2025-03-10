@@ -1,0 +1,107 @@
+@startuml
+title Диаграмма компонентов «Тёплый дом»
+
+top to bottom direction
+
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml
+
+Container_Boundary(WarmHouse, "WarmHouse System") {
+  Container(UserService, "User Service", "Java, Spring", "Предоставление информации о пользоватле, регистрация, авторизация")
+  Container(UserDB, "UserDB", "PostgreSQL", "Хранение информации о пользователе")
+
+  Container(PlaceService, "Place Service", "Java, Spring", "Управление местами расположения устройств. Добавление устройства в комнату")
+  Container(PlaceDB, "PlaceDB", "PostgreSQL", "Хранение информации о местах")
+
+  Container(DeviceService, "Device Service", "Java, Spring", "Сервис регистрации и упраления устройство, хранение детальной информации о устройстве")
+  Container(DeviceDB, "DeviceDB", "PostgreSQL", "Хранение информации о устройствах")
+
+  Container(DeviceStatusService, "Device Status Service", "Java, Spring", "Сервис обработки и предоставления информации о статусе работы устройства")
+  ContainerQueue(DeviceStatusKafka, "Device Status Kafka", "Kafka", "Очередь сообщений со статусом работы устройства")
+  Container(DeviceStatusDB, "DeviceDB", "PostgreSQL", "Хранение информации о состоянии работы устройства")
+
+  Container(SensorHistoryService, "Sensor History Service", "Java, Spring", "Сервис обработки и предоставления информации о показаниях датчиков")
+  ContainerQueue(SensorDataKafka, "Sensor Data Kafka", "Kafka", "Очередь сообщений с показаниями работы датчиков устройств")
+  Container(SensorHistoryDB, "SensorHistoryDB", "PostgreSQL", "Хранение информации о показаниях датчиков")
+}
+
+Container(UserService, "User Service", "Java, Spring") {
+  Component(AuthController, "AuthController", "Контроллер авторизации и аутентификации")
+  Component(UserController, "UserController", "Управление профилем пользователя")
+  Component(RegistrationController, "RegistrationController", "Регистрация пользователя")
+  Component(ServiceLayer, "Service Layer", "Бизнеслогика")
+  Component(RepositoryLayer, "Repository Layer", "Data access logic")
+}
+
+Rel(AuthController,ServiceLayer,"Вызов бизнес логики")
+Rel(UserController,ServiceLayer,"Вызов бизнес логики")
+Rel(RegistrationController,ServiceLayer,"Вызов бизнес логики")
+Rel(ServiceLayer, RepositoryLayer,"Вызов бизнес логики")
+Rel(RepositoryLayer,UserDB,"Reads/Writes user data")
+
+Container(PlaceService, "Place Service", "Java, Spring") {
+  Component(HouseController, "HouseController", "Контроллер создания/редактирования/удаления дома")
+  Component(RoomController, "RoomController", "Контроллер создания/редактирования/удаления команты.")
+  Component(DeviceAddController, "DeviceController", "Добавление устройства в команту")
+  Component(PlaceServiceLayer, "Service Layer", "Бизнеслогика")
+  Component(PlaceRepositoryLayer, "Repository Layer", "Data access logic")
+}
+
+Rel(HouseController,PlaceServiceLayer,"Вызов бизнес логики")
+Rel(RoomController,PlaceServiceLayer,"Вызов бизнес логики")
+Rel(DeviceAddController,PlaceServiceLayer,"Вызов бизнес логики")
+Rel(PlaceServiceLayer, PlaceRepositoryLayer,"Вызов бизнес логики")
+Rel(PlaceRepositoryLayer,PlaceDB,"Reads/Writes user data")
+
+Rel(PlaceServiceLayer, UserController,"Получение информации о пользователе для поиска дома")
+
+
+Container(DeviceService, "Device Service", "Java, Spring") {
+  Component(DeviceController, "DeviceController", "Контроллер предоставления информации о устройстве")
+  Component(DeviceControlController, "ControlController", "Контроллер управления устройством")
+  Component(DeviceRegistrationController, "RegistrationController", "Контроллер регистрации устройства.")
+  Component(DeviceServiceLayer, "Service Layer", "Бизнеслогика управления устройством и регистрации")
+  Component(DeviceRepositoryLayer, "Repository Layer", "Data access logic")
+}
+
+Rel(DeviceController,DeviceServiceLayer,"Вызов бизнес логики")
+Rel(DeviceControlController,DeviceServiceLayer,"Вызов бизнес логики")
+Rel(DeviceRegistrationController,DeviceServiceLayer,"Вызов бизнес логики")
+Rel(DeviceServiceLayer, DeviceRepositoryLayer,"Вызов бизнес логики")
+Rel(DeviceRepositoryLayer, DeviceDB,"Reads/Writes user data")
+
+Rel(PlaceServiceLayer, DeviceController, "Получение информации о устройствах")
+
+
+Container(DeviceStatusService, "Device Status Service", "Java, Spring") {
+  Component(DeviceStatusController, "StatusController", "Контроллер предоставления информации о статусе устройстве")
+  Component(ConsumerStatusKafka, "Consumer Status", "Консьюмер обработки событий о статусе устройства")
+  Component(DeviceStatusServiceLayer, "Service Layer", "Бизнеслогика управления устройством и регистрации")
+  Component(DeviceStatusRepositoryLayer, "Repository Layer", "Data access logic")
+}
+
+Rel(DeviceStatusController,DeviceStatusServiceLayer,"Вызов бизнес логики")
+Rel(ConsumerStatusKafka,DeviceStatusServiceLayer, "Обработка событий из кафки с учетом бизнес логики")
+Rel(DeviceStatusServiceLayer, DeviceStatusRepositoryLayer,"Вызов бизнес логики")
+Rel(DeviceStatusRepositoryLayer, DeviceStatusDB,"Reads/Writes user data")
+Rel(ConsumerStatusKafka, DeviceStatusKafka,"Поток обработки событий из кафки")
+
+Rel(DeviceServiceLayer, DeviceStatusController, "Получение информации о статусе устройства")
+
+
+
+Container(SensorHistoryService, "Sensor History Service", "Java, Spring") {
+  Component(SensorHistoryController, "SensorHistoryController", "Контроллер предоставления информации о показаниях датчиков за период времени")
+  Component(ConsumerSensorDataKafka, "Consumer Status", "Консьюмер обработки событий о показаниях датчиков")
+  Component(SensorHistoryServiceLayer, "Service Layer", "Бизнеслогика управления сохранения показаний датчиков")
+  Component(SensorHistoryRepositoryLayer, "Repository Layer", "Data access logic")
+}
+
+Rel(SensorHistoryController,SensorHistoryServiceLayer,"Вызов бизнес логики")
+Rel(ConsumerSensorDataKafka,SensorHistoryServiceLayer, "Обработка событий из кафки с учетом бизнес логики")
+Rel(SensorHistoryServiceLayer, SensorHistoryRepositoryLayer,"Вызов бизнес логики")
+Rel(SensorHistoryRepositoryLayer, SensorHistoryDB,"Reads/Writes user data")
+Rel(ConsumerSensorDataKafka, SensorDataKafka,"Поток обработки событий из кафки")
+
+Rel(DeviceServiceLayer, SensorHistoryController, "Получение информации о показаниях датчиков")
+
+@enduml

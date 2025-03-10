@@ -1,9 +1,12 @@
 @startuml
-title Диаграмма компонентов «Тёплый дом»
+title Диаграмма контейнеров «Тёплый дом»
 
 top to bottom direction
 
 !includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml
+
+skinparam wrapWidth 300
+' LAYOUT_LANDSCAPE()
 
 Person(user, "Пользователь", "Пользователь системы")
 Person(enginer, "Инженер", "Выполняет настройку и подключение системы")
@@ -41,7 +44,6 @@ Container_Boundary(WarmHouse, "WarmHouse System") {
   Container(SensorHistoryService, "Sensor History Service", "Java Spring", "Сервис с историей показаний устройств")
   ContainerDb(SensorHistoryDB, "SensorHistoryDB", "PostgreSQL", "Device Sensor History")
 
-  ContainerDb(Database, "Database", "PostgreSQL", "Stores user data and schedules")
 }
 
 Rel(user, WebApp, "Управление умным домом. Просмотр статистики, добавление устройств, управление.")
