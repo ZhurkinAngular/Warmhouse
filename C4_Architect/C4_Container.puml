@@ -1,0 +1,83 @@
+@startuml
+title Диаграмма компонентов «Тёплый дом»
+
+top to bottom direction
+
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml
+
+Person(user, "Пользователь", "Пользователь системы")
+Person(enginer, "Инженер", "Выполняет настройку и подключение системы")
+System_Ext(devices, "Датчики", "Внешние устройства умного дома.")
+System(WarmHouse, "WarmHouse", "System managing memberships, schedules, and payments")
+
+Container_Boundary(WarmHouse, "WarmHouse System") {
+  Container(WebApp, "Web Application", "ReactJS", "Интерфейс взаимодействия с пользователем")
+  Container(MobileApp, "Mobile Application", "React Native", "Мобильное приложение для управления устройствами")
+  Container(WebAdminApp, "Admin Web Application", "React Native", "Интерфейс для администраторов")
+  Container(WebGateWayAPI, "API Gateway", "Kong", "Внешний API для WEB приложения")
+  Container(MobileGateWayAPI, "Mobile API Gateway", "Kong", "Внешний API для мобильного приложения")
+  Container(WebAdminGateWayAPI, "Admin API Gateway", "Kong", "Внешний API для WEB приложения инженеров сопровождения")
+  
+  Container(PlaceService, "Place Service", "Java Spring", "Сервси отвечающий за хранение информации о месте установки датчиков")
+  ContainerDb(PlaceDB, "PlaceDB", "PostgreSQL", "House, room, owner")
+  
+  Container(UserService, "User Service", "Java Spring", "Сервси отвечающий за хранение информации о пользователе. Регистрации, авторизации, персональной информации")
+  ContainerDb(UserDB, "UserDB", "PostgreSQL", "House, room, owner")
+
+  Container(DeviceService, "Device Service", "Java Spring", "Сервси отвечающий за хранение информации о устройствах. Регистрации, управлении, детальной информации")
+  ContainerDb(DeviceDB, "DeviceDB", "PostgreSQL", "Device")
+
+  Container(DeviceGateWayAPI, "Device API Gateway", "Kong", "Внешний API для управления и сбора информации с устройств")
+  ContainerQueue(StatusDeviceKafka, "Device Status Kafka", "Kafka", "Очередь сообщений с информацие о статусе работы устройства")
+  Container(DeviceStatusService, "DeviceStatus Service", "Java Spring", "Сервис, который хранит информацию о статусе работы устройства")
+  ContainerDb(DeviceStatusDB, "DeviceStatusDB", "PostgreSQL", "Device Status")
+
+  Container(DeviceGateWayAPI, "Device API Gateway", "Kong", "Внешний API для управления и сбора информации с устройств")
+  ContainerQueue(StatusDeviceKafka, "Device Status Kafka", "Kafka", "Очередь сообщений с информацие о статусе работы устройства")
+  Container(DeviceStatusService, "DeviceStatus Service", "Java Spring", "Сервис, который хранит информацию о статусе работы устройства")
+  ContainerDb(DeviceStatusDB, "DeviceStatusDB", "PostgreSQL", "Device Status")
+
+  ContainerQueue(SensorDataKafka, "Device Sensors Data", "Kafka", "Очередь сообщений с информацие о показаниях датчиков")
+  Container(SensorHistoryService, "Sensor History Service", "Java Spring", "Сервис с историей показаний устройств")
+  ContainerDb(SensorHistoryDB, "SensorHistoryDB", "PostgreSQL", "Device Sensor History")
+
+  ContainerDb(Database, "Database", "PostgreSQL", "Stores user data and schedules")
+}
+
+Rel(user, WebApp, "Управление умным домом. Просмотр статистики, добавление устройств, управление.")
+Rel(user, MobileApp, "Управление умным домом. Просмотр статистики, добавление устройств, управление.")
+Rel(enginer, WebAdminApp, "Выполнение задач сопровождения")
+Rel(WebApp, WebGateWayAPI, "Балансировка запросов", "HTTP")
+Rel(MobileApp, MobileGateWayAPI, "Балансировка запросов", "HTTP")
+Rel(WebAdminApp, WebAdminGateWayAPI, "Балансировка запросов", "HTTP")
+
+Rel(WebGateWayAPI, PlaceService, "Управление расположением датчиков", "HTTP")
+Rel(MobileGateWayAPI, PlaceService, "Управление расположением датчиков", "HTTP")
+Rel(WebAdminGateWayAPI, PlaceService, "Управление расположением датчиков", "HTTP")
+Rel(PlaceService, PlaceDB, "Получение информации о расположении")
+
+Rel(WebGateWayAPI, UserService, "Авторизация, регистрация, аутентификация", "HTTP")
+Rel(MobileGateWayAPI, UserService, "Авторизация, регистрация, аутентификация", "HTTP")
+Rel(WebAdminGateWayAPI, UserService, "Авторизация, регистрация, аутентификация", "HTTP")
+Rel(UserService, UserDB, "Получение информации о пользователе")
+
+Rel(WebGateWayAPI, DeviceService, "Добавление устройства, управление устройством", "HTTP")
+Rel(MobileGateWayAPI, DeviceService, "Добавление устройства, управление устройством", "HTTP")
+Rel(WebAdminGateWayAPI, DeviceService, "Конфигурирование устройства", "HTTP")
+Rel(DeviceService, DeviceDB, "Получение информации о устройствах")
+
+Rel(devices, DeviceGateWayAPI, "Запросы с сообщением о статусе устройства и показаниям. Балансировка, авторизация устройства", "HTTP")
+Rel(DeviceGateWayAPI, StatusDeviceKafka, "Формирование события со статусом работы устройства", "HTTP")
+Rel(StatusDeviceKafka, DeviceStatusService, "Передача события о статусе работы устройства", "HTTP")
+Rel(DeviceStatusService, DeviceStatusDB, "Хранение информации о статусе работы устройства")
+Rel(DeviceStatusService, DeviceService, "Передоставление информации о статусе работы устройства")
+
+Rel(DeviceGateWayAPI, SensorDataKafka, "Формирование события с показаниями датчиков", "HTTP")
+Rel(SensorDataKafka, SensorHistoryService, "Передача события с показаниями датчиков", "HTTP")
+Rel(SensorHistoryService, SensorHistoryDB, "Хранение исторической информации о показаниях датчиков устройств")
+Rel(SensorHistoryService, DeviceService, "Передоставление информации за интервал времени о показаниях датчика")
+
+Rel(PlaceService, UserService, "Получение информации о пользователе")
+Rel(DeviceService, DeviceGateWayAPI, "Запрос на управление устройством")
+
+@enduml
