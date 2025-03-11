@@ -1,0 +1,72 @@
+@startuml
+title Диаграмма кода сервиса Device Service «Тёплый дом»
+
+top to bottom direction
+
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml
+
+class Device {
+  +UUID id 
+  +String name
+  +DeviceType type
+  +DeviceStatus status
+  +List<SensorHistory> memberships
+  +Date registrationAt
+  +UUID roomId
+  +UUID ownerId
+}
+
+enum DeviceType {
+    +BUTTON
+    +WARM_CONTROL
+    +LED_LAMP
+    +TEMP_CONTROL
+    +RELAY 
+}
+
+enum DeviceStatus {
+    +ACTIVE
+    +DISABLED
+    +DISCONNECT
+    +SLEEP
+}
+
+class SensorHistory {
+  +SensorType type
+  +Object data
+  +Date createAt
+}
+
+enum SensorType {
+    +TEMPERATURE
+    +POWER
+    +LIGHT
+    +OFF_ON
+}
+
+class Room {
+  +UUID id
+  +String name
+  +String iconUrl
+  +String description
+  +UUID houseId
+  +Date createAt
+}
+
+class House {
+  +UUID id
+  +String name
+  +String iconUrl
+  +String description
+  +UUID ownerId
+  +Date createAt
+}
+
+Device "1" -- "0..*" SensorHistory : has
+Device "1" -- "1" DeviceType : has
+Device "1" -- "1" DeviceStatus : has
+Device "1" -- "1" Room : has
+House "1" -- "0..*" Room : has
+SensorHistory "1" -- "1" SensorType : has
+
+@enduml
