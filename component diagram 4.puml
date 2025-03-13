@@ -1,0 +1,17 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+title Уровень компонентов для микросервиса "Интеграция с устройствами партнёров"
+
+Container(partner_integration, "Интеграция с устройствами партнёров", "Поддержка стандартных протоколов для подключения сторонних устройств.") {
+    Component(kafka_client, "Kafka Client", "Чтение и запись событий в Kafka.")
+    Component(protocol_adapter, "Адаптер протоколов", "Преобразование данных между протоколами партнёров и внутренним форматом.")
+    Component(device_manager, "Менеджер устройств", "Управление подключёнными устройствами партнёров.")
+}
+
+' Взаимодействие между компонентами
+Rel(kafka_client, protocol_adapter, "Передача команд и событий из Kafka.")
+Rel(protocol_adapter, device_manager, "Управление устройствами.")
+Rel(device_manager, kafka_client, "Отправка событий о состоянии устройств в Kafka.")
+
+@enduml

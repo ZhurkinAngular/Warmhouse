@@ -1,0 +1,17 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+title Уровень компонентов для микросервиса "Самообслуживание и настройка"
+
+Container(self_service, "Самообслуживание и настройка", "Управление пользовательскими настройками и конфигурациями.") {
+    Component(api, "API", "Обработка HTTP-запросов от пользователей.")
+    Component(kafka_client, "Kafka Client", "Чтение и запись событий в Kafka.")
+    Component(config_manager, "Менеджер конфигураций", "Управление настройками пользователей.")
+}
+
+' Взаимодействие между компонентами
+Rel(api, kafka_client, "Отправка запросов на настройку в Kafka.")
+Rel(kafka_client, config_manager, "Передача событий и запросов из Kafka.")
+Rel(config_manager, kafka_client, "Отправка событий о настройках в Kafka.")
+
+@enduml

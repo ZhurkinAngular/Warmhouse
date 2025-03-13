@@ -1,0 +1,17 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+title Уровень компонентов для микросервиса "Мониторинг и телеметрия"
+
+Container(monitoring_telemetry, "Мониторинг и телеметрия", "Сбор данных с датчиков, хранение и предоставление телеметрии.") {
+    Component(kafka_client, "Kafka Client", "Чтение и запись событий в Kafka.")
+    Component(data_processor, "Обработчик данных", "Обработка и агрегация данных телеметрии.")
+    Component(telemetry_storage, "Хранилище телеметрии", "Хранение данных телеметрии в базе данных.")
+}
+
+' Взаимодействие между компонентами
+Rel(kafka_client, data_processor, "Передача данных телеметрии из Kafka.")
+Rel(data_processor, telemetry_storage, "Сохранение данных.")
+Rel(data_processor, kafka_client, "Отправка агрегированных данных в Kafka.")
+
+@enduml

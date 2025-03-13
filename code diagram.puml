@@ -1,0 +1,26 @@
+@startuml
+title Уровень кода для компонента "Обработчик команд"
+
+class CommandHandler {
+    +handleCommand(command: Command): void
+}
+
+class DeviceStateManager {
+    +updateState(deviceId: String, state: DeviceState): void
+}
+
+class Command {
+    +deviceId: String
+    +action: String
+}
+
+class DeviceState {
+    +deviceId: String
+    +state: String
+}
+
+CommandHandler --> DeviceStateManager : updateState
+CommandHandler --> Command : handleCommand
+DeviceStateManager --> DeviceState : updateState
+
+@enduml

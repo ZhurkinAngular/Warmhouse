@@ -1,0 +1,17 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+title Уровень компонентов для микросервиса "Пользовательский интерфейс"
+
+Container(user_interface, "Пользовательский интерфейс", "Веб-интерфейс для управления устройствами и просмотра телеметрии.") {
+    Component(api, "API", "Обработка HTTP-запросов от пользователей.")
+    Component(kafka_client, "Kafka Client", "Чтение и запись событий в Kafka.")
+    Component(ui_controller, "UI Controller", "Управление отображением данных в интерфейсе.")
+}
+
+' Взаимодействие между компонентами
+Rel(api, kafka_client, "Отправка запросов на управление устройствами в Kafka.")
+Rel(kafka_client, ui_controller, "Передача данных телеметрии и событий из Kafka.")
+Rel(ui_controller, kafka_client, "Отправка запросов на управление устройствами в Kafka.")
+
+@enduml
