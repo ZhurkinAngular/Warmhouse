@@ -1,0 +1,33 @@
+@startuml SupportService
+
+title Support Service Component Diagram
+
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+Container(APIGateway, "API Gateway", "Nginx")
+
+ComponentDb(SupportDB, "Support DB", "PostgreSQL", "Хранение обращений пользователей в поддержку")
+
+ContainerQueue(SupportTicketQueue, "Support Ticket Queue", "Kafka")
+
+Container_Boundary(SupportService, "Сервис управления тикетами") {
+    Component(SupportController, "Support Controller", "", "Обработка входящих запросов")
+    Component(TicketManager, "Ticket Manager", "", "Управляет заявками")
+    Component(UserInteractionHandler, "User Interaction Handler", "", "Связывает сообщения с тикетами")
+    Component(AssignmentEngine, "Assignment Engine", "", "Распределяет заявки между операторами поддержки")
+    Component(NotificationSender, "Notification Sender", "", "Отправляет уведомления пользователям")
+    Component(SupportRepository, "Support Repository", "", "Слой доступа к данным")
+}
+
+Rel(SupportRepository, SupportDB, "Читает и записывает данные", "JDBC")
+
+Rel(APIGateway, SupportController, "Обработка входящих запросов")
+
+Rel(SupportController, TicketManager, "Создание/изменение заявки")
+Rel(SupportController, UserInteractionHandler, "Обработка сообщений от пользователей")
+
+Rel(TicketManager, AssignmentEngine, "Поиск оператора для заявки")
+Rel(TicketManager, SupportRepository, "Сохранение тикета в БД")
+Rel(TicketManager, NotificationSender, "Отправка данных для формирования событий")
+
+Rel(NotificationSender, SupportTicketQueue, "support_ticket_updated")

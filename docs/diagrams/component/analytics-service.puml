@@ -1,0 +1,42 @@
+@startuml AnalyticsService
+
+title Analytics Service Component Diagram
+
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+Container(APIGateway, "API Gateway", "Nginx")
+
+ComponentDb(AnalyticsDB, "Analytics DB", "ClickHouse", "Хранение исторических данных и отчетов")
+
+ContainerQueue(TelemetryDataQueue, "Telemetry Data Queue", "Kafka")
+ContainerQueue(DeviceLifecycleQueue, "Device Lifecycle Queue", "Kafka")
+ContainerQueue(DeviceCommandsQueue, "Device Commands Queue", "Kafka")
+ContainerQueue(AnalyticsReportQueue, "Analytics Report Queue", "Kafka")
+
+Container_Boundary(AnalyticsService, "Сервис аналитики") {
+    Component(AnalyticsController, "Analytics Controller", "", "Обработка входящих запросов")
+    Component(EventListener, "Event Listener", "", "Обрабатывает события из Kafka")
+    Component(ReportGenerator, "Report Generator", "", "Создает отчеты на основе исторических данных")
+    Component(DashboardService, "Dashboard Service", "", "Формирует визуальные данные и дашборды")
+    Component(StorageManager, "Storage Manager", "", "Управляет базой данных аналитики (очистка, архивирование, индексация)")
+    Component(DataAggregator , "Data Aggregator", "", "Агрегирует и сохраняет данные")
+}
+
+Rel(APIGateway, AnalyticsController, "REST API вызовы", "HTTPS")
+
+Rel(AnalyticsController, DashboardService, "Формирование дашбордов")
+Rel(AnalyticsController, ReportGenerator, "Формирование отчетов")
+
+Rel(ReportGenerator, StorageManager, "Отправляет данные отчета для хранения")
+Rel(DashboardService, StorageManager, "Отправляет данные дашборда для хранения")
+
+Rel(EventListener, DataAggregator, "Передает агрегированные данные")
+
+Rel(StorageManager, AnalyticsDB, "Читает и записывает данные", "ClickHouse JDBC")
+Rel(DataAggregator, AnalyticsDB, "Записывает данные", "ClickHouse JDBC")
+
+Rel(TelemetryDataQueue, EventListener, "aggregated_telemetry_report")
+Rel(DeviceLifecycleQueue, EventListener, "device_status_changed")
+Rel(DeviceCommandsQueue, EventListener, "device_command_executed")
+
+Rel(ReportGenerator, AnalyticsReportQueue, "analytics_report_generated")

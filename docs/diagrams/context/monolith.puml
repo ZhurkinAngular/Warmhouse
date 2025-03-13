@@ -1,0 +1,18 @@
+@startuml WarmHouse Monolith
+title WarmHouse Monolith Context Diagram
+
+!include https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Context.puml
+
+System(warmHomeMonolith, "WarmHouse Monolith", "Монолитное приложение")
+
+Person(user, "Пользователь", "Пользователь системы «Тёплый дом»")
+Person(support, "Специалист", "Специалист по подключению")
+
+System_Ext(devices, "Внешние устройства", "Устройства для подключения")
+
+Rel(warmHomeMonolith, user, "Данные о температуре")
+Rel(user, warmHomeMonolith, "Управление отоплением")
+
+Rel(support, warmHomeMonolith, "Добавление устройств")
+
+Rel(warmHomeMonolith, devices, "Взаимодействие c устройствами")

@@ -1,0 +1,42 @@
+@startuml BillingService
+
+title Billing Service Component Diagram
+
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+System_Ext(PaymentGateway, "Payment Gateway", "Внешний платежный шлюз")
+
+Container(APIGateway, "API Gateway", "Nginx")
+
+ComponentDb(BillingDB, "Billing DB", "PostgreSQL", "Подписки, платежи, счета и отчетность")
+
+ContainerQueue(BillingEventsQueue, "Billing Events Queue", "Kafka")
+
+Container_Boundary(BillingService, "Сервис подписок и биллинга") {
+    Component(BillingController, "Billing Controller", "", "Обработка внешних запросов")
+    Component(SubscriptionManager, "Subscription Manager", "", "Создание, обновление и отмена подписок")
+    Component(PaymentProcessor, "Payment Processor", "", "Обработка платежей и транзакций")
+    Component(InvoiceGenerator, "Invoice Generator", "", "Генерация и формирование счетов")
+    Component(BillingRepository, "Billing Repository", "", "Слой доступа к данным")
+    Component(NotificationProducer, "Notification Producer", "", "Публикация событий важных изменений")
+}
+
+Rel(APIGateway, BillingController, "REST API вызовы", "HTTPS")
+
+Rel(BillingRepository, BillingDB, "Читает и записывает данные", "JDBC")
+
+Rel(BillingController, SubscriptionManager, "Создание или обновление подписки")
+Rel(BillingController, PaymentProcessor, "Проведение платежей")
+Rel(BillingController, InvoiceGenerator, "Генерация счетов")
+
+Rel(SubscriptionManager, BillingRepository, "Создание и обновление подписок")
+Rel(SubscriptionManager, NotificationProducer, "Генерация событий: subscription_created, subscription_updated")
+
+Rel(PaymentProcessor, PaymentGateway, "Запрос на оплату", "REST API")
+Rel(PaymentProcessor, BillingRepository, "Запись данных платежа")
+Rel(PaymentProcessor, NotificationProducer, "Генерация событий: payment_processed, payment_failed")
+
+Rel(InvoiceGenerator, BillingRepository, "Сохранение данных счета")
+Rel(InvoiceGenerator, NotificationProducer, "Генерация событий: invoice_generated")
+
+Rel(NotificationProducer, BillingEventsQueue, "Публикации всех событий сервиса")

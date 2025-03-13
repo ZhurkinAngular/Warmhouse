@@ -1,0 +1,27 @@
+@startuml WarmHouse Microservices
+title WarmHouse Service Context Diagram
+
+!include https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Context.puml
+
+System(warmHomeService, "WarmHouse Service", "Система «Теплый дом»")
+
+Person(user, "Пользователь", "Пользователь системы «Тёплый дом»")
+Person(support, "Специалист", "Специалист службы поддержки")
+
+System_Ext(devices, "Внешние устройства", "Устройства для подключения")
+System_Ext(paymentService, "Платежный сервис", "Внешний сервис обработки платежей")
+System_Ext(notificationService, "Сервис уведомлений", "Внешний сервис отправки уведомлений")
+
+Rel(warmHomeService, user, "Состояние устройств, данные системы")
+Rel(user, warmHomeService, "Взаимодействие с системой")
+
+Rel(support, warmHomeService, "Взаимодействие с системой")
+Rel(warmHomeService, support, "Данные о системе, обращения пользователей")
+
+Rel(warmHomeService, devices, "Взаимодействие c устройствами")
+Rel(devices, warmHomeService, "Состояние устройства")
+
+Rel(paymentService, warmHomeService, "Состояние платежа")
+Rel(warmHomeService, paymentService, "Создание/отмена платежа")
+
+Rel(warmHomeService, notificationService, "Отправка уведомление пользователю")

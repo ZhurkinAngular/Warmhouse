@@ -1,0 +1,39 @@
+@startuml AutomationService
+
+title Automation Service Component Diagram
+
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+Container(APIGateway, "API Gateway", "Nginx")
+
+ComponentDb(AutomationDB, "Automation DB", "PostgreSQL", "Сценарии пользователей")
+
+ContainerQueue(DeviceLifecycleQueue, "Device Lifecycle Queue", "Kafka")
+ContainerQueue(AutomationEventQueue, "Automation Event Queue", "Kafka")
+
+Container_Boundary(AutomationService, "Сервис автоматизации") {
+    Component(AutomationController, "Automation Controller", "", "Обработка внешних запросов")
+    Component(RuleEngine, "Rule Engine", "", "Основной компонент бизнес-логики. Оценивает условия правил автоматизации на основе входящих событий и сигналов")
+    Component(Scheduler, "Scheduler", "", "Обеспечивает выполнение правил по расписанию")
+    Component(EventListener, "Event Listener", "", "Обрабатывает события из Kafka")
+    Component(RuleRepository, "Rule Repository", "", "Слой доступа к данным")
+    Component(NotificationProducer, "Notification Producer", "", "Отправляет уведомления при срабатывании правил")
+}
+
+Rel(APIGateway, AutomationController, "REST API вызовы", "HTTPS")
+
+Rel(AutomationController, RuleRepository, "CRUD операции для правил")
+
+Rel(RuleRepository, AutomationDB, "Читает и записывает данные", "JDBC")
+
+Rel(RuleEngine, RuleRepository, "Получает правила для оценки")
+Rel(RuleEngine, NotificationProducer, "При срабатывании правила инициирует уведомление")
+Rel(RuleEngine, RuleRepository, "Записывает историю срабатываний")
+
+Rel(Scheduler, RuleEngine, "Отправляет сигналы по расписанию")
+
+Rel(EventListener, RuleEngine, "Передаёт внешние события для оценки")
+Rel(EventListener, DeviceLifecycleQueue, "Потребляет события device_status_changed")
+
+Rel(NotificationProducer, RuleRepository, "Записывает логи уведомлений")
+Rel(NotificationProducer, AutomationEventQueue, "Публикует событие automation_triggered")

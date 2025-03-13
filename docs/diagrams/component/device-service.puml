@@ -1,0 +1,35 @@
+@startuml DeviceService
+
+title Device Service Component Diagram
+
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+Container(APIGateway, "API Gateway", "Nginx")
+
+ComponentDb(DeviceDB, "Device DB", "PostgreSQL", "Основные данные об устройствах")
+
+ContainerQueue(DeviceLifecycleQueue, "Device Lifecycle Queue", "Kafka")
+ContainerQueue(DeviceCommandsQueue, "Device Commands Queue", "Kafka")
+
+Container_Boundary(DeviceService, "Сервис управления устройствами") {
+    Component(DeviceController, "Device Controller", "", "Обработка входящих запросов")
+    Component(CommandProcessor, "Command Processor", "", "Управление командами устройств")
+    Component(StateManager, "State Manager", "", "Хранение текущего состояния устройств")
+    Component(DeviceRegistry, "Device Registry", "", "Регистрация и учет устройств")
+}
+
+Rel(APIGateway, DeviceController, "REST API вызовы", "HTTPS")
+
+Rel(StateManager, DeviceDB, "Читает и записывает данные", "JDBC")
+
+Rel(DeviceController, CommandProcessor, "Выполнение команды")
+Rel(DeviceController, DeviceRegistry, "Регистрация устройства")
+
+Rel(DeviceRegistry, StateManager, "Сохранение данных")
+
+Rel(CommandProcessor, StateManager, "Сохранение данных")
+
+Rel(DeviceRegistry, DeviceLifecycleQueue, "device_registered")
+Rel(DeviceRegistry, DeviceLifecycleQueue, "device_status_changed")
+
+Rel(CommandProcessor, DeviceCommandsQueue, "device_command_executed")

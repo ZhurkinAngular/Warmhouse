@@ -1,0 +1,50 @@
+@startuml NotificationService
+
+title Notification Service Component Diagram
+
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+Container(APIGateway, "API Gateway", "Nginx")
+
+ComponentDb(NotificationDB, "Notification DB", "PostgreSQL", "Хранение логов отправки уведомлений, шаблонов, настроек пользователей")
+
+ContainerQueue(DeviceLifecycleQueue, "Device Lifecycle Queue", "Kafka")
+ContainerQueue(AnalyticsReportQueue, "Analytics Report Queue", "Kafka")
+ContainerQueue(SupportTicketQueue, "Support Ticket Queue", "Kafka")
+
+System_Ext(NotificationGateway, "Notification Gateway", "Внешний шлюз доставки сообщений")
+
+Container_Boundary(NotificationService, "Сервис уведомлений") {
+    Component(NotificationController, "Notification Controller", "", "Обработка входящих запросов (например отправка уведомлений по требованию)")
+    Component(NotificationDispatcher, "Notification Dispatcher", "", "Обработка запросов на уведомления и их отправка")
+    Component(UserPreferencesManager, "User Preferences Manager", "", "Настройки уведомлений пользователей")
+    Component(TemplateManager, "TemplateManager", "", "Шаблоны уведомлений")
+    Component(EventListener, "Event Listener", "", "Слушает события из Kafka")
+    Component(DeliveryTracker, "Delivery Tracker", "", "Отслеживает статус доставки уведомлений")
+    Component(NotificationRepository, "Notification Repository", "", "Взаимодействие с БД")
+}
+
+Rel(APIGateway, NotificationController, "REST API вызовы", "HTTPS")
+
+Rel(DeviceLifecycleQueue, EventListener, "device_status_changed")
+
+Rel(SupportTicketQueue, EventListener, "support_ticket_updated")
+
+Rel(AnalyticsReportQueue, EventListener, "analytics_report_generated")
+
+Rel(NotificationDispatcher, UserPreferencesManager, "Запрос канала пользователя")
+Rel(NotificationDispatcher, TemplateManager, "Получение шаблона для отправки")
+Rel(NotificationDispatcher, NotificationGateway, "Отправка уведомления", "HTTPS")
+Rel(NotificationDispatcher, DeliveryTracker, "Отправляет данные для отслеживания")
+
+Rel(EventListener, NotificationDispatcher, "Передача данных отправки сообщения")
+
+Rel(NotificationController, NotificationDispatcher, "Передача данных отправки сообщения")
+
+Rel(DeliveryTracker, NotificationRepository, "Записывает статус доставки")
+
+Rel(NotificationRepository, NotificationDB, "Читает и записывает данные", "JDBC")
+
+Rel(UserPreferencesManager, NotificationRepository, "Получение настроек пользователя")
+
+Rel(TemplateManager, NotificationRepository, "Получение данных для шаблона")

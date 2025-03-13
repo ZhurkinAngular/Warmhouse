@@ -1,0 +1,128 @@
+@startuml WarmHouse
+
+title WarmHouse System Container Diagram
+
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+Person(user, "Пользователь", "Пользователь системы «Тёплый дом»")
+Person(support, "Специалист", "Специалист службы поддержки")
+
+System_Ext(devices, "Внешние устройства", "Устройства для подключения")
+System_Ext(paymentService, "Платежный сервис", "Внешний сервис обработки платежей")
+System_Ext(extNotificationService, "Внешний сервис уведомлений", "Внешний сервис отправки уведомлений")
+
+System_Boundary(warmHouseSystem, "WarmHouse System") {
+    Container(webApp, "Web Application", "Vue SPA", "Веб-приложение, личный кабинет пользователя")
+    Container(mobileApp, "Mobile Application", "Jetpack Compose", "Кроссплатформенное мобильное приложение")
+
+    Container(Kafka, "Kafka Cluster", "Apache Kafka", "Внутренний брокер сообщений")
+
+    ContainerQueue(TelemetryDataQueue, "Telemetry Data Queue", "Kafka")
+    ContainerQueue(DeviceLifecycleQueue, "Device Lifecycle Queue", "Kafka")
+    ContainerQueue(DeviceCommandsQueue, "Device Commands Queue", "Kafka")
+    ContainerQueue(AnalyticsReportQueue, "Analytics Report Queue", "Kafka")
+    ContainerQueue(AutomationEventQueue, "Automation Event Queue", "Kafka")
+    ContainerQueue(BillingEventsQueue, "Billing Events Queue", "Kafka")
+    ContainerQueue(SupportTicketQueue, "Support Ticket Queue", "Kafka")
+
+    Rel(TelemetryDataQueue, Kafka, "Хранит сообщения")
+    Rel(DeviceLifecycleQueue, Kafka, "Хранит сообщения")
+    Rel(DeviceCommandsQueue, Kafka, "Хранит сообщения")
+    Rel(AnalyticsReportQueue, Kafka, "Хранит сообщения")
+    Rel(AutomationEventQueue, Kafka, "Хранит сообщения")
+    Rel(BillingEventsQueue, Kafka, "Хранит сообщения")
+    Rel(SupportTicketQueue, Kafka, "Хранит сообщения")
+
+    Container(APIGateway, "API Gateway", "Nginx")
+
+    Container(analyticsService, "Analytics Service", "", "Сервис аналитики")
+    Container(AnalyticsDB, "Analytics DB", "ClickHouse", "Хранение исторических данных и отчетов")
+
+    Container(automationService, "Automation Service", "", "Сервис автоматизации")
+    Container(AutomationDB, "Automation DB", "PostgreSQL", "Сценарии пользователей")
+
+    Container(billingService, "Billing Service", "", "Сервис подписок и биллинга")
+    Container(BillingDB, "Billing DB", "PostgreSQL", "Подписки, платежи, счета и отчетность")
+
+    Container(deviceService, "Device Service", "", "Сервис управления устройствами")
+    Container(DeviceDB, "Device DB", "PostgreSQL", "Основные данные об устройствах")
+
+    Container(notificationService, "Notification Service", "Сервис уведомлений")
+    Container(NotificationDB, "Notification DB", "PostgreSQL", "Хранение логов отправки уведомлений, шаблонов, настроек пользователей")
+
+    Container(supportService, "Support Service", "Сервис управления тикетами")
+    Container(SupportDB, "Support DB", "PostgreSQL", "Хранение обращений пользователей в поддержку")
+
+    Container(telemetryService, "Telemetry Service", "Сервис сбора и анализа данных от устройств")
+    Container(TelemetryDB, "Telemetry DB", "MongoDB", "Хранение показаний устройств")
+
+    Container(userService, "User Service", "", "Сервис пользователей")
+    Container(UserDB, "User DB", "PostgreSQL", "Учетные записи пользователей, права доступа")
+
+    Rel(APIGateway, analyticsService, "Перенаправляет запросы", "HTTP")
+    Rel(APIGateway, automationService, "Перенаправляет запросы", "HTTP")
+    Rel(APIGateway, billingService, "Перенаправляет запросы", "HTTP")
+    Rel(APIGateway, deviceService, "Перенаправляет запросы", "HTTP")
+    Rel(APIGateway, notificationService, "Перенаправляет запросы", "HTTP")
+    Rel(APIGateway, supportService, "Перенаправляет запросы", "HTTP")
+    Rel(APIGateway, telemetryService, "Перенаправляет запросы", "HTTP")
+    Rel(APIGateway, userService, "Перенаправляет запросы, проверяет токены, получает данные о правах", "HTTP")
+
+    Rel(analyticsService, AnalyticsDB, "Читает и записывает данные", "ClickHouse JDBC")
+
+    Rel(automationService, AutomationDB, "Читает и записывает данные", "JDBC")
+
+    Rel(billingService, BillingDB, "Читает и записывает данные", "JDBC")
+
+    Rel(deviceService, DeviceDB, "Читает и записывает данные", "JDBC")
+
+    Rel(notificationService, NotificationDB, "Читает и записывает данные", "JDBC")
+
+    Rel(supportService, SupportDB, "Читает и записывает данные", "JDBC")
+
+    Rel(telemetryService, TelemetryDB, "Читает и записывает данные", "MongoDB Driver")
+
+    Rel(userService, UserDB, "Читает и записывает данные", "JDBC")
+
+    Rel(TelemetryDataQueue, analyticsService, "aggregated_telemetry_report")
+    Rel(DeviceLifecycleQueue, analyticsService, "device_status_changed")
+    Rel(DeviceCommandsQueue, analyticsService, "device_command_executed")
+
+    Rel(automationService, DeviceLifecycleQueue, "Потребляет события device_status_changed")
+    Rel(automationService, AutomationEventQueue, "Публикует событие automation_triggered")
+
+    Rel(billingService, BillingEventsQueue, "Публикации всех событий сервиса")
+
+    Rel(deviceService, DeviceLifecycleQueue, "device_registered")
+    Rel(deviceService, DeviceLifecycleQueue, "device_status_changed")
+    Rel(deviceService, DeviceCommandsQueue, "device_command_executed")
+
+    Rel(DeviceLifecycleQueue, notificationService, "device_status_changed")
+    Rel(AnalyticsReportQueue, notificationService, "analytics_report_generated")
+    Rel(SupportTicketQueue, notificationService, "support_ticket_updated")
+
+    Rel(supportService, SupportTicketQueue, "support_ticket_updated")
+
+    Rel(telemetryService, TelemetryDataQueue, "aggregated_telemetry_report")
+    Rel(TelemetryDataQueue, telemetryService, "telemetry_data_received")
+}
+
+Rel(user, webApp, "Использование системы", "HTTPS")
+Rel(user, mobileApp, "Использование системы", "HTTPS")
+
+Rel(support, webApp, "Администрирование системы", "HTTPS")
+
+Rel(webApp, APIGateway, "REST API вызовы", "HTTPS")
+Rel(mobileApp, APIGateway, "REST API вызовы", "HTTPS")
+
+Rel(devices, APIGateway, "Данные телеметрии, регистрация", "HTTPS")
+Rel(paymentService, APIGateway, "Обновление статуса счета", "HTTPS")
+Rel(extNotificationService, APIGateway,"Статус доставки", "HTTPS")
+
+Rel(notificationService, extNotificationService, "Отправка уведомлений", "HTTPS")
+
+Rel(billingService, paymentService, "Выставление счета", "HTTPS")
+
+Rel(deviceService, devices, "Команды управления", "HTTPS")
+
+SHOW_LEGEND()
