@@ -1,7 +1,9 @@
 @startuml
+' Настройки диаграммы
 hide circle
 skinparam linetype ortho
 
+' Сущности
 entity User {
   *id : integer
   --
@@ -14,9 +16,15 @@ entity User {
 entity House {
   *id : integer
   --
-  *user_id : integer
   *address : varchar
   *created_at : timestamp
+}
+
+entity UserHouse {
+  *user_id : integer
+  *house_id : integer
+  --
+  *role : varchar
 }
 
 entity DeviceType {
@@ -59,9 +67,12 @@ entity UserModule {
 }
 
 ' Связи
-User --o{ House : "владеет"
+User }o--o{ House : "владеет/принадлежит"
+UserHouse }-- User : "пользователь"
+UserHouse }-- House : "дом"
+
 House --o{ Device : "содержит"
-DeviceType--o{ Device : "имеет тип"
+DeviceType --o{ Device : "имеет тип"
 Device --o{ TelemetryData : "генерирует"
 User --o{ UserModule : "активирует"
 Module --o{ UserModule : "активирован"
