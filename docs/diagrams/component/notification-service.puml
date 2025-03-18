@@ -15,13 +15,13 @@ ContainerQueue(SupportTicketQueue, "Support Ticket Queue", "Kafka")
 System_Ext(NotificationGateway, "Notification Gateway", "Внешний шлюз доставки сообщений")
 
 Container_Boundary(NotificationService, "Сервис уведомлений") {
-    Component(NotificationController, "Notification Controller", "", "Обработка входящих запросов (например отправка уведомлений по требованию)")
-    Component(NotificationDispatcher, "Notification Dispatcher", "", "Обработка запросов на уведомления и их отправка")
-    Component(UserPreferencesManager, "User Preferences Manager", "", "Настройки уведомлений пользователей")
-    Component(TemplateManager, "TemplateManager", "", "Шаблоны уведомлений")
-    Component(EventListener, "Event Listener", "", "Слушает события из Kafka")
-    Component(DeliveryTracker, "Delivery Tracker", "", "Отслеживает статус доставки уведомлений")
-    Component(NotificationRepository, "Notification Repository", "", "Взаимодействие с БД")
+    Component(NotificationController, "Notification Controller", "NodeJS", "Обработка входящих запросов (например отправка уведомлений по требованию)")
+    Component(NotificationDispatcher, "Notification Dispatcher", "NodeJS", "Обработка запросов на уведомления и их отправка")
+    Component(UserPreferencesManager, "User Preferences Manager", "NodeJS", "Настройки уведомлений пользователей")
+    Component(TemplateManager, "TemplateManager", "NodeJS", "Шаблоны уведомлений")
+    Component(EventListener, "Event Listener", "NodeJS", "Слушает события из Kafka")
+    Component(DeliveryTracker, "Delivery Tracker", "NodeJS", "Отслеживает статус доставки уведомлений")
+    Component(NotificationRepository, "Notification Repository", "NodeJS", "Взаимодействие с БД")
 }
 
 Rel(APIGateway, NotificationController, "REST API вызовы", "HTTPS")
@@ -43,7 +43,7 @@ Rel(NotificationController, NotificationDispatcher, "Передача данны
 
 Rel(DeliveryTracker, NotificationRepository, "Записывает статус доставки")
 
-Rel(NotificationRepository, NotificationDB, "Читает и записывает данные", "JDBC")
+Rel(NotificationRepository, NotificationDB, "Читает и записывает данные", "TCP (PostgreSQL Protocol)")
 
 Rel(UserPreferencesManager, NotificationRepository, "Получение настроек пользователя")
 

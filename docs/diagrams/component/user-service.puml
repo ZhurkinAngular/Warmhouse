@@ -9,17 +9,17 @@ Container(APIGateway, "API Gateway", "Nginx")
 ComponentDb(UserDB, "User DB", "PostgreSQL", "Учетные записи пользователей, права доступа")
 
 Container_Boundary(UserService, "Сервис пользователей") {
-    Component(UserController, "User Controller", "", "Обработка внешних запросов")
-    Component(UserManager, "User Manager", "", "Управление учетными записями пользователей")
-    Component(AuthenticationService, "AuthenticationService", "", "Аутентификация пользователей")
-    Component(AuthorizationModule, "Authorization Module", "", "Контроль доступа")
-    Component(UserProfileManager, "User Profile Manager", "", "Управление профилями")
-    Component(UserRepository, "UserRepository", "", "Слой доступа к данным")
+    Component(UserController, "User Controller", "NodeJS", "Обработка внешних запросов")
+    Component(UserManager, "User Manager", "NodeJS", "Управление учетными записями пользователей")
+    Component(AuthenticationService, "AuthenticationService", "NodeJS", "Аутентификация пользователей")
+    Component(AuthorizationModule, "Authorization Module", "NodeJS", "Контроль доступа")
+    Component(UserProfileManager, "User Profile Manager", "NodeJS", "Управление профилями")
+    Component(UserRepository, "UserRepository", "NodeJS", "Слой доступа к данным")
 }
 
 Rel(APIGateway, UserController, "REST API вызовы", "HTTPS")
 
-Rel(UserRepository, UserDB, "Читает и записывает данные", "JDBC")
+Rel(UserRepository, UserDB, "Читает и записывает данные", "TCP (PostgreSQL Protocol)")
 
 Rel(UserController, UserManager, "Регистрация нового пользователя")
 Rel(UserController, AuthorizationModule, "Проверка доступа пользователя")

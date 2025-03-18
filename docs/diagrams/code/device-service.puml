@@ -1,0 +1,121 @@
+@startuml DeviceServiceClasses
+
+' Основные сущности
+class Device {
+    -id: UUID
+    -name: string
+    -type: DeviceType
+    -status: DeviceStatus
+    -metadata: JSON
+    -createdAt: DateTime
+    -updatedAt: DateTime
+    +updateStatus(status: DeviceStatus): void
+    +updateMetadata(metadata: JSON): void
+}
+
+enum DeviceType {
+    SENSOR
+    ACTUATOR
+    GATEWAY
+    CONTROLLER
+}
+
+enum DeviceStatus {
+    ONLINE
+    OFFLINE
+    MAINTENANCE
+    ERROR
+}
+
+' Команды и события
+class DeviceCommand {
+    -id: UUID
+    -deviceId: UUID
+    -type: CommandType
+    -payload: JSON
+    -status: CommandStatus
+    -createdAt: DateTime
+    -executedAt: DateTime
+    +execute(): void
+    +updateStatus(status: CommandStatus): void
+}
+
+enum CommandStatus {
+    PENDING
+    IN_PROGRESS
+    COMPLETED
+    FAILED
+}
+
+enum CommandType {
+    CONFIGURE
+    RESTART
+    UPDATE
+    GET_STATUS
+}
+
+' Менеджеры и сервисы
+class DeviceRegistry {
+    -devices: Map<UUID, Device>
+    +registerDevice(device: Device): void
+    +unregisterDevice(deviceId: UUID): void
+    +getDevice(deviceId: UUID): Device
+    +updateDeviceStatus(deviceId: UUID, status: DeviceStatus): void
+}
+
+class StateManager {
+    -deviceStates: Map<UUID, DeviceState>
+    +getState(deviceId: UUID): DeviceState
+    +updateState(deviceId: UUID, state: DeviceState): void
+    +saveState(deviceId: UUID): void
+}
+
+class CommandProcessor {
+    -commandQueue: Queue<DeviceCommand>
+    +processCommand(command: DeviceCommand): void
+    +validateCommand(command: DeviceCommand): boolean
+    +executeCommand(command: DeviceCommand): void
+}
+
+class DeviceController {
+    -deviceRegistry: DeviceRegistry
+    -commandProcessor: CommandProcessor
+    +createDevice(data: DeviceDTO): Device
+    +getDevice(id: UUID): Device
+    +updateDevice(id: UUID, data: DeviceDTO): Device
+    +deleteDevice(id: UUID): void
+    +sendCommand(deviceId: UUID, command: DeviceCommand): void
+}
+
+' Data Transfer Objects
+class DeviceDTO {
+    +id: UUID
+    +name: string
+    +type: DeviceType
+    +metadata: JSON
+}
+
+class DeviceState {
+    +deviceId: UUID
+    +status: DeviceStatus
+    +lastSeen: DateTime
+    +metrics: Map<string, any>
+}
+
+' Отношения
+Device --> DeviceType
+Device --> DeviceStatus
+DeviceCommand --> CommandType
+DeviceCommand --> CommandStatus
+DeviceCommand --> Device
+
+DeviceController o-- DeviceRegistry
+DeviceController o-- CommandProcessor
+DeviceRegistry o-- Device
+StateManager o-- DeviceState
+CommandProcessor o-- DeviceCommand
+
+Device ..> DeviceDTO: << converts >>
+Device ..> DeviceState: << has >>
+
+@enduml

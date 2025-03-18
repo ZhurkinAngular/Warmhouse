@@ -11,10 +11,10 @@ ComponentDb(TelemetryDB, "Telemetry DB", "MongoDB", "Хранение показ
 ContainerQueue(TelemetryDataQueue, "Telemetry Data Queue", "Kafka")
 
 Container_Boundary(TelemetryService, "Сервис сбора и анализа данных от устройств") {
-    Component(TelemetryController, "Telemetry Controller", "", "Обработка внешних запросов")
-    Component(EventListener, "Event Listener", "", "Обрабатывает события из Kafka")
-    Component(TelemetryProcessor, "Telemetry Processor", "", "Обработка и запись данных")
-    Component(TelemetryRepository, "Telemetry Repository", "", "Слой доступа к данным")
+    Component(TelemetryController, "Telemetry Controller", "NodeJS", "Обработка внешних запросов")
+    Component(EventListener, "Event Listener", "NodeJS", "Обрабатывает события из Kafka")
+    Component(TelemetryProcessor, "Telemetry Processor", "NodeJS", "Обработка и запись данных")
+    Component(TelemetryRepository, "Telemetry Repository", "NodeJS", "Слой доступа к данным")
 }
 
 Rel(APIGateway, TelemetryController, "REST API вызовы", "HTTPS")

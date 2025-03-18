@@ -13,17 +13,17 @@ ComponentDb(BillingDB, "Billing DB", "PostgreSQL", "Подписки, плате
 ContainerQueue(BillingEventsQueue, "Billing Events Queue", "Kafka")
 
 Container_Boundary(BillingService, "Сервис подписок и биллинга") {
-    Component(BillingController, "Billing Controller", "", "Обработка внешних запросов")
-    Component(SubscriptionManager, "Subscription Manager", "", "Создание, обновление и отмена подписок")
-    Component(PaymentProcessor, "Payment Processor", "", "Обработка платежей и транзакций")
-    Component(InvoiceGenerator, "Invoice Generator", "", "Генерация и формирование счетов")
-    Component(BillingRepository, "Billing Repository", "", "Слой доступа к данным")
-    Component(NotificationProducer, "Notification Producer", "", "Публикация событий важных изменений")
+    Component(BillingController, "Billing Controller", "NodeJS", "Обработка внешних запросов")
+    Component(SubscriptionManager, "Subscription Manager", "NodeJS", "Создание, обновление и отмена подписок")
+    Component(PaymentProcessor, "Payment Processor", "NodeJS", "Обработка платежей и транзакций")
+    Component(InvoiceGenerator, "Invoice Generator", "NodeJS", "Генерация и формирование счетов")
+    Component(BillingRepository, "Billing Repository", "NodeJS", "Слой доступа к данным")
+    Component(NotificationProducer, "Notification Producer", "NodeJS", "Публикация событий важных изменений")
 }
 
 Rel(APIGateway, BillingController, "REST API вызовы", "HTTPS")
 
-Rel(BillingRepository, BillingDB, "Читает и записывает данные", "JDBC")
+Rel(BillingRepository, BillingDB, "Читает и записывает данные", "TCP (PostgreSQL Protocol)")
 
 Rel(BillingController, SubscriptionManager, "Создание или обновление подписки")
 Rel(BillingController, PaymentProcessor, "Проведение платежей")

@@ -1,0 +1,209 @@
+@startuml ServicesER
+
+!define table(x) class x << (T,#FFAAAA) >>
+!define primary_key(x) <b>x</b>
+!define foreign_key(x) <i>x</i>
+
+title Microservices ER Diagram
+
+' Device Service
+table(devices) {
+    primary_key(id): UUID
+    name: VARCHAR
+    type: ENUM
+    status: ENUM
+    metadata: JSONB
+    created_at: TIMESTAMP
+    updated_at: TIMESTAMP
+}
+
+table(device_commands) {
+    primary_key(id): UUID
+    foreign_key(device_id): UUID
+    type: ENUM
+    payload: JSONB
+    status: ENUM
+    created_at: TIMESTAMP
+    executed_at: TIMESTAMP
+}
+
+table(device_states) {
+    primary_key(id): UUID
+    foreign_key(device_id): UUID
+    status: ENUM
+    last_seen: TIMESTAMP
+    metrics: JSONB
+}
+
+' User Service
+table(users) {
+    primary_key(id): UUID
+    username: VARCHAR
+    email: VARCHAR
+    password_hash: VARCHAR
+    status: ENUM
+    created_at: TIMESTAMP
+    updated_at: TIMESTAMP
+}
+
+table(user_profiles) {
+    primary_key(id): UUID
+    foreign_key(user_id): UUID
+    first_name: VARCHAR
+    last_name: VARCHAR
+    phone: VARCHAR
+    settings: JSONB
+}
+
+table(user_roles) {
+    primary_key(id): UUID
+    foreign_key(user_id): UUID
+    role: ENUM
+}
+
+' Billing Service
+table(subscriptions) {
+    primary_key(id): UUID
+    foreign_key(user_id): UUID
+    plan_type: ENUM
+    status: ENUM
+    start_date: TIMESTAMP
+    end_date: TIMESTAMP
+    auto_renew: BOOLEAN
+}
+
+table(payments) {
+    primary_key(id): UUID
+    foreign_key(subscription_id): UUID
+    amount: DECIMAL
+    currency: VARCHAR
+    status: ENUM
+    payment_date: TIMESTAMP
+}
+
+table(invoices) {
+    primary_key(id): UUID
+    foreign_key(subscription_id): UUID
+    foreign_key(payment_id): UUID
+    amount: DECIMAL
+    status: ENUM
+    due_date: TIMESTAMP
+}
+
+' Support Service
+table(support_tickets) {
+    primary_key(id): UUID
+    foreign_key(user_id): UUID
+    foreign_key(assigned_to): UUID
+    status: ENUM
+    priority: ENUM
+    title: VARCHAR
+    created_at: TIMESTAMP
+    updated_at: TIMESTAMP
+}
+
+table(ticket_messages) {
+    primary_key(id): UUID
+    foreign_key(ticket_id): UUID
+    foreign_key(user_id): UUID
+    message: TEXT
+    created_at: TIMESTAMP
+}
+
+' Notification Service
+table(notification_templates) {
+    primary_key(id): UUID
+    type: ENUM
+    title: VARCHAR
+    content: TEXT
+    variables: JSONB
+}
+
+table(notification_logs) {
+    primary_key(id): UUID
+    foreign_key(user_id): UUID
+    foreign_key(template_id): UUID
+    type: ENUM
+    status: ENUM
+    sent_at: TIMESTAMP
+    delivery_status: ENUM
+}
+
+table(user_notification_preferences) {
+    primary_key(id): UUID
+    foreign_key(user_id): UUID
+    notification_type: ENUM
+    channel: ENUM
+    enabled: BOOLEAN
+}
+
+' Automation Service
+table(automation_rules) {
+    primary_key(id): UUID
+    foreign_key(user_id): UUID
+    name: VARCHAR
+    conditions: JSONB
+    actions: JSONB
+    status: ENUM
+    created_at: TIMESTAMP
+}
+
+table(rule_execution_logs) {
+    primary_key(id): UUID
+    foreign_key(rule_id): UUID
+    status: ENUM
+    executed_at: TIMESTAMP
+    result: JSONB
+}
+
+' Analytics Service
+table(analytics_data) {
+    primary_key(id): UUID
+    foreign_key(device_id): UUID
+    metric_type: ENUM
+    value: JSONB
+    timestamp: TIMESTAMP
+}
+
+table(analytics_reports) {
+    primary_key(id): UUID
+    type: ENUM
+    parameters: JSONB
+    data: JSONB
+    created_at: TIMESTAMP
+}
+
+' Telemetry Service
+table(telemetry_data) {
+    primary_key(id): UUID
+    foreign_key(device_id): UUID
+    type: ENUM
+    value: JSONB
+    timestamp: TIMESTAMP
+}
+
+' Relationships
+devices ||--o{ device_commands
+devices ||--|| device_states
+devices ||--o{ telemetry_data
+devices ||--o{ analytics_data
+
+users ||--|| user_profiles
+users ||--o{ user_roles
+users ||--o{ subscriptions
+users ||--o{ support_tickets
+users ||--o{ automation_rules
+users ||--o{ user_notification_preferences
+
+subscriptions ||--o{ payments
+subscriptions ||--o{ invoices
+
+support_tickets ||--o{ ticket_messages
+support_tickets }o--|| users : assigned_to
+
+notification_templates ||--o{ notification_logs
+users ||--o{ notification_logs
+
+automation_rules ||--o{ rule_execution_logs
+
+@enduml

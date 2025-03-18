@@ -35,28 +35,28 @@ System_Boundary(warmHouseSystem, "WarmHouse System") {
 
     Container(APIGateway, "API Gateway", "Nginx")
 
-    Container(analyticsService, "Analytics Service", "", "Сервис аналитики")
+    Container(analyticsService, "Analytics Service", "NodeJS", "Сервис аналитики")
     Container(AnalyticsDB, "Analytics DB", "ClickHouse", "Хранение исторических данных и отчетов")
 
-    Container(automationService, "Automation Service", "", "Сервис автоматизации")
+    Container(automationService, "Automation Service", "NodeJS", "Сервис автоматизации")
     Container(AutomationDB, "Automation DB", "PostgreSQL", "Сценарии пользователей")
 
-    Container(billingService, "Billing Service", "", "Сервис подписок и биллинга")
+    Container(billingService, "Billing Service", "NodeJS", "Сервис подписок и биллинга")
     Container(BillingDB, "Billing DB", "PostgreSQL", "Подписки, платежи, счета и отчетность")
 
-    Container(deviceService, "Device Service", "", "Сервис управления устройствами")
+    Container(deviceService, "Device Service", "NodeJS", "Сервис управления устройствами")
     Container(DeviceDB, "Device DB", "PostgreSQL", "Основные данные об устройствах")
 
-    Container(notificationService, "Notification Service", "Сервис уведомлений")
+    Container(notificationService, "Notification Service", "NodeJS", "Сервис уведомлений")
     Container(NotificationDB, "Notification DB", "PostgreSQL", "Хранение логов отправки уведомлений, шаблонов, настроек пользователей")
 
-    Container(supportService, "Support Service", "Сервис управления тикетами")
+    Container(supportService, "Support Service", "NodeJS", "Сервис управления тикетами")
     Container(SupportDB, "Support DB", "PostgreSQL", "Хранение обращений пользователей в поддержку")
 
-    Container(telemetryService, "Telemetry Service", "Сервис сбора и анализа данных от устройств")
+    Container(telemetryService, "Telemetry Service", "NodeJS", "Сервис сбора и анализа данных от устройств")
     Container(TelemetryDB, "Telemetry DB", "MongoDB", "Хранение показаний устройств")
 
-    Container(userService, "User Service", "", "Сервис пользователей")
+    Container(userService, "User Service", "NodeJS", "Сервис пользователей")
     Container(UserDB, "User DB", "PostgreSQL", "Учетные записи пользователей, права доступа")
 
     Rel(APIGateway, analyticsService, "Перенаправляет запросы", "HTTP")
@@ -68,21 +68,21 @@ System_Boundary(warmHouseSystem, "WarmHouse System") {
     Rel(APIGateway, telemetryService, "Перенаправляет запросы", "HTTP")
     Rel(APIGateway, userService, "Перенаправляет запросы, проверяет токены, получает данные о правах", "HTTP")
 
-    Rel(analyticsService, AnalyticsDB, "Читает и записывает данные", "ClickHouse JDBC")
+    Rel(analyticsService, AnalyticsDB, "Читает и записывает данные", "TCP (Native Protocol)")
 
-    Rel(automationService, AutomationDB, "Читает и записывает данные", "JDBC")
+    Rel(automationService, AutomationDB, "Читает и записывает данные", "TCP (PostgreSQL Protocol)")
 
-    Rel(billingService, BillingDB, "Читает и записывает данные", "JDBC")
+    Rel(billingService, BillingDB, "Читает и записывает данные", "TCP (PostgreSQL Protocol)")
 
-    Rel(deviceService, DeviceDB, "Читает и записывает данные", "JDBC")
+    Rel(deviceService, DeviceDB, "Читает и записывает данные", "TCP (PostgreSQL Protocol)")
 
-    Rel(notificationService, NotificationDB, "Читает и записывает данные", "JDBC")
+    Rel(notificationService, NotificationDB, "Читает и записывает данные", "TCP (PostgreSQL Protocol)")
 
-    Rel(supportService, SupportDB, "Читает и записывает данные", "JDBC")
+    Rel(supportService, SupportDB, "Читает и записывает данные", "TCP (PostgreSQL Protocol)")
 
     Rel(telemetryService, TelemetryDB, "Читает и записывает данные", "MongoDB Driver")
 
-    Rel(userService, UserDB, "Читает и записывает данные", "JDBC")
+    Rel(userService, UserDB, "Читает и записывает данные", "TCP (PostgreSQL Protocol)")
 
     Rel(TelemetryDataQueue, analyticsService, "aggregated_telemetry_report")
     Rel(DeviceLifecycleQueue, analyticsService, "device_status_changed")
