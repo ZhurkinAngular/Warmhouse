@@ -1,0 +1,53 @@
+@startuml
+entity "User" as user {
+  * id : int
+  --
+  * name : varchar(100)
+  * email : varchar(100) <<unique>>
+  * password : byte
+}
+
+entity "House" as house {
+  * id : int
+  --
+  * user_id : int <<FK>>
+  * description : varchar(100)
+}
+
+entity "Device" as device {
+  * id : int
+  --
+  * house_id : int <<FK>>
+  * name : varchar(100)
+  * type : int <<FK>>
+  * serial_number : varchar(100) <<unique>>
+  * status : varchar(50)
+}
+
+entity "Device_type" as device_type {
+  * id : int
+  --
+  * name : varchar(100) <<unique>>
+}
+
+entity "Telemetry" as telemetry {
+  * id: int
+  --
+  * serial_number : varchar(100)
+  * date : timestamp
+  * data : json
+}
+
+entity "Script" as script {
+  * id : int
+  --
+  * user_id : int <<FK>>
+  * script : json
+}
+
+house ||..o{ device
+user ||..o| house
+user ||..o{ script
+device }o..|| device_type
+
+@enduml

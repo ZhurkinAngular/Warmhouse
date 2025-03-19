@@ -1,0 +1,237 @@
+asyncapi: 3.0.0
+info:
+  title: Smart Home Async API
+  version: 1.0.0
+  description: Описание асинхронного интерфейса системы Smart Home
+defaultContentType: application/json
+servers:
+  smart-home-public:
+    host: localhost:8080
+    protocol: wss
+    description: Публичный API сервер
+    security:
+      - $ref: '#/components/securitySchemes/publicApiKey'
+channels:
+  heatingCommand:
+    address: /heating/command
+    messages:
+      heatingCommand:
+        $ref: '#/components/messages/heatingCommand'
+    description: Выполняет передачу команд от сервера управляющим модулям отопления
+  heatingTelemetry:
+    address: /heating/telemetry
+    messages:
+      heatingTelemetry:
+        $ref: '#/components/messages/heatingTelemetry'
+      errorMsg:
+        $ref: '#/components/messages/errorMsg'
+    description: Принимает телеметрию от управляющих модулей отопления
+  lighteningCommand:
+    address: /lightening/command
+    messages:
+      lighteningCommand:
+        $ref: '#/components/messages/lighteningCommand'
+    description: Выполняет передачу команд от сервера управляющим модулям освещения
+  lighteningTelemetry:
+    address: /lightening/telemetry
+    messages:
+      lighteningTelemetry:
+        $ref: '#/components/messages/lighteningTelemetry'
+      errorMsg:
+        $ref: '#/components/messages/errorMsg'
+    description: Принимает телеметрию от управляющих модулей освещения
+  gatesCommand:
+    address: /gates/command
+    messages:
+      gatesCommand:
+        $ref: '#/components/messages/gatesCommand'
+    description: Выполняет передачу команд от сервера управляющим модулям автоматических ворот
+  gatesTelemetry:
+    address: /gates/telemetry
+    messages:
+      gatesTelemetry:
+        $ref: '#/components/messages/gatesTelemetry'
+      errorMsg:
+        $ref: '#/components/messages/errorMsg'
+    description: Принимает телеметрию от управляющих модулей автоматических ворот
+operations:
+  heatingCommand:
+    action: receive
+    channel:
+      $ref: '#/channels/heatingCommand'
+    messages:
+      - $ref: '#/channels/heatingCommand/messages/heatingCommand'
+  heatingTelemetry:
+    action: send
+    channel:
+      $ref: '#/channels/heatingTelemetry'
+    messages:
+      - $ref: '#/channels/heatingTelemetry/messages/heatingTelemetry'
+      - $ref: '#/channels/heatingTelemetry/messages/errorMsg'
+  lighteningCommand:
+    action: receive
+    channel:
+      $ref: '#/channels/lighteningCommand'
+    messages:
+      - $ref: '#/channels/lighteningCommand/messages/lighteningCommand'
+  lighteningTelemetry:
+    action: send
+    channel:
+      $ref: '#/channels/lighteningTelemetry'
+    messages:
+      - $ref: '#/channels/lighteningTelemetry/messages/lighteningTelemetry'
+      - $ref: '#/channels/lighteningTelemetry/messages/errorMsg'
+  gatesCommand:
+    action: receive
+    channel:
+      $ref: '#/channels/gatesCommand'
+    messages:
+      - $ref: '#/channels/gatesCommand/messages/gatesCommand'
+  gatesTelemetry:
+    action: send
+    channel:
+      $ref: '#/channels/gatesTelemetry'
+    messages:
+      - $ref: '#/channels/gatesTelemetry/messages/gatesTelemetry'
+      - $ref: '#/channels/gatesTelemetry/messages/errorMsg'
+components:
+  messages:
+    heatingCommand:
+      name: heatingCommand
+      title: Команда управления отоплением
+      summary: >-
+        Задает параметры управляющего модуля отопления.
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/heatingPayload'
+    heatingTelemetry:
+      name: heatingTelemetry
+      title: Телеметрия управляющего модуля отопления.
+      summary: >-
+        Содержит данные телеметрии управляющего модуля отопления.
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/heatingTelemetry'
+    lighteningCommand:
+      name: lighteningCommand
+      title: Команда управления освещением
+      summary: >-
+        Задает параметры управляющего модуля освещения.
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/lighteningPayload'
+    lighteningTelemetry:
+      name: lighteningTelemetry
+      title: Телеметрия управляющего модуля освещением.
+      summary: >-
+        Содержит данные телеметрии управляющего модуля освещением.
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/lighteningTelemetry'
+    gatesCommand:
+      name: gatesCommand
+      title: Команда управления автоматическими воротами
+      summary: >-
+        Задает параметры управляющего модуля автоматических ворот.
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/gatesPayload'
+    gatesTelemetry:
+      name: gatesTelemetry
+      title: Телеметрия управляющего модуля автоматических ворот.
+      summary: >-
+        Содержит данные телеметрии управляющего модуля автоматических ворот.
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/gatesTelemetry'
+    errorMsg:
+      name: errorMsg
+      title: Сообщение о возникшей ошибке
+      summary: >-
+        Сообщает о возникших ошибках в работе управляющего модуля или устройства.
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/errorMsg'
+  schemas:
+    heatingPayload:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+          description: Признак работы устройства
+        temperatureValue:
+          type: integer
+          minimum: 0
+          description: Значение температуры
+        scale:
+          type: string
+          description: "Шкала температуры: C - градус Цельсия, F - градус Фаренгейта"
+          enum:
+            - C
+            - F
+    heatingTelemetry:
+      type: object
+      properties:
+        ambientTemperature:
+          type: integer
+          description: Комнатная температура
+    lighteningPayload:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+          description: Признак работы устройства
+        lumens:
+          type: integer
+          minimum: 0
+          description: Уровень яркости освещения
+    lighteningTelemetry:
+      type: object
+      properties:
+        ambientLightening:
+          type: integer
+          description: Уровень освещенности в люменах
+    gatesPayload:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+          description: Признак работы устройства
+        opend:
+          type: boolean
+          description: Открыть или закрыть ворота
+    gatesTelemetry:
+      type: object
+      properties:
+        opened:
+          type: boolean
+          description: Открыты ворота или закрыты
+    errorMsg:
+      type: object
+      properties:
+        code:
+          type: string
+          description: Код ошибки
+  securitySchemes:
+    publicApiKey:
+      type: httpApiKey
+      name: X-API-KEY
+      in: header
+      description: API ключ для подключения к конечным точкам сервера.
+  messageTraits:
+    commonHeaders:
+      headers:
+        type: object
+        properties:
+          my-app-header:
+            type: integer
+            minimum: 0
+            maximum: 100
+  operationTraits:
+    kafka:
+      bindings:
+        kafka:
+          clientId:
+            type: string
+            enum:
+              - my-app-id

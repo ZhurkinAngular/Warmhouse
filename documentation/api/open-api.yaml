@@ -1,0 +1,434 @@
+openapi: 3.0.0
+info:
+  title: Smart Home - OpenAPI 3.0
+  description: |-
+    REST интерфейс системы Smart Home.
+  version: 1.0.0
+servers:
+  - url: "https://localhost:8080/api/v1"
+tags:
+  - name: house
+    description: Дома
+  - name: device
+    description: Устройства
+  - name: telemetry
+    description: Телеметрия
+paths:
+  /house:
+    post:
+      tags:
+        - house
+      summary: Добавление нового дома
+      description: Добавление нового дома
+      operationId: addHouse
+      requestBody:
+        description: Добавление нового дома
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/house"
+        required: true
+      responses:
+        "200":
+          description: Успех
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/house"
+        "500":
+          description: Ошибка сервера
+      security:
+        - bearerAuth: [ ]
+  /house/{houseId}:
+    get:
+      tags:
+        - house
+      summary: Информация о доме
+      description: Получает информацию о доме по Id
+      operationId: getHouseById
+      parameters:
+        - name: houseId
+          in: path
+          description: ID дома
+          required: true
+          schema:
+            type: integer
+            format: int
+      responses:
+        "200":
+          description: Успех
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/house"
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/house"
+        "404":
+          description: Дом не найден
+        "500":
+          description: Ошибка сервера
+      security:
+        - bearerAuth: [ ]
+    put:
+      tags:
+        - house
+      summary: Обновление информации о доме
+      description: Обновление информации о доме по ID
+      operationId: updateHouse
+      parameters:
+        - name: houseId
+          in: path
+          description: ID дома
+          required: true
+          schema:
+            type: integer
+            format: int
+      requestBody:
+        description: Обновление информации о доме
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/house"
+        required: true
+      responses:
+        "200":
+          description: Успех
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/house"
+        "404":
+          description: Дом не найден
+        "500":
+          description: Ошибка сервера
+      security:
+        - bearerAuth: [ ]
+    delete:
+      tags:
+        - house
+      summary: Удаляет дом
+      description: Удаляет дом
+      operationId: deleteHouse
+      parameters:
+        - name: houseId
+          in: path
+          description: ID дома
+          required: true
+          schema:
+            type: integer
+            format: int
+      responses:
+        "200":
+          description: Успех
+        "404":
+          description: Дом не найден
+        "500":
+          description: Ошибка сервера
+      security:
+        - bearerAuth: [ ]
+  /house/findByUserId:
+    get:
+      tags:
+        - house
+      summary: Поиск домов пользователя
+      description: Выполняет поиск домов по ID пользователя
+      operationId: findHousesByUserId
+      parameters:
+        - name: user_id
+          in: query
+          description: ID пользователя
+          required: true
+          schema:
+            type: integer
+            format: int
+      responses:
+        "200":
+          description: Успех
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/house"
+        "400":
+          description: Пользователь не найден
+        "500":
+          description: Ошибка сервера
+      security:
+        - bearerAuth: [ ]
+  /device:
+    post:
+      tags:
+        - device
+      summary: Добавление нового устройства
+      description: Добавление нового устройства
+      operationId: addDevice
+      requestBody:
+        description: Добавление нового устройства
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/device"
+        required: true
+      responses:
+        "200":
+          description: Успех
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/device"
+        "500":
+          description: Ошибка сервера
+      security:
+        - bearerAuth: [ ]
+  /device/{deviceId}:
+    get:
+      tags:
+        - device
+      summary: Получение информации об устройстве
+      description: Получение информацию об устройстве по Id
+      operationId: getDeviceById
+      parameters:
+        - name: deviceId
+          in: path
+          description: ID устройства
+          required: true
+          schema:
+            type: integer
+            format: int
+      responses:
+        "200":
+          description: Успех
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/device"
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/device"
+        "404":
+          description: Устройство не найдено
+        "500":
+          description: Ошибка сервера
+      security:
+        - bearerAuth: [ ]
+    put:
+      tags:
+        - device
+      summary: Обновление устройства
+      description: Обновление устройства по ID
+      operationId: updateDevice
+      parameters:
+        - name: deviceId
+          in: path
+          description: ID устройства
+          required: true
+          schema:
+            type: integer
+            format: int
+      requestBody:
+        description: Обновление устройства
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/device"
+        required: true
+      responses:
+        "200":
+          description: Успех
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/device"
+        "404":
+          description: Устройство не найдено
+        "500":
+          description: Ошибка сервера
+      security:
+        - bearerAuth: [ ]
+    delete:
+      tags:
+        - device
+      summary: Удаляет устройство
+      description: Удаляет устройство
+      operationId: deleteDevice
+      parameters:
+        - name: deviceId
+          in: path
+          description: ID устройства
+          required: true
+          schema:
+            type: integer
+            format: int
+      responses:
+        "200":
+          description: Успех
+        "404":
+          description: Устройство не найдено
+        "500":
+          description: Ошибка сервера
+      security:
+        - bearerAuth: [ ]
+  /device/findByUserId:
+    get:
+      tags:
+        - device
+      summary: Поиск устройств пользователя
+      description: Поиск устройств по ID пользователя
+      operationId: findDevicesByUserId
+      parameters:
+        - name: user_id
+          in: query
+          description: ID пользователя
+          required: true
+          schema:
+            type: integer
+            format: int
+      responses:
+        "200":
+          description: Успех
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/device"
+        "400":
+          description: Пользователь не найден
+        "500":
+          description: Ошибка сервера
+      security:
+        - bearerAuth: [ ]
+  /device/findByHouseId:
+    get:
+      tags:
+        - device
+      summary: Поиск устройств дома
+      description: Поиск устройств по ID дома
+      operationId: findDevicesByHouseId
+      parameters:
+        - name: house_id
+          in: query
+          description: ID дома
+          required: true
+          schema:
+            type: integer
+            format: int
+      responses:
+        "200":
+          description: Успех
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/device"
+        "400":
+          description: Дом не найден
+        "500":
+          description: Ошибка сервера
+      security:
+        - bearerAuth: [ ]
+  /telemetry/findByDeviceId:
+    get:
+      tags:
+        - telemetry
+      summary: Поиск телеметрии устройства за период
+      description: Поиск телеметрии по ID устройства за период
+      operationId: findTelemetryByDeviceId
+      parameters:
+        - name: device_id
+          in: query
+          description: ID устройства
+          required: true
+          schema:
+            type: integer
+            format: int
+        - name: from
+          in: query
+          description: Начало периода
+          required: true
+          schema:
+            type: string
+            format: datetime
+        - name: to
+          in: query
+          description: Окончание периода
+          required: true
+          schema:
+            type: string
+            format: datetime
+      responses:
+        "200":
+          description: Успех
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/telemetry"
+        "400":
+          description: Устройство не найдено
+        "500":
+          description: Ошибка сервера
+      security:
+        - bearerAuth: [ ]
+components:
+  schemas:
+    device:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int
+          example: 1
+        houseId:
+          type: integer
+          format: int
+          example: 3
+        name:
+          type: string
+          example: Light switcher
+        serialNumber:
+          type: string
+          example: "666666-77-888888-99"
+        status:
+          type: string
+          example: "off"
+    house:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int
+          example: 10
+        userId:
+          type: integer
+          format: int
+          example: 3
+        description:
+          type: string
+          example: "Дом, милый дом"
+    telemetry:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int
+          example: 99293
+        deviceId:
+          type: integer
+          format: int
+          example: 1
+        date:
+          type: string
+          format: datetime
+        data:
+          type: object
+          format: json
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

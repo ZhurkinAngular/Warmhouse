@@ -1,0 +1,52 @@
+@startuml
+!include ../templates/C4_Container.puml
+
+Person(user, "Пользователь", "Управляет устройствами в доме")
+Person(admin, "Администратор", "Администрирует систему")
+System_Boundary(smart_home, "Smart Home") {
+
+    Container(web_site, "Веб-сайт", "Angular", "Веб-сайт")
+    Container(api_gateway, "API Gateway", "Nginx", "Балансирует запросы между микросервисами, выполняет аутентификацию")
+
+    Container(user_service, "Микросервис управления пользователями", "Spring Boot", "Управляет пользователями системы")
+    ContainerDb(user_db, "База данных пользователей", "PostgreSQL")
+
+    Container(device_service, "Микросервис управления устройствами", "Spring Boot", "Управляет устройствами пользователя")
+    ContainerDb(device_db, "База данных устройств", "PostgreSQL")
+
+    Container(scenario_service, "Микросервис управления сценариями", "Spring Boot", "Управляет сценариями")
+    ContainerDb(scenario_db, "База данных сценариев", "PostgreSQL")
+
+    Container(telemetry_service, "Микросервис телеметрии", "Spring Boot", "Получает и предоставляет данные телеметрии устройств")
+    ContainerDb(telemetry_db, "База данных телеметрии", "PostgreSQL")
+
+    Container(device_lb, "Load Balancer", "NGINX", "Распределяет подключения")
+    ContainerQueue(emqx, "Брокер MQTT", "EMQX", "Принимает и отправляет сообщения в формате MQTT")
+    ContainerQueue(kafka, "Kafka", "", "Брокер сообщений")
+}
+
+System_Ext(smart_home_device, "Устройства умного дома", "")
+
+Rel(smart_home_device, device_lb, "Получает телеметрию, передает команды", "MQTT")
+Rel(device_lb, emqx, "Получает телеметрию, передает команды", "MQTT")
+Rel(emqx, kafka, "Получает телеметрию, передает команды")
+Rel(device_service, kafka, "Передает команды, получает данные")
+Rel(scenario_service, kafka, "Передает команды")
+
+Rel(user, web_site, "Просматривает телеметрию, управляет устройствами дома")
+Rel(admin, web_site, "Администрирует систему")
+Rel(web_site, api_gateway, "Выполняет запросы", "REST")
+
+Rel(api_gateway, user_service, "Выполняет запросы", "REST")
+Rel(user_service, user_db, "Читает и записывает данные", "SQL")
+
+Rel(api_gateway, device_service, "Выполняет запросы", "REST")
+Rel(device_service, device_db, "Читает и записывает данные", "SQL")
+
+Rel(api_gateway, scenario_service, "Выполняет запросы", "REST")
+Rel(scenario_service, scenario_db, "Читает и записывает данные", "SQL")
+
+Rel(api_gateway, telemetry_service, "Передает данные телеметрии", "WebSocket")
+Rel(telemetry_service, telemetry_db, "Читает и записывает данные", "SQL")
+Rel(kafka, telemetry_service, "Записывает данные телеметрии")
+@enduml

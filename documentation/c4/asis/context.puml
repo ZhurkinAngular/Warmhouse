@@ -1,0 +1,11 @@
+@startuml Context Diagram
+!include ../templates/C4_Context.puml
+
+Person(client, "Клиент", "Управляет отоплением в своём доме")
+System(smart_home, "Smart Home", "Контролирует температуру в домах клиентов")
+System_Ext(device, "Датчики температуры и контроллеры отопления")
+
+Rel(client, smart_home, "Просматривает актуальную температуру, выставляет температуру, включает/отключает отопление")
+Rel(smart_home, device, "Мониторит температуру, включает/отключает отопление")
+
+@enduml
