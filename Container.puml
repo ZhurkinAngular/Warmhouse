@@ -1,0 +1,29 @@
+@startuml
+title WarmHouse Container Diagram
+
+top to bottom direction
+
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml
+
+Person(user, "Пользователь", "Пользователь умного дома")
+Person(admin, "Администратор", "Администратор умного дома")
+System(WarmHouse, "Теплый дом", "Система управления микроклиматом в помещениях")
+
+Container_Boundary(WarmHouse, "Тёплый дом") {
+  Container(WebApp, "Веб-приложение", "TS, React", "ЛК Пользователя")
+  Container(Users, "Управление пользователями", "Java", "Регистрация пользователей, аутентификация, авторизация")
+  Container(Devices, "Управление устройствами", "Java", "Регистрация устройств, метрики, команды")
+}
+
+System_Ext(controllers, "Внешние устройства", "Управляемые отопительные приборы")
+System_Ext(sensors, "Внешние датчики", "Датчики температуры")
+
+Rel(user, WebApp, "Работа в ЛК пользователя")
+Rel(admin, WebApp, "Работа в ЛК администратора")
+
+Rel(WebApp,Users,"Запрашивает показания")
+Rel(WebApp,Devices,"Передаёт команды")
+
+Rel(sensors,Devices,"Передаёт показания")
+Rel(Devices,controllers,"Передаёт команды")
+@enduml

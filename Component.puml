@@ -1,0 +1,55 @@
+@startuml
+title FitLife Web Application Component Diagram
+
+top to bottom direction
+
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml
+
+Person(user, "Пользователь", "Пользователь умного дома")
+Person(admin, "Администратор", "Администратор умного дома")
+System(WarmHouse, "Теплый дом", "Система управления микроклиматом в помещениях")
+
+Container_Boundary(WarmHouse, "Тёплый дом") {
+  Container(WebApp, "Веб-приложение", "TS, React", "ЛК Пользователя")
+  Container(Users, "Управление пользователями", "Java", "Регистрация пользователей, аутентификация, авторизация")
+  Container(Devices, "Управление устройствами", "Java", "Регистрация устройств, метрики, команды")
+}
+
+Container(WebApp, "Веб-приложение", "TS, React, Java") {
+  Component(StaticServer, "StaticServer", "Публикация статических файлов")
+  Component(BFF, "BFF", "Слой адаптации API под веб-интерфейс")  
+}
+
+Container(Users, "Мастер-система: Управление пользователями", "Java, Spring") {
+  Component(UsersApp, "UsersApp", "Регистрация, аутентификация, авторизация")
+  Component(UsersDB, "UsersDB", "Информация о пользователях")
+}
+
+Container(Devices, "Мастер-система: Управление устройствами", "Java, MQTT, MongoDB, CassandraDB") {
+  Component(MessageBroker, "MessageBroker", "Брокер сообщений для взаимодействия с устройствами в реальном времени")
+  Component(DevicesApp, "DevicesApp", "Регистрация устройств, управление устройствами")
+  Component(DevicesDB, "DevicesDB", "Информация об устройствах")
+  Component(MetricsDB, "MetricsDB", "Метрики с датчиков")
+}
+
+System_Ext(controllers, "Внешние устройства", "Управляемые отопительные приборы")
+System_Ext(sensors, "Внешние датчики", "Датчики температуры")
+
+Rel(user, WebApp, "Работа в ЛК пользователя")
+Rel(admin, WebApp, "Работа в ЛК администратора")
+
+Rel(BFF,UsersApp,"Управление пользователями")
+Rel(BFF,DevicesApp,"Управление устройствами")
+
+Rel(UsersApp,UsersDB,"Сохраняет информацию о пользователях")
+
+Rel(DevicesApp,DevicesDB,"Сохраняет информацию об устройствах")
+Rel(DevicesApp,MetricsDB,"Сохраняет метрики с устройств")
+
+Rel(sensors,MessageBroker,"Передача показаний")
+Rel(MessageBroker,controllers,"Передача команд")
+
+Rel(MessageBroker,DevicesApp,"Показания")
+Rel(DevicesApp,MessageBroker,"Команды")
+
+@enduml
