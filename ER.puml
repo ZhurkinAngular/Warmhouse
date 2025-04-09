@@ -1,0 +1,34 @@
+@startuml 
+title WarmHouse ER diagram
+
+entity User {
+  * id : integer
+  --
+  email : varchar
+  status : varchar
+  password : varchar
+}
+
+entity Device {
+  * id : integer
+  --
+  userid : integer
+  type : varchar
+  location : varchar
+  status : varchar
+  lastUpdateDateTime : timestamp
+}
+
+entity Metric {
+  * id : integer
+  --
+  deviceid : integer
+  type : varchar
+  value : varchar
+}
+
+' Связи
+User ||--o{ Device : "has"
+Device ||--o{ Metric : "publish"
+
+@enduml
