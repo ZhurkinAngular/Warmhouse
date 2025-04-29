@@ -1,0 +1,25 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+title Диаграмма компонентов сервиса "Телеметрия"
+
+Container_Boundary(telemetry_processor, "Телеметрия") {
+    Component(kafka_consumer, "Kafka консьюмер", "GO", "Получает сообщения из Kafka")
+    Component(data_processor, "Обработчик данных", "GO", "Обрабатывает данные телеметрии")
+    Component(data_aggregator, "Агрегатор данных", "GO", "Агрегирует данные телеметрии")
+    Component(data_storage, "Хранилище данных", "GO", "Управляет сохранением данных в БД")
+    Component(metrics_service, "Сервис метрик", "GO", "Сервис метрик")
+    Component(alert_manager, "Менеджер оповещений", "GO", "Генерирует оповещения при аномалиях")
+}
+
+Container_Ext(kafka, "Kafka", "Брокер сообщений")
+ContainerDb_Ext(postgresql, "База данных", "PostgreSQL")
+
+Rel(kafka, kafka_consumer, "Предоставляет сообщения", "JSON")
+Rel(kafka_consumer, data_processor, "Передает сообщения для обработки")
+Rel(data_processor, data_aggregator, "Передает обработанные данные")
+Rel(data_aggregator, metrics_service, "Передает агрегированные данные")
+Rel(metrics_service, data_storage, "Сохраняет")
+Rel(data_storage, postgresql, "Сохраняет данные", "SQL")
+Rel(data_processor, alert_manager, "Передает данные для анализа аномалий")
+@enduml

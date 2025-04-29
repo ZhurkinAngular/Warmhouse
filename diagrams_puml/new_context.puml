@@ -1,0 +1,29 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+title Диаграмма контейнеров системы телеметрии
+
+Person(user, "Пользователь", "Пользователь системы")
+System_Ext(devices, "Устройства", "Физические устройства с датчиками")
+
+System_Boundary(system, "") {
+    Container(telemetry_receiver, "Шлюз для телеметрии", "GO", "Принимает данные телеметрии с устройств")
+    Container(kafka, "Kafka", "Apache Kafka", "Брокер сообщений для передачи телеметрии")
+    Container(telemetry_processor, "Телеметрия", "GO", "Обрабатывает и сохраняет данные телеметрии")
+    ContainerDb(postgresql_telemetry, "База данных", "PostgreSQL", "Хранит данные телеметрии")
+
+    Container(device_service, "Управление устройствами/модулями", "GO", "Управляет устройствами/модулями и обрабатывает команды пользователей")
+    Container(house_service, "Управление домами", "GO", "Управляет домами")
+
+    ContainerDb(postgresql_devices, "База данных", "PostgreSQL", "Хранит данные девайсов")
+}
+
+Rel(devices, telemetry_receiver, "Отправляет данные телеметрии", "MQTT/HTTP")
+Rel(telemetry_receiver, kafka, "Публикует данные телеметрии", "JSON")
+Rel(telemetry_processor, kafka, "Подписывается на данные телеметрии", "JSON")
+Rel(telemetry_processor, postgresql_telemetry, "Сохраняет данные телеметрии", "SQL")
+Rel(device_service, postgresql_devices, "Читает/записывает информацию об устройствах", "SQL")
+Rel(device_service, devices, "Отправляет команды управления", "MQTT/HTTP")
+Rel(user, device_service, "Отправляет команды управления устройствами", "HTTP/REST")
+Rel(user, house_service, "Управляет домами", "HTTP/REST")
+@enduml

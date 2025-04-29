@@ -1,0 +1,24 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+title Диаграмма компонентов сервиса "Шлюз для телеметрии"
+
+Container_Boundary(telemetry_receiver, "Шлюз для телеметрии") {
+    Component(mqtt_handler, "MQTT обработчик", "GO", "Обрабатывает входящие MQTT сообщения от устройств")
+    Component(http_handler, "HTTP обработчик", "GO", "Обрабатывает входящие HTTP запросы от устройств")
+    Component(message_validator, "Валидатор сообщений", "GO", "Проверяет корректность формата входящих сообщений")
+    Component(device_authenticator, "Аутентификатор устройств", "GO", "Проверяет подлинность устройств")
+    Component(kafka_producer, "Kafka продюсер", "GO", "Отправляет сообщения в Kafka")
+}
+
+System_Ext(devices, "Устройства", "Физические устройства с датчиками")
+Container_Ext(kafka, "Kafka", "Брокер сообщений")
+
+Rel(devices, mqtt_handler, "Отправляет телеметрию", "MQTT")
+Rel(devices, http_handler, "Отправляет телеметрию", "HTTP")
+Rel(mqtt_handler, message_validator, "Передает сообщения для валидации")
+Rel(http_handler, message_validator, "Передает сообщения для валидации")
+Rel(message_validator, device_authenticator, "Передает валидные сообщения")
+Rel(device_authenticator, kafka_producer, "Передает аутентифицированные сообщения")
+Rel(kafka_producer, kafka, "Публикует сообщения", "JSON")
+@enduml

@@ -1,0 +1,31 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+title Диаграмма компонентов сервиса "Управление устройствами"
+
+Container_Boundary(device_manager, "Управление устройствами") {
+    Component(rest_api, "REST API", "GO", "Обрабатывает HTTP запросы от пользователей")
+    Component(auth_service, "Сервис аутентификации", "GO", "Аутентифицирует пользователей")
+    Component(device_registry, "Устройства", "GO", "Управляет информацией об устройствах")
+    Component(command_processor, "Обработчик команд", "GO", "Обрабатывает команды для устройств")
+    Component(mqtt_client, "MQTT клиент", "GO", "Отправляет команды на устройства по MQTT")
+    Component(http_client, "HTTP клиент", "GO", "Отправляет команды на устройства по HTTP")
+    Component(scheduler, "Планировщик", "GO", "Планирует отложенные команды")
+}
+
+Person_Ext(user, "Пользователь")
+System_Ext(devices, "Устройства", "Физические устройства с датчиками")
+ContainerDb_Ext(postgresql, "База данных", "PostgreSQL")
+
+Rel(user, rest_api, "Отправляет команды", "HTTP/REST")
+Rel(rest_api, auth_service, "Проверяет аутентификацию")
+Rel(rest_api, device_registry, "Запрашивает информацию об устройствах")
+Rel(rest_api, command_processor, "Передает команды")
+Rel(device_registry, postgresql, "Читает/записывает данные", "SQL")
+Rel(command_processor, mqtt_client, "Передает команды для MQTT устройств")
+Rel(command_processor, http_client, "Передает команды для HTTP устройств")
+Rel(mqtt_client, devices, "Отправляет команды", "MQTT")
+Rel(http_client, devices, "Отправляет команды", "HTTP")
+Rel(command_processor, scheduler, "Регистрирует отложенные команды")
+Rel(scheduler, command_processor, "Инициирует выполнение отложенных команд")
+@enduml

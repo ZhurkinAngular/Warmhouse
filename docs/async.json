@@ -1,0 +1,290 @@
+asyncapi: 2.5.0
+info:
+  title: API шлюза телеметрии умного дома
+  version: 1.0.0
+  description: |
+    Асинхронный API для обмена телеметрией между устройствами умного дома и системой.
+    Включает в себя каналы для приема телеметрии от устройств и отправки команд на устройства.
+  contact:
+    name: Команда разработки умного дома
+    email: support@smarthome.example.com
+
+servers:
+  mqtt-broker:
+    url: mqtt://mqtt.smarthome.example.com
+    protocol: mqtt
+    description: Основной MQTT брокер для обмена сообщениями с устройствами
+  kafka-broker:
+    url: kafka://kafka.smarthome.example.com:9092
+    protocol: kafka
+    description: Kafka брокер для внутреннего обмена сообщениями между сервисами
+
+channels:
+  # MQTT каналы для взаимодействия с устройствами
+  devices/{deviceId}/telemetry:
+    description: Канал для приема телеметрии от устройств
+    parameters:
+      deviceId:
+        description: Уникальный идентификатор устройства
+        schema:
+          type: string
+    publish:
+      summary: Устройства публикуют телеметрию в этот канал
+      operationId: publishTelemetry
+      message:
+        $ref: '#/components/messages/TelemetryMessage'
+
+  devices/{deviceId}/commands:
+    description: Канал для отправки команд на устройства
+    parameters:
+      deviceId:
+        description: Уникальный идентификатор устройства
+        schema:
+          type: string
+    subscribe:
+      summary: Устройства подписываются на этот канал для получения команд
+      operationId: subscribeToCommands
+      message:
+        $ref: '#/components/messages/CommandMessage'
+
+  devices/{deviceId}/status:
+    description: Канал для получения статуса устройств
+    parameters:
+      deviceId:
+        description: Уникальный идентификатор устройства
+        schema:
+          type: string
+    publish:
+      summary: Устройства публикуют свой статус в этот канал
+      operationId: publishStatus
+      message:
+        $ref: '#/components/messages/StatusMessage'
+
+  # Kafka топики для внутреннего обмена сообщениями
+  telemetry-data:
+    description: Топик для передачи телеметрии от шлюза к сервису телеметрии
+    bindings:
+      kafka:
+        topic: telemetry-data
+    publish:
+      summary: Шлюз публикует обработанную телеметрию в этот топик
+      operationId: publishTelemetryToKafka
+      message:
+        $ref: '#/components/messages/ProcessedTelemetryMessage'
+
+  device-status:
+    description: Топик для передачи статуса устройств от шлюза к сервису управления устройствами
+    bindings:
+      kafka:
+        topic: device-status
+    publish:
+      summary: Шлюз публикует статус устройств в этот топик
+      operationId: publishStatusToKafka
+      message:
+        $ref: '#/components/messages/ProcessedStatusMessage'
+
+components:
+  messages:
+    TelemetryMessage:
+      name: telemetry
+      title: Сообщение телеметрии от устройства
+      contentType: application/json
+      payload:
+        type: object
+        required:
+          - timestamp
+          - module_id
+          - metrics
+        properties:
+          timestamp:
+            type: string
+            format: date-time
+            description: Время измерения в формате ISO 8601
+          module_id:
+            type: string
+            description: Идентификатор модуля устройства, отправившего телеметрию
+          metrics:
+            type: object
+            description: Метрики телеметрии в формате ключ-значение
+            additionalProperties:
+              type: number
+          battery:
+            type: number
+            description: Уровень заряда батареи устройства (если применимо)
+          rssi:
+            type: number
+            description: Уровень сигнала (если применимо)
+        example:
+          timestamp: "2023-06-20T15:30:00Z"
+          module_id: "temp_sensor_1"
+          metrics:
+            temperature: 22.5
+            humidity: 45.2
+          battery: 85
+          rssi: -65
+
+    CommandMessage:
+      name: command
+      title: Команда для устройства
+      contentType: application/json
+      payload:
+        type: object
+        required:
+          - command_id
+          - command_type
+          - payload
+        properties:
+          command_id:
+            type: string
+            description: Уникальный идентификатор команды
+          command_type:
+            type: string
+            description: Тип команды
+          payload:
+            type: object
+            description: Данные команды
+          timestamp:
+            type: string
+            format: date-time
+            description: Время отправки команды
+        example:
+          command_id: "cmd-12345"
+          command_type: "set_temperature"
+          payload:
+            temperature: 23.0
+          timestamp: "2023-06-20T16:00:00Z"
+
+    StatusMessage:
+      name: status
+      title: Статус устройства
+      contentType: application/json
+      payload:
+        type: object
+        required:
+          - status
+          - timestamp
+        properties:
+          status:
+            type: string
+            enum: [online, offline, error]
+            description: Текущий статус устройства
+          timestamp:
+            type: string
+            format: date-time
+            description: Время обновления статуса
+          error_code:
+            type: string
+            description: Код ошибки (если статус error)
+          error_message:
+            type: string
+            description: Описание ошибки (если статус error)
+          firmware_version:
+            type: string
+            description: Версия прошивки устройства
+          modules:
+            type: array
+            items:
+              type: object
+              properties:
+                id:
+                  type: string
+                status:
+                  type: string
+                  enum: [online, offline, error]
+        example:
+          status: "online"
+          timestamp: "2023-06-20T15:45:00Z"
+          firmware_version: "1.2.3"
+          modules:
+            - id: "temp_sensor_1"
+              status: "online"
+            - id: "heating_relay"
+              status: "online"
+
+    ProcessedTelemetryMessage:
+      name: processed-telemetry
+      title: Обработанное сообщение телеметрии для внутреннего использования
+      contentType: application/json
+      payload:
+        type: object
+        required:
+          - device_id
+          - timestamp
+          - received_at
+          - module_id
+          - metrics
+        properties:
+          device_id:
+            type: string
+            description: Идентификатор устройства
+          timestamp:
+            type: string
+            format: date-time
+            description: Время измерения
+          received_at:
+            type: string
+            format: date-time
+            description: Время получения сообщения шлюзом
+          module_id:
+            type: string
+            description: Идентификатор модуля
+          metrics:
+            type: object
+            description: Метрики телеметрии
+            additionalProperties:
+              type: number
+          metadata:
+            type: object
+            description: Дополнительные метаданные
+        example:
+          device_id: "550e8400-e29b-41d4-a716-446655440002"
+          timestamp: "2023-06-20T15:30:00Z"
+          received_at: "2023-06-20T15:30:01Z"
+          module_id: "temp_sensor_1"
+          metrics:
+            temperature: 22.5
+            humidity: 45.2
+          metadata:
+            battery: 85
+            rssi: -65
+
+    ProcessedStatusMessage:
+      name: processed-status
+      title: Обработанное сообщение статуса для внутреннего использования
+      contentType: application/json
+      payload:
+        type: object
+        required:
+          - device_id
+          - status
+          - timestamp
+          - received_at
+        properties:
+          device_id:
+            type: string
+            description: Идентификатор устройства
+          status:
+            type: string
+            enum: [online, offline, error]
+            description: Статус устройства
+          timestamp:
+            type: string
+            format: date-time
+            description: Время обновления статуса
+          received_at:
+            type: string
+            format: date-time
+            description: Время получения сообщения шлюзом
+          modules:
+            type: array
+            items:
+              type: object
+              properties:
+                id:
+                  type: string
+                status:
+                  type: string
+                  enum: [online, offline, error]
+          metadata:
+            type: object
+            description: Дополнительные метаданные

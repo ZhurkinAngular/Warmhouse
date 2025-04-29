@@ -1,0 +1,204 @@
+@startuml
+!define Table(name,desc) class name as "desc" << (T,#FFAAAA) >>
+!define PK(x) <b><color:#b8861b><&key></color> x</b>
+!define FK(x) <color:#aaaaaa><&key></color> x
+!define column(x) <color:#efefef><&media-record></color> x
+
+' Новые таблицы
+Table(users, "users") {
+    PK(id) UUID
+    column(username) VARCHAR(100)
+    column(email) VARCHAR(255)
+    column(password_hash) VARCHAR(255)
+    column(first_name) VARCHAR(100)
+    column(last_name) VARCHAR(100)
+    column(role) VARCHAR(50)
+    column(status) VARCHAR(20)
+    column(last_login) TIMESTAMP
+    column(created_at) TIMESTAMP
+    column(updated_at) TIMESTAMP
+}
+
+Table(houses, "houses") {
+    PK(id) UUID
+    FK(owner_id) UUID
+    column(name) VARCHAR(255)
+    column(address) TEXT
+    column(timezone) VARCHAR(50)
+    column(created_at) TIMESTAMP
+    column(updated_at) TIMESTAMP
+}
+
+Table(device_types, "device_types") {
+    PK(id) UUID
+    column(name) VARCHAR(100)
+    column(description) TEXT
+    column(capabilities) JSONB
+    column(created_at) TIMESTAMP
+    column(updated_at) TIMESTAMP
+}
+
+Table(modules, "modules") {
+    PK(id) UUID
+    FK(device_id) UUID
+    column(name) VARCHAR(100)
+    column(type) VARCHAR(50)
+    column(status) VARCHAR(20)
+    column(config) JSONB
+    column(created_at) TIMESTAMP
+    column(updated_at) TIMESTAMP
+}
+
+' Таблицы для управления устройствами
+Table(devices, "devices") {
+    PK(id) UUID
+    FK(house_id) UUID
+    FK(device_type_id) UUID
+    column(name) VARCHAR(255)
+    column(serial_number) VARCHAR(100)
+    column(firmware_version) VARCHAR(50)
+    column(status) VARCHAR(20)
+    column(last_online) TIMESTAMP
+    column(created_at) TIMESTAMP
+    column(updated_at) TIMESTAMP
+}
+
+Table(device_groups, "device_groups") {
+    PK(id) UUID
+    FK(house_id) UUID
+    column(name) VARCHAR(255)
+    column(description) TEXT
+    column(created_at) TIMESTAMP
+    column(updated_at) TIMESTAMP
+}
+
+Table(device_group_mappings, "device_group_mappings") {
+    PK(id) UUID
+    FK(device_id) UUID
+    FK(group_id) UUID
+    column(created_at) TIMESTAMP
+}
+
+Table(device_configs, "device_configs") {
+    PK(id) UUID
+    FK(device_id) UUID
+    column(config_key) VARCHAR(100)
+    column(config_value) TEXT
+    column(created_at) TIMESTAMP
+    column(updated_at) TIMESTAMP
+}
+
+Table(device_commands, "device_commands") {
+    PK(id) UUID
+    FK(device_id) UUID
+    FK(user_id) UUID
+    column(command_type) VARCHAR(50)
+    column(payload) JSONB
+    column(status) VARCHAR(20)
+    column(result) JSONB
+    column(scheduled_at) TIMESTAMP
+    column(executed_at) TIMESTAMP
+    column(created_at) TIMESTAMP
+    column(updated_at) TIMESTAMP
+}
+
+' Таблицы для телеметрии
+Table(telemetry_data, "telemetry_data") {
+    PK(id) UUID
+    FK(device_id) UUID
+    FK(module_id) UUID
+    column(timestamp) TIMESTAMP
+    column(data) JSONB
+    column(received_at) TIMESTAMP
+}
+
+Table(telemetry_aggregated_hourly, "telemetry_aggregated_hourly") {
+    PK(id) UUID
+    FK(device_id) UUID
+    FK(module_id) UUID
+    column(hour_start) TIMESTAMP
+    column(metric_name) VARCHAR(100)
+    column(min_value) FLOAT
+    column(max_value) FLOAT
+    column(avg_value) FLOAT
+    column(sum_value) FLOAT
+    column(count) INTEGER
+    column(created_at) TIMESTAMP
+}
+
+Table(telemetry_aggregated_daily, "telemetry_aggregated_daily") {
+    PK(id) UUID
+    FK(device_id) UUID
+    FK(module_id) UUID
+    column(day_start) DATE
+    column(metric_name) VARCHAR(100)
+    column(min_value) FLOAT
+    column(max_value) FLOAT
+    column(avg_value) FLOAT
+    column(sum_value) FLOAT
+    column(count) INTEGER
+    column(created_at) TIMESTAMP
+}
+
+Table(telemetry_metrics, "telemetry_metrics") {
+    PK(id) UUID
+    FK(device_type_id) UUID
+    column(name) VARCHAR(100)
+    column(display_name) VARCHAR(255)
+    column(unit) VARCHAR(50)
+    column(data_type) VARCHAR(20)
+    column(description) TEXT
+    column(created_at) TIMESTAMP
+    column(updated_at) TIMESTAMP
+}
+
+Table(alerts, "alerts") {
+    PK(id) UUID
+    FK(device_id) UUID
+    FK(house_id) UUID
+    column(alert_type) VARCHAR(50)
+    column(severity) VARCHAR(20)
+    column(message) TEXT
+    column(data) JSONB
+    column(status) VARCHAR(20)
+    column(created_at) TIMESTAMP
+    column(resolved_at) TIMESTAMP
+}
+
+Table(user_house_access, "user_house_access") {
+    PK(id) UUID
+    FK(user_id) UUID
+    FK(house_id) UUID
+    column(access_level) VARCHAR(50)
+    column(created_at) TIMESTAMP
+    column(updated_at) TIMESTAMP
+}
+
+' Связи между таблицами
+users "1" -- "0..*" houses : владеет
+users "1" -- "0..*" device_commands : отправляет
+users "0..*" -- "0..*" houses : имеет доступ
+(users, houses) .. user_house_access
+
+houses "1" -- "0..*" devices : содержит
+houses "1" -- "0..*" device_groups : содержит
+houses "1" -- "0..*" alerts : связаны с
+
+device_types "1" -- "0..*" devices : определяет тип
+device_types "1" -- "0..*" telemetry_metrics : определяет метрики
+
+devices "1" -- "0..*" modules : содержит
+devices "1" -- "0..*" device_configs : имеет
+devices "1" -- "0..*" device_commands : получает
+devices "1" -- "0..*" telemetry_data : генерирует
+devices "1" -- "0..*" telemetry_aggregated_hourly : имеет
+devices "1" -- "0..*" telemetry_aggregated_daily : имеет
+devices "1" -- "0..*" alerts : генерирует
+
+modules "1" -- "0..*" telemetry_data : генерирует
+modules "1" -- "0..*" telemetry_aggregated_hourly : имеет
+modules "1" -- "0..*" telemetry_aggregated_daily : имеет
+
+devices "0..*" -- "0..*" device_groups : входит в
+(devices, device_groups) .. device_group_mappings
+@enduml

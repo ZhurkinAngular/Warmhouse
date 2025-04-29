@@ -1,0 +1,667 @@
+openapi: 3.0.0
+info:
+  title: API управления устройствами умного дома
+  description: API для управления устройствами умного дома, получения информации о них и отправки команд
+  version: 1.0.0
+  contact:
+    name: Команда разработки умного дома
+    email: support@smarthome.example.com
+
+servers:
+  - url: https://api.smarthome.example.com/v1
+    description: Основной API сервер
+
+tags:
+  - name: devices
+    description: Операции с устройствами
+  - name: houses
+    description: Операции с домами
+  - name: device-groups
+    description: Операции с группами устройств
+  - name: commands
+    description: Операции с командами для устройств
+  - name: modules
+    description: Операции с модулями устройств
+
+paths:
+  /houses:
+    get:
+      summary: Получить список домов
+      description: Возвращает список домов, доступных пользователю
+      tags:
+        - houses
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          description: Номер страницы для пагинации
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          description: Количество элементов на странице
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/House'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+              example:
+                data:
+                  - id: "550e8400-e29b-41d4-a716-446655440000"
+                    name: "Мой дом"
+                    address: "ул. Примерная, д. 123"
+                    timezone: "Europe/Moscow"
+                    created_at: "2023-01-15T12:00:00Z"
+                    updated_at: "2023-01-15T12:00:00Z"
+                pagination:
+                  total: 1
+                  page: 1
+                  limit: 20
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    
+    post:
+      summary: Создать новый дом
+      description: Создает новый дом для пользователя
+      tags:
+        - houses
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+              properties:
+                name:
+                  type: string
+                  example: "Мой новый дом"
+                address:
+                  type: string
+                  example: "ул. Новая, д. 456"
+                timezone:
+                  type: string
+                  example: "Europe/Moscow"
+            example:
+              name: "Мой новый дом"
+              address: "ул. Новая, д. 456"
+              timezone: "Europe/Moscow"
+      responses:
+        '201':
+          description: Дом успешно создан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/House'
+              example:
+                id: "550e8400-e29b-41d4-a716-446655440001"
+                name: "Мой новый дом"
+                address: "ул. Новая, д. 456"
+                timezone: "Europe/Moscow"
+                created_at: "2023-06-20T14:30:00Z"
+                updated_at: "2023-06-20T14:30:00Z"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /houses/{houseId}:
+    get:
+      summary: Получить информацию о доме
+      description: Возвращает подробную информацию о доме
+      tags:
+        - houses
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: houseId
+          in: path
+          required: true
+          description: ID дома
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/House'
+              example:
+                id: "550e8400-e29b-41d4-a716-446655440000"
+                name: "Мой дом"
+                address: "ул. Примерная, д. 123"
+                timezone: "Europe/Moscow"
+                created_at: "2023-01-15T12:00:00Z"
+                updated_at: "2023-01-15T12:00:00Z"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /houses/{houseId}/devices:
+    get:
+      summary: Получить список устройств в доме
+      description: Возвращает список устройств, установленных в указанном доме
+      tags:
+        - devices
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: houseId
+          in: path
+          required: true
+          description: ID дома
+          schema:
+            type: string
+            format: uuid
+        - name: page
+          in: query
+          description: Номер страницы для пагинации
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          description: Количество элементов на странице
+          schema:
+            type: integer
+            default: 20
+        - name: status
+          in: query
+          description: Фильтр по статусу устройства
+          schema:
+            type: string
+            enum: [online, offline, error]
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Device'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+              example:
+                data:
+                  - id: "550e8400-e29b-41d4-a716-446655440002"
+                    house_id: "550e8400-e29b-41d4-a716-446655440000"
+                    device_type_id: "550e8400-e29b-41d4-a716-446655440010"
+                    name: "Термостат гостиной"
+                    serial_number: "TH-12345"
+                    firmware_version: "1.2.3"
+                    status: "online"
+                    last_online: "2023-06-20T15:45:00Z"
+                    created_at: "2023-02-10T09:30:00Z"
+                    updated_at: "2023-06-20T15:45:00Z"
+                pagination:
+                  total: 1
+                  page: 1
+                  limit: 20
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /devices/{deviceId}:
+    get:
+      summary: Получить информацию об устройстве
+      description: Возвращает подробную информацию об устройстве
+      tags:
+        - devices
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: deviceId
+          in: path
+          required: true
+          description: ID устройства
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceDetail'
+              example:
+                id: "550e8400-e29b-41d4-a716-446655440002"
+                house_id: "550e8400-e29b-41d4-a716-446655440000"
+                device_type_id: "550e8400-e29b-41d4-a716-446655440010"
+                name: "Термостат гостиной"
+                serial_number: "TH-12345"
+                firmware_version: "1.2.3"
+                status: "online"
+                last_online: "2023-06-20T15:45:00Z"
+                created_at: "2023-02-10T09:30:00Z"
+                updated_at: "2023-06-20T15:45:00Z"
+                device_type:
+                  id: "550e8400-e29b-41d4-a716-446655440010"
+                  name: "Термостат"
+                  description: "Умный термостат для управления отоплением"
+                modules:
+                  - id: "550e8400-e29b-41d4-a716-446655440020"
+                    name: "Датчик температуры"
+                    type: "temperature_sensor"
+                    status: "online"
+                  - id: "550e8400-e29b-41d4-a716-446655440021"
+                    name: "Реле отопления"
+                    type: "heating_relay"
+                    status: "online"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    
+    patch:
+      summary: Обновить информацию об устройстве
+      description: Обновляет информацию об устройстве
+      tags:
+        - devices
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: deviceId
+          in: path
+          required: true
+          description: ID устройства
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: "Новое название термостата"
+            example:
+              name: "Новое название термостата"
+      responses:
+        '200':
+          description: Устройство успешно обновлено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Device'
+              example:
+                id: "550e8400-e29b-41d4-a716-446655440002"
+                house_id: "550e8400-e29b-41d4-a716-446655440000"
+                device_type_id: "550e8400-e29b-41d4-a716-446655440010"
+                name: "Новое название термостата"
+                serial_number: "TH-12345"
+                firmware_version: "1.2.3"
+                status: "online"
+                last_online: "2023-06-20T15:45:00Z"
+                created_at: "2023-02-10T09:30:00Z"
+                updated_at: "2023-06-20T16:00:00Z"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /devices/{deviceId}/commands:
+    post:
+      summary: Отправить команду устройству
+      description: Отправляет команду на выполнение устройству
+      tags:
+        - commands
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: deviceId
+          in: path
+          required: true
+          description: ID устройства
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - command_type
+                - payload
+              properties:
+                command_type:
+                  type: string
+                  example: "set_temperature"
+                payload:
+                  type: object
+                  example:
+                    temperature: 22.5
+                scheduled_at:
+                  type: string
+                  format: date-time
+                  example: "2023-06-21T08:00:00Z"
+            example:
+              command_type: "set_temperature"
+              payload:
+                temperature: 22.5
+      responses:
+        '202':
+          description: Команда принята к исполнению
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Command'
+              example:
+                id: "550e8400-e29b-41d4-a716-446655440030"
+                device_id: "550e8400-e29b-41d4-a716-446655440002"
+                user_id: "550e8400-e29b-41d4-a716-446655440100"
+                command_type: "set_temperature"
+                payload:
+                  temperature: 22.5
+                status: "pending"
+                created_at: "2023-06-20T16:15:00Z"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /devices/{deviceId}/commands/{commandId}:
+    get:
+      summary: Получить информацию о команде
+      description: Возвращает информацию о статусе выполнения команды
+      tags:
+        - commands
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: deviceId
+          in: path
+          required: true
+          description: ID устройства
+          schema:
+            type: string
+            format: uuid
+        - name: commandId
+          in: path
+          required: true
+          description: ID команды
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Command'
+              example:
+                id: "550e8400-e29b-41d4-a716-446655440030"
+                device_id: "550e8400-e29b-41d4-a716-446655440002"
+                user_id: "550e8400-e29b-41d4-a716-446655440100"
+                command_type: "set_temperature"
+                payload:
+                  temperature: 22.5
+                status: "completed"
+                result:
+                  success: true
+                  message: "Температура успешно установлена"
+                created_at: "2023-06-20T16:15:00Z"
+                executed_at: "2023-06-20T16:15:10Z"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  schemas:
+    House:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        address:
+          type: string
+        timezone:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    
+    Device:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        house_id:
+          type: string
+          format: uuid
+        device_type_id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        serial_number:
+          type: string
+        firmware_version:
+          type: string
+        status:
+          type: string
+          enum: [online, offline, error]
+        last_online:
+          type: string
+          format: date-time
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    
+    DeviceDetail:
+      allOf:
+        - $ref: '#/components/schemas/Device'
+        - type: object
+          properties:
+            device_type:
+              type: object
+              properties:
+                id:
+                  type: string
+                  format: uuid
+                name:
+                  type: string
+                description:
+                  type: string
+            modules:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                  name:
+                    type: string
+                  type:
+                    type: string
+                  status:
+                    type: string
+                    enum: [online, offline, error]
+    
+    Command:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        device_id:
+          type: string
+          format: uuid
+        user_id:
+          type: string
+          format: uuid
+        command_type:
+          type: string
+        payload:
+          type: object
+        status:
+          type: string
+          enum: [pending, in_progress, completed, failed, cancelled]
+        result:
+          type: object
+        scheduled_at:
+          type: string
+          format: date-time
+        executed_at:
+          type: string
+          format: date-time
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    
+    Pagination:
+      type: object
+      properties:
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+    
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        details:
+          type: object
+
+  responses:
+    BadRequest:
+      description: Некорректный запрос
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: "bad_request"
+            message: "Некорректные данные запроса"
+            details:
+              name: "Поле обязательно для заполнения"
+    
+    Unauthorized:
+      description: Не авторизован
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: "unauthorized"
+            message: "Требуется авторизация"
+    
+    Forbidden:
+      description: Доступ запрещен
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: "forbidden"
+            message: "У вас нет доступа к этому ресурсу"
+    
+    NotFound:
+      description: Ресурс не найден
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: "not_found"
+            message: "Запрашиваемый ресурс не найден"
+    
+    InternalServerError:
+      description: Внутренняя ошибка сервера
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: "internal_server_error"
+            message: "Внутренняя ошибка сервера"
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
