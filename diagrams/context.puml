@@ -1,0 +1,17 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+title Диаграмма контекста компании "Теплый дом" для монолитного решения
+
+Person(user, "User", "Пользователь системы отопления Теплый дом.")
+
+Enterprise_Boundary(c0, "Теплый дом") {
+    System(system, "Сервис управления отоплением", "Позволяет пользователям управлять отоплением и отслеживать температуру.")
+
+    System_Ext(sensors, "Датчики", "Датчики различных систем отоплениия, позволяющие управлять отоплением и отслеживать температуру")
+
+}
+
+Rel_Neighbor(user, system, "Использует")
+Rel_R(system, sensors, "Управляет")
+Rel_Back(system, sensors, "Возвращает температуру")
+@enduml
