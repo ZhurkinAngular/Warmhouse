@@ -1,0 +1,31 @@
+@startuml
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml
+
+Container_Boundary(dev, "DeviceManager") {
+  Component(DeviceController, "DeviceController", "Управляет девайсами")
+  Component(DeviceCommandController, "DeviceCommandController", "Управляет командами")
+
+  Component(ServiceLayer, "ServiceLayer", "Business logic")
+
+  Component(RepositoryLayer, "RepositoryLayer", "Data access logic")
+
+  Component(MQTTPublisher, "MQTTCommandAdapter", "MQTT Client")
+  Component(LegacyDeviceClient, "LegacyDeviceClient", "HTTP Client")
+
+  Rel(DeviceController, ServiceLayer, "Вызывает бизнес логику")
+  Rel(DeviceCommandController, ServiceLayer, "Вызывает бизнес логику")
+
+  Rel(ServiceLayer, RepositoryLayer, "Чтение / запись данных")
+  Rel(ServiceLayer, MQTTPublisher, "Управление девайсами")
+  Rel(ServiceLayer, LegacyDeviceClient, "Управление девайсами")
+}
+
+ContainerDb(Db, "DeviceService DB", "PostgreSQL", "Хранит устройства, команды, статус")
+System_Ext(Devices, "Девайсы")
+System_Ext(LegacyDevices, "Старые температурные датчики")
+Container(LegacyHeatingAdapter, "Адаптер для работы с старыми датчиками")
+Rel(RepositoryLayer, Db, "Чтение / Запись данных о девайсах и командах")
+Rel(MQTTPublisher, Devices, "Посылает команды [MQTT]")
+Rel(LegacyDeviceClient, LegacyHeatingAdapter, "Посылает команды [HTTP]")
+Rel(LegacyHeatingAdapter, LegacyDevices, "Управляет девайсами")
+@enduml

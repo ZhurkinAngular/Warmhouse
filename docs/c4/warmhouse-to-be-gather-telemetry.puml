@@ -1,0 +1,33 @@
+```plantuml
+@startuml
+!include https://raw.githubusercontent.com/bschwarz/puml-themes/master/themes/cerulean/puml-theme-cerulean.puml
+skinparam backgroundColor white
+
+autonumber
+
+==Cбор телеметрии\nс девайсов==
+
+participant Device as d
+
+box "Warm house system"
+participant ApiGW as api
+participant AuthSrv as auth
+participant TelemetryBridge as bridge
+queue EventBus as eb
+participant TelemetrySrv as telemetry
+database DB as db
+end box
+
+d -> api: Отравить данные [MQTT]
+api -> auth: Аутентификация
+alt Аутентификация\nпрошла успешно
+	api -> bridge: Отправить\nданные [HTTP]
+	bridge -> eb: Опубликовать\nсобытие телеметрии
+	eb <- telemetry: Получение\nсобытия\nтелеметрии
+	telemetry -> db: Сохранить\nзначение в базу
+	alt Значение датчика поменялось
+		telemetry -> eb: Опубликовать\nсобытие о изменении
+	end
+end
+@enduml
+```

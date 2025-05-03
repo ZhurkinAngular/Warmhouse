@@ -1,0 +1,68 @@
+asyncapi: '2.6.0'
+info:
+  title: Warm house device Responses API
+  version: '1.0.0'
+
+servers:
+  mqttBroker:
+    url: broker.example.com
+    protocol: mqtt
+
+channels:
+  device/{device_id}/command:
+    parameters:
+      device_id:
+        description: Device ID
+    publish:
+      operationId: publishCommand
+      message:
+        $ref: '#/components/messages/DeviceCommand'
+  device/{device_id}/telemetry:
+    parameters:
+      device_id:
+        description: Device ID
+    publish:
+      operationId: publishTemetry
+      message:
+        $ref: '#/components/messages/DeviceTelemetry'
+
+components:
+  messages:
+    DeviceTelemetry:
+      name: DeviceTelemetry
+      payload:
+        type: object
+        properties:
+          telemetry_type:
+            type: string
+            description: Type of telemetry event
+          value:
+            type: string
+          timestamp:
+            type: string
+
+    DeviceCommand:
+      name: DeviceCommand
+      payload:
+        type: object
+        properties:
+          command_id:
+            type: string
+            description: Device Command ID
+          status:
+            type: string
+            enum: [success, error, pending]
+          data:
+            type: object
+            description: Addition response data
+          timestamp:
+            type: string
+            format: date-time
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        details:
+          type: string

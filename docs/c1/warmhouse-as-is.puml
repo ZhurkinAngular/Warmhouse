@@ -1,0 +1,15 @@
+@startuml
+top to bottom direction
+
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml
+
+Person(user, "Пользователь", "Человек в доме которого установлен датчик")
+Person(admin, "Мастер", "Специалист компании который занимается подключением датчиков к системе")
+System(WarmHouseApp, "Система Теплый дом", "Приложение по управлению температурными датчиками написанное на Go")
+
+System_Ext(ThermalDevice, "Температурные датчики", "Датчики которые установленны специалистами комании в домах пользователей")
+
+Rel(user, WarmHouseApp, "Смотрит значения датчиков и управляет ими")
+Rel(admin,WarmHouseApp,"Устанавливает\nдатчики")
+Rel(WarmHouseApp, ThermalDevice,"[HTTP Sync]\nУправляет датчиком")
+@enduml

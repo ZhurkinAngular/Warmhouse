@@ -1,0 +1,776 @@
+openapi: 3.0.3
+info:
+  title: Smart Home API
+  version: 1.0.0
+
+servers:
+  - url: https://api.example.com/
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Auth
+    description: Authentication operations
+  - name: Users
+    description: User management
+  - name: Devices
+    description: Smart device operations
+  - name: Scenarios
+    description: Automation scenarios
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+              example: "404"
+            message:
+              type: string
+              example: "Requested resource not found"
+            details:
+              type: array
+              items:
+                type: object
+                properties:
+                  field:
+                    type: string
+                  issue:
+                    type: string
+    UserDetail:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        email:
+          type: string
+        phone:
+          type: string
+        password_hash:
+          type: string
+        status:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+    DeviceDetail:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        type:
+          type: string
+        model:
+          type: string
+        manufacturer:
+          type: string
+        status:
+          type: string
+        connection_config:
+          type: object
+        firmware_version:
+          type: string
+        is_legacy:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+    DeviceCommandDetail:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        command:
+          type: string
+        args:
+          type: object
+        executed_by:
+          type: string
+          enum: ["user", "scenario"]
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+    DeviceTelemetry:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        value:
+          type: string
+        telemetry_type:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+          readOnly: true
+
+
+    DeviceDetailResponse:
+      allOf:
+        - $ref: '#/components/schemas/DeviceDetail'
+        - type: object
+          properties:
+            _links:
+              type: object
+              properties:
+                telemetry:
+                  type: object
+                  properties:
+                    href:
+                      type: string
+                      example: "/devices/1/telemetry"
+                    method:
+                      type: string
+                      example: "GET"
+                commands:
+                  type: object
+                  properties:
+                    href:
+                      type: string
+                      example: "/devices/1/commands"
+                    method:
+                      type: string
+                      example: "GET"
+                scenarios:
+                  type: object
+                  properties:
+                    href:
+                      type: string
+                      example: "/devices/1/scenarios"
+                    method:
+                      type: string
+                      example: "GET"
+                update:
+                  type: object
+                  properties:
+                    href:
+                      type: string
+                      example: "/devices/1"
+                    method:
+                      type: string
+                      example: "PUT"
+                delete:
+                  type: object
+                  properties:
+                    href:
+                      type: string
+                      example: "/devices/1"
+                    method:
+                      type: string
+                      example: "DELETE"
+
+    ScenarioDetail:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        device_id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        trigger:
+          type: string
+        actions:
+          type: string
+        status:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+
+    ScenarioDetailResponse:
+      allOf:
+        - $ref: '#/components/schemas/ScenarioDetail'
+        - type: object
+          properties:
+            _links:
+              type: object
+              properties:
+                devices:
+                  type: object
+                  properties:
+                    href:
+                      type: string
+                      example: "/scenarios/1/devices"
+                    method:
+                      type: string
+                      example: "GET"
+                update:
+                  type: object
+                  properties:
+                    href:
+                      type: string
+                      example: "/scenarios/1"
+                    method:
+                      type: string
+                      example: "PUT"
+                delete:
+                  type: object
+                  properties:
+                    href:
+                      type: string
+                      example: "/scenarios/1"
+                    method:
+                      type: string
+                      example: "DELETE"
+
+    AuthRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+
+    AuthResponse:
+      type: object
+      properties:
+        access_token:
+            type: string
+        token_type:
+          type: string
+          example: bearer
+
+  responses:
+    ErrorResponse:
+      description: Ошибка
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                $ref: '#/components/schemas/ErrorResponse'
+
+paths:
+  /api/v1/auth/login:
+    post:
+      summary: User login
+      security: []
+      tags:
+        - Auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthRequest'
+      responses:
+        '200':
+          description: JWT token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+
+  /api/v1/users:
+    get:
+      summary: Get all users
+      tags:
+        - Users
+      responses:
+        '200':
+          description: List of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserDetail'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+
+    post:
+      summary: Create a new user
+      tags:
+        - Users
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserDetail'
+      responses:
+        '201':
+          description: User created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDetail'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+
+  /api/v1/users/{user_id}:
+    get:
+      summary: Get user by ID
+      tags:
+        - Users
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: User details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDetail'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+
+    put:
+      summary: Update user
+      tags:
+        - Users
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserDetail'
+      responses:
+        '200':
+          description: User updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDetail'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+
+    delete:
+      summary: Delete user
+      tags:
+        - Users
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: User deleted
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+
+  /api/v1/devices:
+    get:
+      tags:
+        - Devices
+      summary: Get all devices
+      parameters:
+        - name: user_id
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: List of devices
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DeviceDetail'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+
+    post:
+      tags:
+        - Devices
+      summary: Create a new device
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeviceDetail'
+
+      responses:
+        '201':
+          description: Device created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceDetailResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+
+  /api/v1/devices/{device_id}:
+    get:
+      tags:
+        - Devices
+      summary: Get device by ID
+      parameters:
+        - name: device_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Device details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceDetailResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+
+    put:
+      tags:
+        - Devices
+      summary: Update device
+      parameters:
+        - name: device_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeviceDetail'
+      responses:
+        '200':
+          description: Device updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceDetailResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+
+    delete:
+      tags:
+        - Devices
+      summary: Delete device
+      parameters:
+        - name: device_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Device deleted
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/v1/devices/{device_id}/commands:
+    post:
+      tags:
+        - Devices
+      summary: Create a new command for a device
+      parameters:
+        - name: device_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeviceCommandDetail'
+      responses:
+        '200':
+          description: Device command created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceCommandDetail'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    get:
+      tags:
+        - Devices
+      summary: Get commands associated with a specific device
+      parameters:
+        - name: device_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: List of device commands
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DeviceCommandDetail'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+
+  /api/v1/devices/{device_id}/telemetry:
+    get:
+      tags:
+        - Devices
+      summary: Get telemetry data associated with a specific device
+      parameters:
+        - name: device_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          description: List of telemetry data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DeviceTelemetry'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+
+  /api/v1/devices/{device_id}/scenarios:
+    get:
+      tags:
+        - Devices
+      summary: Get scenarios associated with a specific device
+      parameters:
+        - name: device_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: user_id
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: List of scenarios
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ScenarioDetail'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+
+  /api/v1/scenarios:
+    get:
+      tags:
+        - Scenarios
+      summary: Get all scenarios
+      parameters:
+        - name: user_id
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: List of scenarios
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ScenarioDetail'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+
+    post:
+      tags:
+        - Scenarios
+      summary: Create a new scenario
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScenarioDetail'
+      responses:
+        '201':
+          description: Scenario created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScenarioDetailResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+
+  /api/v1/scenarios/{scenario_id}:
+    get:
+      tags:
+        - Scenarios
+      summary: Get scenario by ID
+      parameters:
+        - name: scenario_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Scenario details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScenarioDetailResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+
+    put:
+      tags:
+        - Scenarios
+      summary: Update scenario
+      parameters:
+        - name: scenario_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScenarioDetail'
+      responses:
+        '200':
+          description: Scenario updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScenarioDetailResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+
+    delete:
+      tags:
+        - Scenarios
+      summary: Delete scenario
+      parameters:
+        - name: scenario_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Scenario deleted
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+
+  /api/v1/scenarios/{scenario_id}/devices:
+    get:
+      tags:
+        - Scenarios
+      summary: Get devices associated with a specific scenario
+      parameters:
+        - name: scenario_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: user_id
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: List of devices
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DeviceDetail'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+

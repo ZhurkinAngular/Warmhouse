@@ -1,0 +1,25 @@
+@startuml
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml
+
+Container_Boundary(dev, "TelemetryLegacyHeatingAdapter") {
+	Component(Scheduler, "Scheduler", "CRON Планировщик")
+
+	Component(ServiceLayer, "ServiceLayer", "Business logic")
+
+	Component(KafkaProducer, "KafkaProducer", "Продюсер для публикации событий телеметрии")
+	Component(HTTPClient, "HTTPClient", "HTTP клиент для взаимодествия с старыми температурными датчиками")
+
+
+	Rel(Scheduler, Scheduler, "Раз в N минут")
+	Rel(Scheduler, ServiceLayer, "Вызывает бизнес логику")
+
+	Rel(ServiceLayer, HTTPClient, "Получить телеметрию")
+	Rel(ServiceLayer, KafkaProducer, "Отправляет события телеметрии")
+}
+
+ContainerQueue(EventBus, "EventBus", "Kafka")
+System_Ext(LegacyDevices, "Старые температурные датчики")
+
+Rel(KafkaProducer, EventBus, "Публикует события телеметрии")
+Rel(HTTPClient, LegacyDevices, "Получение телеметрии [HTTP]")
+@enduml

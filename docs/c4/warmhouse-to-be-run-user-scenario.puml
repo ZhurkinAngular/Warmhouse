@@ -1,0 +1,34 @@
+```plantuml
+@startuml
+!include https://raw.githubusercontent.com/bschwarz/puml-themes/master/themes/cerulean/puml-theme-cerulean.puml
+skinparam backgroundColor white
+
+autonumber
+
+==Обработка\nпользовательских\nсценариев==
+
+box "Warm house system"
+queue EventBus as eb
+participant DeviceScenarioService as dss
+database ScenatioDB as sdb
+participant DeviceManager as dm
+database DeviceManagerDB as dmdb
+participant LegacyHeatingAdapter as legacy
+end box
+
+participant Device as d
+
+eb -> dss: Получение события\nизменения телеметрии
+dss -> sdb: Поиск подходящег\nсценария
+alt Нашелся подходящий сценарий
+	dss -> dm: Отправить\nкоманду [HTTP]
+	dm -> dmdb: Получить\nданные о девайсе
+	alt Это легаси девайс
+		dm -> legacy: Отправить команду [MQTT]
+		legacy -> d: Отправить команду [HTTP]
+	else
+		dm -> d: Отправить команду [MQTT]
+	end
+end
+@enduml
+```

@@ -1,0 +1,61 @@
+```plantuml
+@startuml
+!include https://raw.githubusercontent.com/bschwarz/puml-themes/master/themes/cerulean/puml-theme-cerulean.puml
+skinparam backgroundColor white
+
+autonumber
+
+==Отправка команды\nпользователем на\nустройство==
+
+
+actor User as user
+
+box "Warm house system"
+participant UI as ui
+participant ApiGW as api
+participant AuthSrv as auth
+participant DeviceManager as dm
+database DB as db
+participant LegacyHeatingAdapter as legacy
+end box
+
+participant Device as d
+
+user -> ui: Отправить\nкоманду на девайс
+ui -> api: Отправить запрос\nпользователя [HTTP]
+api -> auth: Аутентификация\n[HTTP, JWT]
+
+alt Аутентификация прошла успешно
+	api -> dm: Отправить запрос\nпользователь\nна девайс [HTTP]
+	dm -> db: Получить данные\nо девайсе\nиз БД [SQL]
+	dm -> db: Зарегистрировать\nкоманду в базе\nданных [SQL]
+	alt Девайс НЕ поддерживает протоколы IoT (legacy)
+		dm -> legacy: Отправить\nкоманду [HTTP]
+		legacy -> device: Запуск\nкоманды [HTTP]
+		device -> legacy: Отправит ответ [HTTP]
+		legacy -> dm: Получаем ответ\nот устройства
+		dm -> db: Сохранить\nответ в БД [SQL]
+		dm -> api: Отправить\nответ [HTTP]
+		api -> ui: Отравить\nответ [WS]
+		ui -> user: Вывести статус команды
+	else Девайс поддерживает протоколы IoT
+		dm -> d: Отправить команд\nна девайс [MQTT]
+		==Девайс выполнил\nкоманду и отправил\nответ==
+		d -> api: Получить ответ\nот девайса [MQTT]
+		api -> auth: Аутентификация [MQTT, JWT]
+		alt Аутентификация прошла успешно
+			api -> dm: Сохранить\nответ [HTTP]
+			dm -> db: Сохранить\nответ в БД [SQL]
+			dm -> api: Отправить\nответ [HTTP]
+			api -> ui: Отравить\nответ [WS]
+			ui -> user: Вывести статус команды
+		end
+	end
+
+else Ошибка аутентификации
+	api -> ui: Отправить ошибку\naccess denied
+end
+
+
+@enduml
+```

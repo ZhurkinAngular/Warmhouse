@@ -1,0 +1,36 @@
+```plantuml
+@startuml
+!include https://raw.githubusercontent.com/bschwarz/puml-themes/master/themes/cerulean/puml-theme-cerulean.puml
+skinparam backgroundColor white
+
+autonumber
+
+==Cбор телеметрии\nс legacy девайсов==
+
+
+box "Warm house system"
+database DB as db
+participant TelemetrySrv as telemetry
+queue EventBus as eb
+
+participant TelemetryLegacyAdapter as legacy
+participant DeviceManager as dm
+
+end box
+
+participant Device as d
+
+loop раз в N минут
+	legacy -> dm: Получить список\nlegacy девайсов\n[HTTP]
+	legacy -> d: Получить\nтелеметрию\n[HTTP]
+	legacy -> eb: Опубликовать\nсобытия\nтелеметрии
+end
+
+telemetry -> eb: Получить\nсобытия\nтелеметрии
+telemetry -> db: Сохранить\nзначение в базу
+alt Значение датчика поменялось
+	telemetry -> eb: Опубликовать\nсобытие о изменении
+end
+
+@enduml
+```

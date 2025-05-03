@@ -1,0 +1,16 @@
+@startuml
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml
+
+Container_Boundary(dev, "LegacyHeatingAdapter") {
+	Component(Controller, "Controller", "Управление старыми датчиками")
+	Component(ServiceLayer, "ServiceLayer", "Business logic")
+	Component(HTTPClient, "HTTPClient", "HTTP клиент для взаимодествия с старыми температурными датчиками")
+
+	Rel(Controller, ServiceLayer, "Вызывает бизнес логику")
+
+	Rel(ServiceLayer, HTTPClient, "Управление датчиками")
+}
+System_Ext(LegacyDevices, "Старые температурные датчики")
+
+Rel(HTTPClient, LegacyDevices, "Управление датчиками [HTTP]")
+@enduml

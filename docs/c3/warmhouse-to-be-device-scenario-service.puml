@@ -1,0 +1,25 @@
+@startuml
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml
+
+Container_Boundary(dev, "ScenarioService") {
+	Component(TelemetryChangeConsumer, "TelemetryChangeConsumer", "Получает события от телеметрии")
+	Component(ScenarioController, "DeviceController", "Управляет девайсами")
+
+	Component(ServiceLayer, "ServiceLayer", "Business logic")
+
+	Component(RepositoryLayer, "RepositoryLayer", "Data access logic")
+
+	Component(HTTPClient, "HTTPClient", "HTTP клиент для взаимодествия с DeviceManager")
+
+	Rel(ScenarioController, ServiceLayer, "Вызывает бизнес логику")
+	Rel(TelemetryChangeConsumer, ServiceLayer, "Вызывает бизнес логику")
+
+	Rel(ServiceLayer, RepositoryLayer, "Чтение / запись данных")
+	Rel(ServiceLayer, HTTPClient, "Отправляет команды")
+}
+
+ContainerDb(Db, "Scenario DB", "PostgreSQL", "Хранит сценарии")
+Container(DeviceManager, "DeviceManager")
+Rel(RepositoryLayer, Db, "Чтение / Запись данных о сценариях")
+Rel(HTTPClient, DeviceManager, "Посылает команды [HTTP]")
+@enduml

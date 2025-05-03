@@ -1,0 +1,107 @@
+@startuml
+!define UUID String
+
+entity users {
+  *id : UUID
+  --
+  email : String
+  phone : String
+  password_hash : String
+  status : String
+  created_at : DateTime
+  updated_at : DateTime
+}
+
+entity auth_logs {
+  *id : UUID
+  --
+  user_id : UUID
+  event_type : String <<enum: "login", "logout">>
+  timestamp : DateTime
+  ip_address : String
+  user_agent : String
+}
+
+entity subscriptions {
+  *id : UUID
+  --
+  user_id : UUID
+  plan : String
+  start_date : DateTime
+  end_date : DateTime
+  status : String
+}
+
+entity payments {
+  *id : UUID
+  --
+  user_id : UUID
+  amount : Decimal
+  currency : String
+  payment_method : String
+  status : String
+  paid_at : DateTime
+}
+
+entity devices {
+  *id : UUID
+  --
+  user_id: UUID
+  is_legacy: Boolean
+  type : String
+  model : String
+  manufacturer : String
+  status : String
+  connection_config : JSON
+  firmware_version : String
+  created_at : DateTime
+  updated_at : DateTime
+}
+
+entity device_commands {
+	*id : UUID
+	--
+	device_id: UUID
+	command: String
+	args: JSON
+	executed_by : String <<enum: "user", "scenario">>
+	created_at : DateTime
+}
+
+entity telemetry_events {
+  *id : UUID
+  --
+  device_id : UUID
+  timestamp : DateTime
+  telemetry_type : String
+  value : String
+}
+
+entity scenarios {
+  *id : UUID
+  --
+  name : String
+  trigger : String
+  actions : String
+  status : String
+  created_at : DateTime
+}
+
+entity scenario_device_links {
+  *id : UUID
+  --
+  scenario_id : UUID
+  device_id : UUID
+}
+
+' Relationships
+users ||--o{ subscriptions : has
+users ||--o{ payments : pays
+users ||--o{ devices : has
+users ||--o{ auth_logs : logs
+devices ||--o{ telemetry_events : generates
+devices ||--o{ device_commands : has
+scenarios ||--o{ scenario_device_links : linked_to
+devices ||--o{ scenario_device_links : links
+
+@enduml

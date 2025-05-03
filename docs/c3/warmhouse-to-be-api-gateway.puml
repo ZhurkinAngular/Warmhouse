@@ -1,0 +1,22 @@
+@startuml
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml
+
+Container_Boundary(dev, "ApiGateway") {
+	Component(HttpControllers, "HttpControllers", "Принимает HTTP запросы [SYNC]")
+	Component(MQTTControllers, "MQTTSubscribers", "Обрабатывает MQTT события [ASYNC]")
+
+	Component(ServiceLayer, "ServiceLayer", "Business logic")
+
+	Component(HTTPClient, "HTTPClient", "HTTP клиент для взаимодествия с другими сервисами")
+
+	Rel(HttpControllers, ServiceLayer, "Вызывает бизнес логику")
+	Rel(MQTTControllers, ServiceLayer, "Вызывает бизнес логику")
+
+	Rel(ServiceLayer, HTTPClient, "Отправка запросов")
+}
+
+Container(Microservices, "Microservices", "Микросервисы")
+Container(AuthService, "AuthService", "Сервис авторизации и аутентификации")
+Rel(HTTPClient, Microservices, "Отправка запросов в другие микросервисы [HTTP]")
+Rel(HTTPClient, AuthService, "Аутентификация / Авторизация [HTTP]")
+@enduml

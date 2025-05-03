@@ -1,0 +1,25 @@
+@startuml
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml
+
+Container_Boundary(dev, "TelemetryService") {
+	Component(TelemetryController, "TelemetryController", "Обрабатывает запросы на чтение телеметрии")
+	Component(TelemetryConsumer, "TelemetryConsumer", "Обрабатывает события по изменени телеметрии датчиков")
+
+	Component(ServiceLayer, "ServiceLayer", "Business logic")
+
+	Component(RepositoryLayer, "RepositoryLayer", "Data access logic")
+
+	Component(KafkaProducer, "KafkaProducer", "Продюсер для публикации событий по изменению телеметри для конкретного датчика")
+
+	Rel(TelemetryController, ServiceLayer, "Вызывает бизнес логику")
+	Rel(TelemetryConsumer, ServiceLayer, "Вызывает бизнес логику")
+
+	Rel(ServiceLayer, RepositoryLayer, "Чтение / запись данных")
+	Rel(ServiceLayer, KafkaProducer, "Отправляет события изменения телеметрии")
+}
+
+ContainerDb(Db, "Telemery DB", "PostgreSQL", "Хранит данные телеметрии")
+ContainerQueue(EventBus, "EventBus", "Kafka")
+Rel(RepositoryLayer, Db, "Чтение / Запись данных о сценариях")
+Rel(KafkaProducer, EventBus, "Публикует события")
+@enduml

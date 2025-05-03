@@ -1,0 +1,18 @@
+@startuml
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml
+
+Container_Boundary(dev, "TelemetryBridgeService") {
+	Component(Controller, "TelemetryBridgeController", "Обрабатывает запросы на запись телеметрии")
+
+	Component(ServiceLayer, "ServiceLayer", "Business logic")
+
+	Component(KafkaProducer, "KafkaProducer", "Продюсер для публикации событий телеметрии")
+
+	Rel(Controller, ServiceLayer, "Вызывает бизнес логику")
+
+	Rel(ServiceLayer, KafkaProducer, "Отправляет события телеметрии")
+}
+
+ContainerQueue(EventBus, "EventBus", "Kafka")
+Rel(KafkaProducer, EventBus, "Публикует события")
+@enduml

@@ -1,0 +1,70 @@
+@startuml
+top to bottom direction
+
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml
+
+Person(user, "Пользователь", "Пользователь который подключил девайсы к системе")
+System(WarmHouseSystem, "Система теплый дом")
+
+Container_Boundary(WarmHouseSystem, "Система теплый дом") {
+	Container(Frontend, "Пользовательский UI", "VueJS")
+	Container(ApiGateway, "ApiGateway", "GO")
+
+
+	Container(TelemetryService, "Сервис телеметрии", "Go")
+	Container(TelemetryBridgeService, "Сервис-мост для телеметрии", "Go")
+	Container(TelemetryLegacyHeatingAdapter, "Адаптер для получения телеметрии от старых датчиков", "Go")
+	ContainerDb(TelemetryServiceDB, "База данных телеметрии", "Postgres")
+
+	Container(DeviceManager, "Менеджер девайсов умного дома", "Go")
+	ContainerDb(DeviceManagerDB, "База данных девайсов", "Postgres")
+	Container(LegacyHeatingAdapter, "Адаптер для работы с старыми подключенными датчиками", "Go")
+
+	Container(DeviceScenarioService, "Сервис по работе с сценариями подключенных девайсов")
+	ContainerDb(DeviceScenarioDB, "База данных сценариев")
+
+	Container(AuthService, "Сервис Авторизации", "Go")
+	Container(UserService, "Сервис по работе с пользователями", "Go")
+	Container(BillingService, "Сервис оплаты подписки", "Go")
+
+	ContainerDb(UserServiceDB, "База данных c данными пользователей", "Postgres")
+	ContainerDb(AuthDB, "База данных c доступами", "Postgres")
+	ContainerDb(BillingDB, "База данных c платежами и подписками", "Postgres")
+
+	ContainerQueue(EventBus, "Очередь событий", "Kafka")
+}
+
+System_Ext(device, "Девайсы умного дома", "Девайсы подключенные к системе 'Теплый дом'")
+System_Ext(PaymentSystem, "Платежная система", "Банковская платежная система")
+System_Ext(LegacyHeatingDevice, "Старые температурные датчики", "Старые температурные датчики которые работают с системой напрямую")
+
+Rel(user, Frontend, "Использует систему")
+Rel(device, ApiGateway, "Отправляет данные о своем текущем состоянии [HTTP, MQTT]")
+Rel(Frontend, ApiGateway, "[HTTP]")
+Rel(ApiGateway, DeviceManager, "Управляет девайсами\n[HTTP]")
+Rel(ApiGateway, TelemetryBridgeService, "Отправляет телеметрию\n[HTTP]")
+Rel(TelemetryBridgeService, EventBus, "Публикует сообытия телеметрии")
+Rel(ApiGateway, AuthService, "Авторизирует пользователей / девайсы [HTTP]")
+Rel(AuthService, UserService, "Получает данные о пользователе [HTTP]")
+Rel(AuthService, DeviceManager, "Получает данные о девайсе [HTTP]")
+Rel(ApiGateway, BillingService, "Обрабатывает платежне запросы[HTTP]")
+Rel(BillingService, PaymentSystem, "Обрабатывает платеж [HTTP]")
+Rel(DeviceManager, device, "Управляет девайсами[MQTT]")
+Rel(DeviceManager, LegacyHeatingAdapter, "Управляет температурными датчиками [MQTT]")
+Rel(LegacyHeatingAdapter, LegacyHeatingDevice, "Управляет температурой [HTTP]")
+Rel(DeviceManager, DeviceManagerDB, "Управляет данными")
+Rel(TelemetryService, EventBus, "Получает события телеметрии")
+Rel(TelemetryService, EventBus, "Публикует события изменения телеметрии")
+Rel(TelemetryService, TelemetryServiceDB, "Управляет данными")
+Rel(TelemetryLegacyHeatingAdapter, LegacyHeatingDevice, "Собираеи телеметрию [HTTP]")
+Rel(TelemetryLegacyHeatingAdapter, EventBus, "Публикует события телеметрии")
+Rel(AuthService, AuthDB, "Управляет данными")
+Rel(BillingService, BillingDB, "Управляет данными")
+Rel(ApiGateway, TelemetryService, "Получает данные телеметрии [HTTP]")
+Rel(ApiGateway, UserService, "Управляет данными пользователей [HTTP]")
+Rel(UserService, UserServiceDB, "Управляет данными")
+Rel(ApiGateway, DeviceScenarioService, "Обрабатывает сценарии использования [HTTP]")
+Rel(DeviceScenarioService, EventBus, "Получает изменения событий телеметрии")
+Rel(DeviceScenarioService, DeviceScenarioDB, "Управляет сценариями")
+Rel(DeviceScenarioService, DeviceManager, "Отправляет команды [HTTP]")
+@enduml
