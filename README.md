@@ -58,83 +58,42 @@
 
 **Диаграмма контейнеров (Containers)**
 
-Добавьте диаграмму.
+[Диаграмма контейнеров](https://github.com/justaleaf/architecture-warmhouse/blob/warmhouse/diagrams/containers.puml)
 
 **Диаграмма компонентов (Components)**
 
-Добавьте диаграмму для каждого из выделенных микросервисов.
+- [Диаграмма компонентов микросервиса отопления](https://github.com/justaleaf/architecture-warmhouse/blob/warmhouse/diagrams/components_heating.puml)
+- [Диаграмма компонентов микросервиса видеонаблюдения](https://github.com/justaleaf/architecture-warmhouse/blob/warmhouse/diagrams/components_cameras.puml)
+- [Диаграмма компонентов микросервиса дверей и ворот](https://github.com/justaleaf/architecture-warmhouse/blob/warmhouse/diagrams/components_doors.puml)
+- [Диаграмма компонентов микросервиса света](https://github.com/justaleaf/architecture-warmhouse/blob/warmhouse/diagrams/components_light.puml)
+- [Диаграмма компонентов микросервиса сценариев](https://github.com/justaleaf/architecture-warmhouse/blob/warmhouse/diagrams/components_scenarios.puml)
 
 **Диаграмма кода (Code)**
 
-Добавьте одну диаграмму или несколько.
+- [Диаграмма кода ядра микросервиса сценариев](https://github.com/justaleaf/architecture-warmhouse/blob/warmhouse/diagrams/code_scenario_engine.puml)
+- [Диаграмма потока обработки данных в компоненте консьюмера](https://github.com/justaleaf/architecture-warmhouse/blob/warmhouse/diagrams/code_kafka_consumer_flow.puml)
 
 # Задание 3. Разработка ER-диаграммы
 
-Добавьте сюда ER-диаграмму. Она должна отражать ключевые сущности системы, их атрибуты и тип связей между ними.
+[ER-диаграмма](https://github.com/justaleaf/architecture-warmhouse/blob/warmhouse/diagrams/er_diagram.puml)
 
 # Задание 4. Создание и документирование API
 
 ### 1. Тип API
 
-Укажите, какой тип API вы будете использовать для взаимодействия микросервисов. Объясните своё решение.
+Для взаимодействия юзер - микросервер используется синхронное API, так как оно позволяет немедленно возвращать ответ.  
+Для взаимодействия между микросервисами будет использовано асинхронное API (для Kafka).
 
 ### 2. Документация API
 
-Здесь приложите ссылки на документацию API для микросервисов, которые вы спроектировали в первой части проектной работы. Для документирования используйте Swagger/OpenAPI или AsyncAPI.
+- [Синхронное API для микросервиса отопления](https://github.com/justaleaf/architecture-warmhouse/blob/warmhouse/apis/rest/heating-service.openapi.yaml)
+- [Синхронное API для микросервиса сценариев](https://github.com/justaleaf/architecture-warmhouse/blob/warmhouse/apis/rest/scenario-service.openapi.yaml)
+- [Асинхронное API для микросервиса отопления](https://github.com/justaleaf/architecture-warmhouse/blob/warmhouse/apis/async/kafka-events.asyncapi.yaml)
 
 # Задание 5. Работа с docker и docker-compose
 
-Перейдите в apps.
+1) Реализовано приложение на Python + FastAPI для выдачи температуры согласно требуемому формату запроса.
 
-Там находится приложение-монолит для работы с датчиками температуры. В README.md описано как запустить решение.
+2) Приложение упаковано в Docker и добавлено в docker-compose. Порт выставлен 8081
 
-Вам нужно:
-
-1) сделать простое приложение temperature-api на любом удобном для вас языке программирования, которое при запросе /temperature?location= будет отдавать рандомное значение температуры.
-
-Locations - название комнаты, sensorId - идентификатор названия комнаты
-
-```
-	// If no location is provided, use a default based on sensor ID
-	if location == "" {
-		switch sensorID {
-		case "1":
-			location = "Living Room"
-		case "2":
-			location = "Bedroom"
-		case "3":
-			location = "Kitchen"
-		default:
-			location = "Unknown"
-		}
-	}
-
-	// If no sensor ID is provided, generate one based on location
-	if sensorID == "" {
-		switch location {
-		case "Living Room":
-			sensorID = "1"
-		case "Bedroom":
-			sensorID = "2"
-		case "Kitchen":
-			sensorID = "3"
-		default:
-			sensorID = "0"
-		}
-	}
-```
-
-2) Приложение следует упаковать в Docker и добавить в docker-compose. Порт по умолчанию должен быть 8081
-
-3) Кроме того для smart_home приложения требуется база данных - добавьте в docker-compose файл настройки для запуска postgres с указанием скрипта инициализации ./smart_home/init.sql
-
-Для проверки можно использовать Postman коллекцию smarthome-api.postman_collection.json и вызвать:
-
-- Create Sensor
-- Get All Sensors
-
-Должно при каждом вызове отображаться разное значение температуры
-
-Ревьюер будет проверять точно так же.
-
-
+3) Добавлен в docker-compose файл настройки для запуска postgres с указанием скрипта инициализации ./smart_home/init.sql
