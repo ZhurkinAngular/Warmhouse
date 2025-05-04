@@ -1,0 +1,57 @@
+asyncapi: 2.6.0
+info:
+  title: Шина данных
+  version: 1.0.0
+  description: Асинхронные события между микросервисами
+
+servers:
+  production:
+    url: kafka-broker1:9092
+    protocol: kafka
+
+channels:
+  commands-topic:
+    subscribe:
+      summary: Команды, отправляемые другим микросервисам
+      message:
+        payload:
+          $ref: '#/components/schemas/CommandMessage'
+
+  heating-sensor-topic:
+    publish:
+      summary: Данные от датчика отопления
+      message:
+        payload:
+          $ref: '#/components/schemas/HeatingSensorEvent'
+
+components:
+  schemas:
+    CommandMessage:
+      type: object
+      properties:
+        commandType:
+          type: string
+        targetDeviceId:
+          type: string
+        parameters:
+          type: object
+        triggeredByScenarioId:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+
+    HeatingSensorEvent:
+      type: object
+      properties:
+        sensorId:
+          type: string
+        temperature:
+          type: number
+        humidity:
+          type: number
+        status:
+          type: string
+        timestamp:
+          type: string
+          format: date-time

@@ -1,0 +1,120 @@
+openapi: 3.0.0
+info:
+  title: API микросервиса сценариев
+  version: 1.0.0
+  description: Управление пользовательскими сценариями умного дома
+
+servers:
+  - url: https://api.example.com/scenario/v1
+
+paths:
+  /scenarios:
+    get:
+      summary: Получить все сценарии пользователя
+      parameters:
+        - name: userId
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Список сценариев
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Scenario'
+        '404':
+          description: Пользователь не найден
+        '500':
+          description: Внутренняя ошибка сервера
+
+    post:
+      summary: Создать новый сценарий
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScenarioCreateRequest'
+      responses:
+        '201':
+          description: Сценарий успешно создан
+          headers:
+            Location:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScenarioCreateResponse'
+        '400':
+          description: Невалидный запрос
+        '500':
+          description: Внутренняя ошибка сервера
+
+components:
+  schemas:
+    Scenario:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        enabled:
+          type: boolean
+        conditions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Condition'
+        actions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Action'
+
+    Condition:
+      type: object
+      properties:
+        type:
+          type: string
+        value:
+          type: [string, number, object]
+
+    Action:
+      type: object
+      properties:
+        type:
+          type: string
+        targetDeviceId:
+          type: string
+        parameters:
+          type: object
+
+    ScenarioCreateRequest:
+      type: object
+      properties:
+        userId:
+          type: string
+        name:
+          type: string
+        enabled:
+          type: boolean
+        conditions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Condition'
+        actions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Action'
+
+    ScenarioCreateResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        status:
+          type: string

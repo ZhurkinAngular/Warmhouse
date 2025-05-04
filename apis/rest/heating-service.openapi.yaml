@@ -1,0 +1,92 @@
+openapi: 3.0.0
+info:
+  title: API микросервиса отопления
+  version: 1.0.0
+  description: Управление датчиками отопления
+
+servers:
+  - url: https://api.example.com/heating/v1
+
+paths:
+  /heating/{deviceId}/state:
+    get:
+      summary: Получить текущее состояние устройства
+      parameters:
+        - name: deviceId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Текущее состояние устройства
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HeatingState'
+        '404':
+          description: Устройство не найдено
+        '500':
+          description: Внутренняя ошибка сервера
+
+    put:
+      summary: Установить температуру на устройстве
+      parameters:
+        - name: deviceId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SetTemperatureRequest'
+      responses:
+        '200':
+          description: Температура успешно установлена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SetTemperatureResponse'
+        '400':
+          description: Неверное значение температуры
+        '404':
+          description: Устройство не найдено
+        '500':
+          description: Внутренняя ошибка сервера
+
+components:
+  schemas:
+    HeatingState:
+      type: object
+      properties:
+        deviceId:
+          type: string
+        currentTemperature:
+          type: number
+        humidity:
+          type: number
+        status:
+          type: string
+        lastUpdated:
+          type: string
+          format: date-time
+
+    SetTemperatureRequest:
+      type: object
+      properties:
+        targetTemperature:
+          type: number
+
+    SetTemperatureResponse:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
