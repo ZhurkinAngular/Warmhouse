@@ -1,0 +1,30 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+LAYOUT_WITH_LEGEND()
+
+title Диаграмма компонентов для микросервиса сценариев
+
+Container_Boundary(heating, "Микросервис сценариев") {
+    Component(controller, "API Контроллер", "Go", "Принимает команды от API")
+    Component(service, "Ядро микросервиса сценариев", "Go", "Обрабатывает бизнес-логику")
+    Component(repository, "Репозиторий", "Go", "Чтение/запись в БД")
+    Component(event_producer, "Продюсер сообщений", "Kafka Producer", "Публикация событий в Kafka")
+    Component(event_consumer, "Консьюмер сообщений", "Kafka Consumer", "Обработка команд из других сервисов")
+}
+
+ContainerDb(database, "База данных", "PostgreSQL", "Хранит данные о состоянии датчиков")
+
+Container(kafka, "Шина данных", "Kafka", "Распределённая система потоковой передачи")
+
+Rel(controller, service, "Использует")
+Rel(service, repository, "Использует")
+Rel(service, event_producer, "Публикует события")
+Rel(event_consumer, service, "Передаёт команды")
+Rel(repository, database, "Читает/пишет данные", "SQL")
+
+Rel(event_producer, kafka, "Публикует в топики датчиков", "Kafka API")
+Rel(event_consumer, kafka, "Подписывается на 'commands-topic'", "Kafka API")
+
+
+@enduml

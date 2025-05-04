@@ -1,0 +1,94 @@
+@startuml
+' ER Diagram with attributes using PlantUML entities
+
+entity "User" as users {
+  * id : UUID
+  * email : VARCHAR(255)
+  * password_hash : TEXT
+  * created_at : TIMESTAMP
+  * last_login : TIMESTAMP
+}
+
+entity "Home" as homes {
+  * id : UUID
+  * name : VARCHAR(255)
+  * address : TEXT
+  * owner_id : UUID
+  * created_at : TIMESTAMP
+}
+
+entity "Device" as devices {
+  * id : UUID
+  * home_id : UUID
+  * device_type_id : UUID
+  * name : VARCHAR(255)
+  * serial_number : VARCHAR(255)
+  * created_at : TIMESTAMP
+}
+
+entity "DeviceType" as device_types {
+  * id : UUID
+  * type_name : VARCHAR(50) (thermostat, light, door_lock, camera)
+  * description : TEXT
+}
+
+entity "DeviceState" as device_states {
+  * id : UUID
+  * device_id : UUID
+  * state : JSON
+  * timestamp : TIMESTAMP
+}
+
+entity "Scenario" as scenarios {
+  * id : UUID
+  * user_id : UUID
+  * name : VARCHAR(255)
+  * enabled : BOOLEAN
+  * description : TEXT
+  * created_at : TIMESTAMP
+}
+
+entity "ScenarioCondition" as scenario_conditions {
+  * id : UUID
+  * scenario_id : UUID
+  * device_id : UUID
+  * condition_type : VARCHAR(50)
+  * value : JSON
+}
+
+entity "ScenarioAction" as scenario_actions {
+  * id : UUID
+  * scenario_id : UUID
+  * device_id : UUID
+  * action_type : VARCHAR(50)
+  * parameters : JSON
+}
+
+entity "AccessToken" as access_tokens {
+  * id : UUID
+  * user_id : UUID
+  * token_hash : TEXT
+  * expires_at : TIMESTAMP
+  * revoked : BOOLEAN
+}
+
+entity "Log" as logs {
+  * id : UUID
+  * device_id : UUID
+  * event_type : VARCHAR(50)
+  * data : JSON
+  * timestamp : TIMESTAMP
+}
+
+users "1" -- "N" homes : владеет
+homes "1" -- "N" devices : содержит
+devices "1" -- "1" device_types : имеет тип
+devices "1" -- "N" device_states : имеет состояние
+devices "1" -- "N" logs : создает
+
+users "1" -- "N" scenarios : создаёт
+scenarios "1" -- "N" scenario_conditions : имеет
+scenarios "1" -- "N" scenario_actions : имеет
+
+users "1" -- "N" access_tokens : имеет
+@enduml

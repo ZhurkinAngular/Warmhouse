@@ -1,0 +1,52 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+LAYOUT_WITH_LEGEND()
+
+title Диаграмма контейнеров
+
+Person(user, "User", "Пользователь системы умного дома")
+
+System_Boundary(c1, "Управление устройствами") {
+    Container(heating, "Микросервис отопления", "Go", "Осуществляет взаимодействие с датчиками отопления")
+    Container(light, "Микросервис света", "Go", "Осуществляет взаимодействие со световыми приборами")
+    Container(doors, "Микросервис устройств для дверей и ворот", "Go", "Осуществляет взаимодействие с датчиками и приводами")
+    Container(cameras, "Микросервис видеонаблюдения", "Go", "Осуществляет взаимодействие с видеокамерами")
+    ContainerDb(database, "База данных", "Postgres", "Сохраняет пользовательские данные, логи устройств и сценарии")
+    Container(scenario_service, "Сервис сценариев", "Go", "Обрабатывает сценарии пользователя, реагирует на события")
+}
+
+System_Ext(sensors, "Датчики", "Датчики отопления, света, видеонаблюдения, дверей и ворот и другие")
+
+Container(kafka, "Шина данных", "Kafka", "Распределённая система потоковой передачи")
+
+Rel(user, heating, "Использует", API)
+Rel(user, light, "Использует", API)
+Rel(user, doors, "Использует", API)
+Rel(user, cameras, "Использует", API)
+Rel(user, scenario_service, "Настраивает сценарии", API)
+
+Rel(heating, database, "Записывает и читает данные", async)
+Rel(light, database, "Записывает и читает данные", async)
+Rel(doors, database, "Записывает и читает данные", async)
+Rel(cameras, database, "Записывает и читает данные", async)
+Rel(scenario_service, database, "Читает/сохраняет сценарии", async)
+
+' Микросервисы общаются через Kafka
+Rel(heating, kafka, "Публикует/читает события", "Kafka API")
+Rel(light, kafka, "Публикует/читает события", "Kafka API")
+Rel(doors, kafka, "Публикует/читает события", "Kafka API")
+Rel(cameras, kafka, "Публикует/читает события", "Kafka API")
+Rel(scenario_service, kafka, "Подписывается на события и отправляет команды", "Kafka Consumer / Producer")
+
+Rel(sensors, kafka, "Публикует данные сенсоров", "Kafka API")
+
+note right of kafka
+  Используемые топики:
+  * heating-sensor-topic
+  * light-sensor-topic
+  * door-sensor-topic
+  * camera-sensor-topic
+  * commands-topic
+end note
+@enduml

@@ -1,0 +1,15 @@
+@startuml
+actor "Kafka" as kafka
+participant "EventConsumer" as consumer
+participant "ScenarioEngine" as engine
+participant "Trigger" as trigger
+participant "Command" as command
+participant "KafkaProducer" as producer
+
+kafka --> consumer : сообщение в 'heating-sensor-topic'
+consumer --> engine : processEvent(Event)
+engine --> trigger : match(Event)
+trigger --> trigger : execute() → Command
+engine --> producer : dispatch(Command)
+producer --> kafka : publish в 'commands-topic'
+@enduml

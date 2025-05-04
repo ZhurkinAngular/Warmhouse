@@ -1,0 +1,62 @@
+@startuml
+skinparam classAttributeIconSize 0
+
+class ScenarioEngine {
+  +registerTrigger(Trigger)
+  +unregisterTrigger(String)
+  +processEvent(Event)
+}
+
+class Trigger {
+  <<interface>>
+  +match(event: Event): Boolean
+  +execute(): Command
+}
+
+class LightTrigger {
+  +matchCondition(event: Event): Boolean
+  +execute(): Command
+}
+
+class HeatingTrigger {
+  +matchCondition(event: Event): Boolean
+  +execute(): Command
+}
+
+class DoorTrigger {
+  +matchCondition(event: Event): Boolean
+  +execute(): Command
+}
+
+class Command {
+  <<interface>>
+  +execute(): void
+}
+
+class TurnOnLightCommand {
+  +execute()
+}
+
+class AdjustHeatingCommand {
+  +execute()
+}
+
+class LockDoorCommand {
+  +execute()
+}
+
+class Event {
+  +type: String
+  +payload: Map<String, Object>
+}
+
+ScenarioEngine --> "List<Trigger>" Trigger
+Trigger <|-- LightTrigger
+Trigger <|-- HeatingTrigger
+Trigger <|-- DoorTrigger
+
+Trigger --> Command
+Command <|-- TurnOnLightCommand
+Command <|-- AdjustHeatingCommand
+Command <|-- LockDoorCommand
+@enduml
