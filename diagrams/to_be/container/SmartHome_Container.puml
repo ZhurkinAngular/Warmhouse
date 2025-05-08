@@ -1,0 +1,38 @@
+@startuml
+!includeurl https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+Person(user, "Пользователь", "Управляет системой через веб-интерфейс")
+Person(support, "Служба поддержки", "Помогает пользователям с подключением и настройкой")
+System_Ext(partnerDevice, "Устройство партнёра", "Интеграция через протоколы")
+
+System_Boundary(smartHome, "Экосистема умного дома") {
+    Container(apiGateway, "API Gateway", "Go", "Маршрутизация внешних запросов ко всем сервисам")
+    Container(webApp, "Web UI", "React", "Интерфейс пользователя для управления системой")
+    Container(authService, "Auth Service", "Go", "Аутентификация и управление сессиями")
+    Container(userService, "User Service", "Go", "Управление пользователями и их ролями")
+    Container(deviceService, "Device Service", "Go", "Регистрация и мониторинг устройств")
+    Container(automationEngine, "Automation Engine", "Go", "Обработка сценариев и автоматизации")
+    Container(monitoringService, "Monitoring Service", "Grafana/Prometheus", "Метрики и логи")
+
+    ContainerDb(userDb, "User DB", "PostgreSQL", "Хранение данных пользователей")
+    ContainerDb(deviceDb, "Device DB", "PostgreSQL", "Информация об устройствах")
+    ContainerDb(authDb, "Auth DB", "PostgreSQL", "Учётные записи и токены")
+    ContainerDb(telemetryDb, "Telemetry DB", "TimeSeries DB", "Хранение телеметрии и сценариев")
+}
+
+Rel(user, webApp, "Использует через браузер")
+Rel(webApp, apiGateway, "REST/HTTPS")
+Rel(apiGateway, authService, "Запросы авторизации")
+Rel(apiGateway, userService, "Запросы управления профилем")
+Rel(apiGateway, deviceService, "Запросы на регистрацию и управление устройствами")
+Rel(apiGateway, automationEngine, "Управление сценариями")
+
+Rel(authService, authDb, "Чтение/запись")
+Rel(userService, userDb, "Чтение/запись")
+Rel(deviceService, deviceDb, "Чтение/запись")
+Rel(automationEngine, telemetryDb, "Чтение/запись")
+Rel(support, webApp, "Доступ к панели администратора")
+
+Rel(deviceService, partnerDevice, "Управление по протоколу")
+
+@enduml

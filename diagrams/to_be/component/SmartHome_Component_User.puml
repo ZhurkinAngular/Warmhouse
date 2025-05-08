@@ -1,0 +1,19 @@
+@startuml
+!includeurl https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+Container(userService, "User Service", "Go", "Управление пользователями и их ролями")
+ContainerDb(userDb, "User DB", "PostgreSQL", "Хранение данных пользователей")
+Container(apiGateway, "API Gateway", "Go", "Маршрутизация внешних запросов ко всем сервисам")
+
+Component(userController, "UserController", "HTTP REST", "Обработка входящих HTTP-запросов по пользователям")
+Component(userManager, "UserManager", "Go Class", "Бизнес-логика управления пользователями и ролями")
+Component(userRepo, "UserRepository", "Go Class", "Доступ к данным пользователей в БД")
+Component(permissionService, "PermissionValidator", "Go Class", "Проверка прав доступа и ролей")
+
+Rel(apiGateway, userController, "REST")
+Rel(userController, userManager, "Вызов бизнес-логики")
+Rel(userManager, userRepo, "Чтение/запись")
+Rel(userRepo, userDb, "SQL")
+Rel(userManager, permissionService, "Проверка доступа")
+
+@enduml

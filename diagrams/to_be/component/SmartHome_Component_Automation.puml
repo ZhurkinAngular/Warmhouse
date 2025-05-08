@@ -1,0 +1,25 @@
+@startuml
+!includeurl https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+Container(automationEngine, "Automation Engine", "Go", "Обработка сценариев и автоматизации")
+ContainerDb(telemetryDb, "Telemetry DB", "TimeSeries DB", "Хранение телеметрии и сценариев")
+Container(deviceService, "Device Service", "Go", "Управление устройствами")
+
+Component(apiHandler, "AutomationAPI", "Go HTTP Handler", "Обработка REST-запросов на создание и редактирование сценариев")
+Component(scheduler, "Scheduler", "Go Component", "Выполняет задачи по расписанию")
+Component(eventProcessor, "EventProcessor", "Go Component", "Обработка событий от устройств")
+Component(ruleEngine, "RuleEngine", "Go Library", "Проверка условий и выполнение действий")
+Component(scenarioRepo, "ScenarioRepository", "Go Class", "Чтение/запись сценариев в базу данных")
+Component(deviceCommandAdapter, "DeviceCommandAdapter", "Go Interface", "Отправка команд в Device Service")
+
+Rel(apiHandler, scenarioRepo, "Чтение/запись сценариев")
+Rel(apiHandler, ruleEngine, "Валидация сценариев")
+
+Rel(scheduler, ruleEngine, "Выполняет сценарии по расписанию")
+Rel(eventProcessor, ruleEngine, "Обрабатывает условия на основе входящих событий")
+
+Rel(ruleEngine, deviceCommandAdapter, "Отдаёт команды на выполнение")
+Rel(deviceCommandAdapter, deviceService, "Команды на управление устройствами")
+
+Rel(scenarioRepo, telemetryDb, "Чтение/запись")
+@enduml

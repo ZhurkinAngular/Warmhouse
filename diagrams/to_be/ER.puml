@@ -1,0 +1,85 @@
+@startuml
+!define table(x) class x << (T,#FFAAAA) >>
+!define primary_key(x) <b>x</b>
+!define foreign_key(x) <i>x</i>
+
+' Пользователь
+table(User) {
+  primary_key(id): UUID
+  email: string
+  password_hash: string
+  role: enum
+}
+
+table(House) {
+  primary_key(id): UUID
+  name: string
+  address: string
+  foreign_key(owner_id): UUID
+}
+
+table(DeviceType) {
+  primary_key(id): UUID
+  name: string
+  description: string
+}
+
+table(Device) {
+  primary_key(id): UUID
+  name: string
+  serial_number: string
+  status: enum
+  metadata: JSON
+  foreign_key(house_id): UUID
+  foreign_key(type_id): UUID
+}
+
+table(Module) {
+  primary_key(id): UUID
+  name: string
+  firmware_version: string
+  foreign_key(house_id): UUID
+}
+
+table(TelemetryData) {
+  primary_key(id): UUID
+  foreign_key(device_id): UUID
+  timestamp: datetime
+  key: string
+  value: float
+}
+
+table(Scenario) {
+  primary_key(id): UUID
+  name: string
+  enabled: bool
+  foreign_key(user_id): UUID
+}
+
+table(Condition) {
+  primary_key(id): UUID
+  foreign_key(scenario_id): UUID
+  key: string
+  operator: string
+  value: string
+}
+
+table(Action) {
+  primary_key(id): UUID
+  foreign_key(scenario_id): UUID
+  foreign_key(device_id): UUID
+  command: string
+}
+
+' Связи
+User ||--o{ House : owns
+House ||--o{ Device : contains
+House ||--o{ Module : includes
+DeviceType ||--o{ Device : typed
+Device ||--o{ TelemetryData : sends
+User ||--o{ Scenario : creates
+Scenario ||--o{ Condition : has
+Scenario ||--o{ Action : triggers
+Device ||--o{ Action : controlled by
+
+@enduml

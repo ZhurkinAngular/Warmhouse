@@ -1,0 +1,25 @@
+@startuml
+!includeurl https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+Container(deviceService, "Device Service", "Go", "Регистрация и мониторинг устройств")
+
+System_Ext(partnerDevice, "Устройство партнёра", "Интеграция через протоколы")
+
+ContainerDb(deviceDb, "Device DB", "PostgreSQL", "Информация об устройствах")
+
+Container(apiGateway, "API Gateway", "Go", "Маршрутизация внешних запросов ко всем сервисам")
+
+Component(devController, "DeviceController", "HTTP REST", "Обрабатывает входящие запросы по управлению устройствами")
+Component(devService, "DeviceManager", "Go Class", "Бизнес-логика: регистрация, обновление, статус устройств")
+Component(protocolAdapter, "ProtocolAdapter", "Go Interface", "Взаимодействие с устройствами через протоколы (MQTT, HTTP, etc.)")
+Component(deviceRepo, "DeviceRepository", "Go Class", "Работа с базой данных устройств")
+
+Rel(apiGateway, devController, "REST")
+Rel(devController, devService, "Вызов методов")
+Rel(devService, deviceRepo, "Чтение/запись")
+Rel(deviceRepo, deviceDb, "SQL")
+
+Rel(devService, protocolAdapter, "Отправка команд/получение статуса")
+Rel(protocolAdapter, partnerDevice, "Протокол обмена")
+
+@enduml

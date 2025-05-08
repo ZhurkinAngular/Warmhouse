@@ -1,0 +1,60 @@
+@startuml
+skinparam classAttributeIconSize 0
+
+package "User Service" {
+  class User {
+    +id: UUID
+    +email: string
+    +passwordHash: string
+    +role: UserRole
+  }
+
+  enum UserRole {
+    ADMIN
+    USER
+  }
+
+  class UserService {
+    +getUser(id: UUID): User
+    +createUser(data): User
+    +updateUser(id, data): User
+    +deleteUser(id: UUID): void
+  }
+
+  class AuthService {
+    +login(email, password): Token
+    +validateToken(token): User
+  }
+}
+
+package "Device Service" {
+  class Device {
+    +id: UUID
+    +name: string
+    +ownerId: UUID
+    +type: DeviceType
+    +metadata: map
+  }
+
+  enum DeviceType {
+    SENSOR
+    SWITCH
+    CAMERA
+  }
+
+  class DeviceService {
+    +registerDevice(userId, deviceData): Device
+    +getDevicesByUser(userId: UUID): List<Device>
+    +updateDevice(deviceId, data): Device
+    +deleteDevice(deviceId): void
+  }
+}
+
+User --> UserRole
+Device --> DeviceType
+Device --> "1" User : ownerId
+
+UserService --> User
+DeviceService --> Device
+AuthService --> User
+@enduml

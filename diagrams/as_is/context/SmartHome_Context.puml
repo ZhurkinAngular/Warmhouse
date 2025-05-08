@@ -1,0 +1,20 @@
+@startuml
+!includeurl https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+
+Person(user, "Пользователь", "Управляет системой через веб-интерфейс")
+Person(installer, "Инженер-установщик", "Подключает устройства вручную в текущей версии системы")
+System_Ext(houseSystem, "Системы отопления в домах", "Локальные устройства в каждом доме")
+System_Ext(sensor, "Датчики температуры", "Регистрируются при включении, передают показания")
+
+System_Boundary(monolith, "Монолитное приложение (Умный дом)") {
+    System(coreSystem, "Центральная система управления", "Обрабатывает команды, управляет устройствами")
+    System(database, "База данных", "Хранит пользователей, устройства")
+}
+
+Rel(user, coreSystem, "Отправляет команды и получает данные")
+Rel(installer, coreSystem, "Регистрирует устройства вручную")
+Rel(coreSystem, houseSystem, "Управляет отоплением в домах")
+Rel(coreSystem, sensor, "Регистрирует и опрашивает датчики")
+Rel(coreSystem, database, "Чтение и запись данных")
+
+@enduml

@@ -1,0 +1,31 @@
+@startuml
+!includeurl https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+Container(apiGateway, "API Gateway", "Go", "Маршрутизация внешних запросов ко всем сервисам")
+
+Container(authService, "Auth Service", "Go", "Аутентификация и управление сессиями")
+Container(userService, "User Service", "Go", "Управление пользователями")
+Container(deviceService, "Device Service", "Go", "Управление устройствами")
+Container(automationEngine, "Automation Engine", "Go", "Автоматизация сценариев")
+
+Component(entrypoint, "HTTP Entrypoint", "Go HTTP Handler", "Точка входа для всех HTTP-запросов")
+Component(router, "Router", "Go Middleware", "Определяет целевой сервис по URI")
+Component(authMiddleware, "AuthMiddleware", "Go Middleware", "Проверка и валидация JWT токена через AuthService")
+Component(httpProxy, "HttpProxy", "Go Module", "Проксирует запрос к нужному внутреннему сервису")
+Component(rateLimiter, "RateLimiter", "Go Middleware", "Ограничение частоты запросов")
+Component(requestLogger, "RequestLogger", "Go Middleware", "Логирование запросов и ошибок")
+
+Rel(entrypoint, router, "Передаёт запросы")
+Rel(router, rateLimiter, "Ограничение по IP/токену")
+Rel(router, authMiddleware, "Проверка авторизации (если требуется)")
+Rel(authMiddleware, authService, "Проверка токена (JWT)")
+
+Rel(router, requestLogger, "Логирование запроса")
+Rel(router, httpProxy, "Форвардинг запроса")
+
+Rel(httpProxy, userService, "REST")
+Rel(httpProxy, deviceService, "REST")
+Rel(httpProxy, automationEngine, "REST")
+Rel(httpProxy, authService, "REST (логин, регистрация)")
+
+@enduml

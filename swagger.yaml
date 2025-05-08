@@ -1,0 +1,168 @@
+openapi: 3.0.3
+info:
+  title: SmartHome API
+  description: REST API для управления пользователями и устройствами в умном доме
+  version: 1.1.0
+paths:
+  /devices:
+    get:
+      summary: Получение списка устройств пользователя
+      parameters:
+        - name: user_id
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Список устройств
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Device'
+        '400':
+          description: Некорректный user_id
+        '500':
+          description: Внутренняя ошибка сервера
+
+  /devices/{id}:
+    patch:
+      summary: Обновление информации об устройстве
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                metadata:
+                  type: object
+      responses:
+        '200':
+          description: Устройство обновлено
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  device:
+                    $ref: '#/components/schemas/Device'
+        '400':
+          description: Неверный формат запроса
+        '404':
+          description: Устройство не найдено
+
+  /devices/{id}/commands:
+    post:
+      summary: Отправка команды на устройство
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                command:
+                  type: string
+      responses:
+        '202':
+          description: Команда принята
+        '404':
+          description: Устройство не найдено
+        '422':
+          description: Неизвестная команда
+
+  /users/{id}:
+    get:
+      summary: Получение профиля пользователя
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Профиль пользователя
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          description: Пользователь не найден
+        '401':
+          description: Неавторизован
+
+  /users/{id}/role:
+    put:
+      summary: Обновление роли пользователя
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                role:
+                  type: string
+                  enum: [ADMIN, USER]
+      responses:
+        '200':
+          description: Роль обновлена
+        '400':
+          description: Неверная роль
+        '403':
+          description: Недостаточно прав
+
+components:
+  schemas:
+    Device:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        type:
+          type: string
+        status:
+          type: string
+        house_id:
+          type: string
+        serial_number:
+          type: string
+        metadata:
+          type: object
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+        role:
+          type: string

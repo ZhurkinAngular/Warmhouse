@@ -1,0 +1,27 @@
+@startuml
+!includeurl https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+Container(webApp, "Web UI", "React", "Интерфейс пользователя для управления системой")
+Container(apiGateway, "API Gateway", "Go", "Маршрутизация внешних запросов ко всем сервисам")
+
+Component(authPage, "AuthPage", "React Component", "Страница входа и регистрации")
+Component(dashboard, "Dashboard", "React Component", "Обзор состояния системы")
+Component(devicePage, "DevicePage", "React Component", "Управление устройствами")
+Component(automationPage, "AutomationPage", "React Component", "Сценарии автоматизации")
+Component(adminPanel, "AdminPanel", "React Component", "Интерфейс службы поддержки")
+
+Component(apiClient, "ApiClient", "JS Module", "Обёртка над REST-запросами к API Gateway")
+Component(stateManager, "StateManager", "Redux/Zustand/MobX", "Управление глобальным состоянием приложения")
+
+Rel(authPage, apiClient, "Вход, регистрация")
+Rel(dashboard, apiClient, "Получение информации")
+Rel(devicePage, apiClient, "Работа с устройствами")
+Rel(automationPage, apiClient, "Сценарии")
+Rel(adminPanel, apiClient, "Администрирование")
+
+Rel(apiClient, apiGateway, "REST/HTTPS")
+Rel(authPage, stateManager, "Сохраняет токен")
+Rel(dashboard, stateManager, "Чтение состояния")
+Rel(devicePage, stateManager, "Обновление/чтение")
+
+@enduml
