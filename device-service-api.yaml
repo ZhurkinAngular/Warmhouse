@@ -1,0 +1,290 @@
+openapi: 3.0.3
+info:
+  title: Device Service API
+  description: API for managing smart home devices
+  version: 1.0.0
+servers:
+  - url: https://api.smarthome.com/v1/devices
+paths:
+  /:
+    get:
+      summary: Get all devices
+      operationId: getAllDevices
+      parameters:
+        - name: userId
+          in: query
+          schema:
+            type: string
+        - name: locationId
+          in: query
+          schema:
+            type: string
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [TEMPERATURE_SENSOR, HEATING_SYSTEM, THERMOSTAT]
+      responses:
+        '200':
+          description: List of devices retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Device'
+    post:
+      summary: Add a new device
+      operationId: addDevice
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeviceRequest'
+      responses:
+        '201':
+          description: Device added successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Device'
+        '400':
+          description: Invalid request
+  
+  /{deviceId}:
+    get:
+      summary: Get device by ID
+      operationId: getDeviceById
+      parameters:
+        - name: deviceId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Device retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Device'
+        '404':
+          description: Device not found
+    
+    put:
+      summary: Update a device
+      operationId: updateDevice
+      parameters:
+        - name: deviceId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeviceUpdateRequest'
+      responses:
+        '200':
+          description: Device updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Device'
+        '404':
+          description: Device not found
+    
+    delete:
+      summary: Delete a device
+      operationId: deleteDevice
+      parameters:
+        - name: deviceId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Device deleted successfully
+        '404':
+          description: Device not found
+  
+  /{deviceId}/status:
+    put:
+      summary: Update device status
+      operationId: updateDeviceStatus
+      parameters:
+        - name: deviceId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - status
+              properties:
+                status:
+                  type: string
+                  enum: [ONLINE, OFFLINE, MAINTENANCE]
+      responses:
+        '200':
+          description: Device status updated successfully
+        '404':
+          description: Device not found
+  
+  /{deviceId}/readings:
+    get:
+      summary: Get device readings
+      operationId: getDeviceReadings
+      parameters:
+        - name: deviceId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: Device readings retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DeviceReading'
+        '404':
+          description: Device not found
+    
+    post:
+      summary: Add a new device reading
+      operationId: addDeviceReading
+      parameters:
+        - name: deviceId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeviceReadingRequest'
+      responses:
+        '201':
+          description: Device reading added successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceReading'
+        '404':
+          description: Device not found
+
+components:
+  schemas:
+    Device:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        type:
+          type: string
+          enum: [TEMPERATURE_SENSOR, HEATING_SYSTEM, THERMOSTAT]
+        status:
+          type: string
+          enum: [ONLINE, OFFLINE, MAINTENANCE]
+        locationId:
+          type: string
+        userId:
+          type: string
+        metadata:
+          type: object
+          additionalProperties: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    
+    DeviceRequest:
+      type: object
+      required:
+        - name
+        - type
+        - locationId
+        - userId
+      properties:
+        name:
+          type: string
+        type:
+          type: string
+          enum: [TEMPERATURE_SENSOR, HEATING_SYSTEM, THERMOSTAT]
+        locationId:
+          type: string
+        userId:
+          type: string
+        metadata:
+          type: object
+          additionalProperties: true
+    
+    DeviceUpdateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        status:
+          type: string
+          enum: [ONLINE, OFFLINE, MAINTENANCE]
+        locationId:
+          type: string
+        metadata:
+          type: object
+          additionalProperties: true
+    
+    DeviceReading:
+      type: object
+      properties:
+        id:
+          type: string
+        deviceId:
+          type: string
+        value:
+          type: number
+        unit:
+          type: string
+          enum: [CELSIUS, FAHRENHEIT, PERCENT, WATT]
+        timestamp:
+          type: string
+          format: date-time
+    
+    DeviceReadingRequest:
+      type: object
+      required:
+        - value
+        - unit
+      properties:
+        value:
+          type: number
+        unit:
+          type: string
+          enum: [CELSIUS, FAHRENHEIT, PERCENT, WATT]

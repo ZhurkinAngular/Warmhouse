@@ -106,7 +106,10 @@ Kafka - для ассинхроных действий, по типу опове
 
 ### 2. Документация API
 
-Здесь приложите ссылки на документацию API для микросервисов, которые вы спроектировали в первой части проектной работы. Для документирования используйте Swagger/OpenAPI или AsyncAPI.
+- [API Gateway](./api-gateway.yaml)
+- [User Service](./user-service.yaml)
+- [Device Service](./device-service.yaml)
+- [Automation Service](./automation-service.yaml)
 
 # Задание 5. Работа с docker и docker-compose
 

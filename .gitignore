@@ -192,3 +192,4 @@ build/
 
 tmp/
 task-*
+node_modules
