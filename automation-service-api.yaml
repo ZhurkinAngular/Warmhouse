@@ -1,0 +1,243 @@
+openapi: 3.0.3
+info:
+  title: Automation Service API
+  description: API for managing smart home automation rules
+  version: 1.0.0
+servers:
+  - url: https://api.smarthome.com/v1/automation
+paths:
+  /rules:
+    get:
+      summary: Get all automation rules
+      operationId: getAllRules
+      parameters:
+        - name: userId
+          in: query
+          schema:
+            type: string
+        - name: deviceId
+          in: query
+          schema:
+            type: string
+        - name: isActive
+          in: query
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: List of automation rules retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AutomationRule'
+
+    post:
+      summary: Create a new automation rule
+      operationId: createRule
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AutomationRuleRequest'
+      responses:
+        '201':
+          description: Automation rule created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AutomationRule'
+        '400':
+          description: Invalid request
+
+  /rules/{ruleId}:
+    get:
+      summary: Get automation rule by ID
+      operationId: getRuleById
+      parameters:
+        - name: ruleId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Automation rule retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AutomationRule'
+        '404':
+          description: Automation rule not found
+
+    put:
+      summary: Update an automation rule
+      operationId: updateRule
+      parameters:
+        - name: ruleId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AutomationRuleUpdateRequest'
+      responses:
+        '200':
+          description: Automation rule updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AutomationRule'
+        '404':
+          description: Automation rule not found
+
+    delete:
+      summary: Delete an automation rule
+      operationId: deleteRule
+      parameters:
+        - name: ruleId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Automation rule deleted successfully
+        '404':
+          description: Automation rule not found
+
+  /rules/{ruleId}/toggle:
+    put:
+      summary: Toggle automation rule active status
+      operationId: toggleRuleStatus
+      parameters:
+        - name: ruleId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - isActive
+              properties:
+                isActive:
+                  type: boolean
+      responses:
+        '200':
+          description: Automation rule status toggled successfully
+        '404':
+          description: Automation rule not found
+
+components:
+  schemas:
+    AutomationRule:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        userId:
+          type: string
+        trigger:
+          $ref: '#/components/schemas/Trigger'
+        action:
+          $ref: '#/components/schemas/Action'
+        isActive:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    AutomationRuleRequest:
+      type: object
+      required:
+        - name
+        - userId
+        - trigger
+        - action
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        userId:
+          type: string
+        trigger:
+          $ref: '#/components/schemas/Trigger'
+        action:
+          $ref: '#/components/schemas/Action'
+        isActive:
+          type: boolean
+          default: true
+
+    AutomationRuleUpdateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        trigger:
+          $ref: '#/components/schemas/Trigger'
+        action:
+          $ref: '#/components/schemas/Action'
+        isActive:
+          type: boolean
+
+    Trigger:
+      type: object
+      required:
+        - type
+      properties:
+        type:
+          type: string
+          enum: [TEMPERATURE, TIME, DEVICE_STATUS]
+        deviceId:
+          type: string
+        condition:
+          type: string
+          enum: [GREATER_THAN, LESS_THAN, EQUALS, BETWEEN]
+        value:
+          type: number
+        secondValue:
+          type: number
+        timeValue:
+          type: string
+          format: date-time
+        cronExpression:
+          type: string
+          description: Cron expression for scheduled triggers
+
+    Action:
+      type: object
+      required:
+        - type
+        - deviceId
+      properties:
+        type:
+          type: string
+          enum: [TURN_ON, TURN_OFF, SET_TEMPERATURE, ADJUST_TEMPERATURE]
+        deviceId:
+          type: string
+        value:
+          type: number
+        delay:
+          type: integer
+          description: Delay in seconds before executing the action
