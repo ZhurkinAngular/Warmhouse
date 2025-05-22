@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/http"
 	"time"
-	"log"
 )
 
 // TemperatureService handles fetching temperature data from external API
