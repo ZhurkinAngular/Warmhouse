@@ -93,7 +93,7 @@ func (h *SensorHandler) GetSensorByID(c *gin.Context) {
 			sensor.LastUpdated = tempData.Timestamp
 			log.Printf("Updated temperature data for sensor %d from external API", sensor.ID)
 		} else {
-			log.Printf("Failed to fetch temperature data for sensor %d: %v", sensor.ID, err)
+			log.Printf("Failed to fetch temperature data TEST2 for sensor %d: %v", sensor.ID, err)
 		}
 	}
 
