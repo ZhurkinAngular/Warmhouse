@@ -87,3 +87,112 @@ func getEnv(key, defaultValue string) string {
 	}
 	return value
 }
+
+// @title           Swagger API
+// @version         1.0
+// @description     This is REST API.
+
+// @contact.name   OWNER
+// @contact.url    test.ru
+// @contact.email  test@test.test
+
+// @host      localhost:8080
+// @BasePath  /
+
+// List godoc
+// @Summary      List sensors
+// @Description  List sensors
+// @Tags         sensor
+// @Accept       json
+// @Produce      json
+// @Param        offset   query      int  true  "Offset"
+// @Param        limit   query      int  true  "Limit"
+// @Success      200  {array}  Sensor
+// @Failure      400  {object}  HTTPError
+// @Failure      404  {object}  HTTPError
+// @Failure      500  {object}  HTTPError
+// @Router       /sensors [get]
+func List() {
+
+}
+
+// Get godoc
+// @Summary      Get sensor
+// @Description  Get sensor by ID
+// @Tags         sensor
+// @Accept       json
+// @Produce      json
+// @Param        id   path      int  true  "ID of sensor"
+// @Success      200  {object}  Sensor
+// @Failure      400  {object}  HTTPError
+// @Failure      404  {object}  HTTPError
+// @Failure      500  {object}  HTTPError
+// @Router       /sensors/:id [get]
+func Get() {
+
+}
+
+// Create godoc
+// @Summary      Create sensor
+// @Description  Create sensor
+// @Tags         sensor
+// @Accept       json
+// @Produce      json
+// @Param        data   body      object  true  "Sensor object"
+// @Success      201  {object}  Sensor
+// @Failure      400  {object}  HTTPError
+// @Failure      404  {object}  HTTPError
+// @Failure      500  {object}  HTTPError
+// @Router       /sensors [post]
+func Create() {
+
+}
+
+// Update godoc
+// @Summary      Update sensor
+// @Description  Update sensor
+// @Tags         sensor
+// @Accept       json
+// @Produce      json
+// @Param        id   path      int  true  "ID of sensor"
+// @Param        data   body      object  true  "Sensor object"
+// @Success      200  {object}  Sensor
+// @Failure      400  {object}  HTTPError
+// @Failure      404  {object}  HTTPError
+// @Failure      500  {object}  HTTPError
+// @Router       /sensors/:id [put]
+func Update() {
+
+}
+
+// Delete godoc
+// @Summary      Delete sensor
+// @Description  Delete sensor by ID
+// @Tags         sensor
+// @Accept       json
+// @Produce      json
+// @Param        id   path      int  true  "ID of sensor"
+// @Success      204
+// @Failure      400  {object}  HTTPError
+// @Failure      404  {object}  HTTPError
+// @Failure      500  {object}  HTTPError
+// @Router       /sensors/:id [delete]
+func Delete() {
+
+}
+
+type Sensor struct {
+	ID int
+	Name string
+	Location string
+	Type string
+	Status string
+	CreatedAt string
+	UpdatedAt string
+}
+
+type HTTPError struct {
+	Code int
+	Message string
+	Fields interface{}
+}

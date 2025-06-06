@@ -1,0 +1,212 @@
+basePath: /
+definitions:
+  main.HTTPError:
+    properties:
+      code:
+        type: integer
+      fields: {}
+      message:
+        type: string
+    type: object
+  main.Sensor:
+    properties:
+      createdAt:
+        type: string
+      id:
+        type: integer
+      location:
+        type: string
+      name:
+        type: string
+      status:
+        type: string
+      type:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: test@test.test
+    name: OWNER
+    url: test.ru
+  description: This is REST API.
+  title: Swagger API
+  version: "1.0"
+paths:
+  /sensors:
+    get:
+      consumes:
+      - application/json
+      description: List sensors
+      parameters:
+      - description: Offset
+        in: query
+        name: offset
+        required: true
+        type: integer
+      - description: Limit
+        in: query
+        name: limit
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/main.Sensor'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/main.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/main.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/main.HTTPError'
+      summary: List sensors
+      tags:
+      - sensor
+    post:
+      consumes:
+      - application/json
+      description: Create sensor
+      parameters:
+      - description: Sensor object
+        in: body
+        name: data
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/main.Sensor'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/main.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/main.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/main.HTTPError'
+      summary: Create sensor
+      tags:
+      - sensor
+  /sensors/:id:
+    delete:
+      consumes:
+      - application/json
+      description: Delete sensor by ID
+      parameters:
+      - description: ID of sensor
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/main.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/main.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/main.HTTPError'
+      summary: Delete sensor
+      tags:
+      - sensor
+    get:
+      consumes:
+      - application/json
+      description: Get sensor by ID
+      parameters:
+      - description: ID of sensor
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.Sensor'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/main.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/main.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/main.HTTPError'
+      summary: Get sensor
+      tags:
+      - sensor
+    put:
+      consumes:
+      - application/json
+      description: Update sensor
+      parameters:
+      - description: ID of sensor
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Sensor object
+        in: body
+        name: data
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.Sensor'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/main.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/main.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/main.HTTPError'
+      summary: Update sensor
+      tags:
+      - sensor
+swagger: "2.0"
