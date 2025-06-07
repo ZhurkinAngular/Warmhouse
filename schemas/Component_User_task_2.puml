@@ -1,0 +1,26 @@
+@startuml
+title SmartHouse UserService Component Diagram
+
+top to bottom direction
+
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml
+
+Container_Boundary(SmartHouseSystem, "SmartHouse System") {
+  Container(UserService, "User Service", "Java, Spring", "Handles user interactions")
+  Container(Database, "Database", "PostgreSQL", "Stores user data")
+}
+
+Container(UserService, "Web Application", "Java, Spring") {
+  Component(AuthController, "AuthController", "Handles authentication and authorization")
+  Component(UserController, "UserController", "Manages user profiles")
+  Component(KafkaListener, "KafkaListener", "Listen for new device registration events")
+  Component(ServiceLayer, "Service Layer", "Business logic")
+  Component(RepositoryLayer, "Repository Layer", "Data access logic")
+}
+
+Rel(AuthController,ServiceLayer,"Calls auth business logic")
+Rel(UserController,ServiceLayer,"Calls user business logic")
+Rel(ServiceLayer,RepositoryLayer,"Reads/Writes data")
+Rel(KafkaListener,RepositoryLayer,"Reads/Writes data")
+Rel(RepositoryLayer,Database,"Reads/Writes user data")
+@enduml

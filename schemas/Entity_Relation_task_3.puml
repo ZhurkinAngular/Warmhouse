@@ -1,0 +1,99 @@
+@startuml
+title SmartHouse User Devices Code Diagram
+
+top to bottom direction
+
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml
+
+class User {
+  +UUID id
+  +String name
+  +String email
+  +String encryptedPassword
+  +List<Location> locations
+  +void register()
+  +void login()
+}
+
+class Location {
+    +UUID id
+    +UUID userId
+    +String address
+    +List<Device> devices
+}
+
+class Device {
+  +UUID id
+  +String name
+  +DeviceType deviceType
+  +UUID locationId
+  +List<Module> modules
+  +DeviceStatus status
+  +LocalDateTime lastUpdated
+  +LocalDateTime createdAt
+  +DeviceCommandHandler deviceCommandHandler
+  +void updateStatus(status: DeviceStatus)
+  +void execute(command: String)
+}
+
+class Module {
+    +UUID id
+    +UUID deviceId
+    +ModuleType type
+    +List<TelemetryRecord> telemetryRecords
+}
+
+interface DeviceCommandHandler {
+  +void executeCommand(command: String)
+}
+
+class LightDeviceHandler implements DeviceCommandHandler {
+  +void executeCommand(command: String)
+}
+
+class GateDeviceHandler implements DeviceCommandHandler {
+  +void executeCommand(command: String)
+}
+
+class SocketDeviceHandler implements DeviceCommandHandler {
+  +void executeCommand(command: String)
+}
+
+class TelemetryRecord {
+  +UUID id
+  +UUID moduleId
+  +LocalDateTime createdAt
+  +String payload
+}
+
+enum ModuleType {
+    RELAY
+    LIGHT_SENSOR
+    MOTION_SENSOR
+    DIMMING_SENSOR
+}
+
+enum DeviceStatus {
+  ON
+  OFF
+}
+
+enum DeviceType {
+  SENSOR
+  LIGHT
+  CAMERA
+  GATES
+}
+
+Device --> DeviceCommandHandler : delegates
+DeviceCommandHandler <|.. LightDeviceHandler
+DeviceCommandHandler <|.. GateDeviceHandler
+DeviceCommandHandler <|.. SocketDeviceHandler
+
+User "1" -- "0..*" Location : has
+Location "1" -- "0..*" Device : has
+Device "1" -- "0..*" Module : has
+Module "1" --> "*" TelemetryRecord : produces
+
+
+@enduml

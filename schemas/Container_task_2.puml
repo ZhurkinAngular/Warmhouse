@@ -1,0 +1,37 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+Person(user, "Пользователь", "Управляет умным домом через веб или мобильное приложение")
+
+System_Boundary(smartHome, "Умный дом") {
+
+  Container(webApp, "Web/Mobile UI", "React / Flutter", "Панель управления умным домом")
+  Container(apiGateway, "API Gateway", "Spring Cloud Gateway", "Маршрутизирует REST-запросы")
+
+  Container(userService, "User Service", "Spring Boot", "Регистрация, авторизация, управление аккаунтом, добавление устройств пользователю")
+  Container(deviceService, "Device Service", "Spring Boot", "Обработка команд к устройствам, получение телеметрии")
+
+  Container(deviceGateway, "Device Gateway", "Node.js / MQTT Broker", "Обеспечивает связь с внешними IoT-устройствами через MQTT/WebSocket/HTTPS")
+  Container(dbUsers, "User DB", "PostgreSQL", "Хранит пользователей")
+  Container(dbDevices, "Device DB", "PostgreSQL", "Хранит телеметрию и состояние устройств")
+  Container(messageQueue, "Message Queue", "Kafka", "Асинхронная передача событий между сервисами")
+}
+
+System_Ext(iotDevices, "Устройства умного дома", "Физические устройства сторонних производителей")
+
+Rel(user, webApp, "Взаимодействует")
+Rel(webApp, apiGateway, "REST/HTTPS")
+Rel(apiGateway, userService, "Маршрутизирует вызовы пользователя (JSON)")
+Rel(apiGateway, deviceService, "Маршрутизирует управление устройствами (JSON)")
+
+Rel(userService, dbUsers, "Чтение/запись данных о пользователях системы (SQL)")
+Rel(deviceService, dbDevices, "Чтение/запись данных об устройствах и их телеметрии (SQL)")
+Rel(deviceService, deviceGateway, "Отправка команд (JSON)", "TCP")
+Rel(deviceGateway, messageQueue, "Публикация телеметрии (JSON)", "TCP")
+Rel(deviceGateway, iotDevices, "Управление IoT-устройствами", "MQTT / WebSocket / HTTPS")
+Rel(messageQueue, deviceService, "Обработка событий (JSON)", "TCP")
+Rel(messageQueue, userService, "Процедура pairing, связь устройства с пользователем (JSON)", "TCP")
+
+Rel(iotDevices, deviceGateway, "Обмениваются телеметрией и командами", "MQTT / WebSocket / HTTPS")
+
+@enduml

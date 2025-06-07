@@ -1,0 +1,42 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+allow_mixing
+skinparam classFontSize 13
+
+Container_Boundary(devices, "User Devices Controller") {
+    class UserDevicesController {
+        + getUserDeviceIds(userId): List<UUID>
+        + addDevice(userId, deviceId)
+        + removeDevice(userId, deviceId)
+    }
+
+    class UserDevicesService {
+        - repository: UserDevicesRepository
+        + getUserDeviceIds(userId): List<UUID>
+        + addUserDevice(userId, deviceId)
+        + deleteUserDevice(userId, deviceId)
+    }
+
+    class UserDevicesRepository {
+        + findUserDevices(userId): List<UserDevice>
+        + addUserDevice(userId, deviceId)
+        + deleteUserDevice(userId, deviceId)
+    }
+
+    class UserDevice {
+        - userId: UUID
+        - deviceId: UUID
+    }
+
+    UserDevicesController --> UserDevicesService : uses
+    UserDevicesService --> UserDevicesRepository : depends on
+    UserDevicesRepository --> UserDevice : manages
+}
+
+ComponentDb(dbUser, "User DB", "PostgreSQL", "Хранит данные пользователей и связи с и их устройствами")
+
+UserDevicesRepository --> dbUser : uses
+
+@enduml
