@@ -6,21 +6,21 @@ top to bottom direction
 !includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml
 
 Container_Boundary(SmartHouseSystem, "SmartHouse System") {
-  Container(DeviceService, "Device Service", "Java, Spring", "Handles device interactions")
-  Container(Database, "Database", "PostgreSQL", "Stores device data and telemetry")
+  Container(DeviceService, "Device Service", "Java, Spring", "Работа с устройствами и их модулями")
+  Container(Database, "Database", "PostgreSQL", "Хранение данных устройств и телеметрии модулей")
 }
 
 Container(DeviceService, "Web Application", "Java, Spring") {
-  Component(CommandController, "CommandController", "Handles commands for devices")
-  Component(TelemetryController, "TelemetryController", "Handles requests to recieve device telemetry")
-  Component(KafkaListener, "KafkaListener", "Listen for telemetry events from devices")
-  Component(ServiceLayer, "Service Layer", "Business logic")
-  Component(RepositoryLayer, "Repository Layer", "Data access logic")
+  Component(CommandController, "CommandController", "Обработка команд для модулей")
+  Component(TelemetryController, "TelemetryController", "Получение телеметрии модулей")
+  Component(KafkaListener, "KafkaListener", "Получение новых событий о телеметрии с устройств")
+  Component(ServiceLayer, "Service Layer", "Слой бизнес логики")
+  Component(RepositoryLayer, "Repository Layer", "Слой доступа к данным")
 }
 
-Rel(CommandController,ServiceLayer,"Sends commands to specific user device")
-Rel(TelemetryController,ServiceLayer,"Reads telemetry from specific device")
-Rel(ServiceLayer,RepositoryLayer,"Reads/Writes data")
-Rel(KafkaListener,RepositoryLayer,"Writes data")
-Rel(RepositoryLayer,Database,"Reads/Writes user data")
+Rel(CommandController,ServiceLayer,"Изменение значения на определенном модуле устройства")
+Rel(TelemetryController,ServiceLayer,"Получение телеметрии с модуля устройства")
+Rel(ServiceLayer,RepositoryLayer,"Чтение/запись данных")
+Rel(KafkaListener,RepositoryLayer,"Чтение/запись данных")
+Rel(RepositoryLayer,Database,"Чтение/запись данных")
 @enduml

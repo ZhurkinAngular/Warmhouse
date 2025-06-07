@@ -39,6 +39,7 @@ class Device {
 class Module {
     +UUID id
     +UUID deviceId
+    +float64 currentValue
     +ModuleType type
     +List<TelemetryRecord> telemetryRecords
 }
@@ -63,7 +64,7 @@ class TelemetryRecord {
   +UUID id
   +UUID moduleId
   +LocalDateTime createdAt
-  +String payload
+  +float64 value
 }
 
 enum ModuleType {

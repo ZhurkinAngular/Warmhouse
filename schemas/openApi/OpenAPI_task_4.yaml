@@ -54,32 +54,79 @@ paths:
         "500":
           description: Ошибка сервера
 
-# TODO: continue 2 more endpoints (rest & async)
-  /devices/{deviceId}/commands:
+  /devices/{deviceId}/module/{moduleId}:
     post:
-      summary: Изменить значение на устройстве (отправить команду)
+      summary: Изменить значение на модуле устройства
       parameters:
         - name: deviceId
           in: path
           required: true
           schema:
             type: string
+            format: UUID
+        - name: moduleId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: UUID
       requestBody:
-        description: Команда для устройства
+        description: Новое значение для модуля устройства
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/CommandRequest"
-            examples:
-              turn_on_light:
-                value:
-                  command: "set_brightness"
-                  parameters:
-                    value: 70
+              $ref: "#/components/schemas/UpdateValueRequest"
       responses:
         "202":
-          description: Команда принята
+          description: Запрос успешно обработан
+        "404":
+          description: Устройство не найдено
+        "500":
+          description: Ошибка сервера
+
+  /devices/{deviceId}/module/{moduleId}/telemetry:
+    get:
+      summary: Получить телеметрию модуля устройства
+      description: Возвращает список последних значений телеметрии
+      parameters:
+        - name: deviceId
+          in: path
+          required: true
+          description: UUID устройства
+          schema:
+            type: string
+            format: uuid
+        - name: moduleId
+          in: path
+          required: true
+          description: UUID модуля
+          schema:
+            type: string
+            format: uuid
+        - name: page
+          in: query
+          required: false
+          description: Параметр пагинации
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          required: false
+          description: Количество последних записей (по умолчанию 50)
+          schema:
+            type: integer
+            default: 50
+      responses:
+        "200":
+          description: Успешный ответ со списком телеметрии
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TelemetryData"
         "404":
           description: Устройство не найдено
         "500":
@@ -117,7 +164,7 @@ components:
           description: Название устройства
         deviceType:
           type: string
-          enum: [SENSOR, LIGHT, CAMERA, GATES]
+          enum: [ SENSOR, LIGHT, CAMERA, GATES ]
           description: Тип устройства
         modules:
           type: array
@@ -127,18 +174,30 @@ components:
             description: Список идентификаторов модулей устройства
         status:
           type: string
-          enum: [ON, OFF]
+          enum: [ ON, OFF ]
         location:
           type: string
           format: UUID
           description: Идентификатор локации устройства
 
-    CommandRequest:
+    UpdateValueRequest:
       type: object
       properties:
-        command:
+        newValue:
+          type: number
+          format: float
+
+    TelemetryData:
+      type: object
+      properties:
+        id:
           type: string
-        parameters:
-          type: object
-          additionalProperties: true
-      required: [command]
+          format: UUID
+        moduleId:
+          type: string
+          format: UUID
+        createdAt:
+          type: string
+          format: date-time
+        value:
+          type: string

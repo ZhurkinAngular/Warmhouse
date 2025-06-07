@@ -6,21 +6,21 @@ top to bottom direction
 !includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml
 
 Container_Boundary(SmartHouseSystem, "SmartHouse System") {
-  Container(UserService, "User Service", "Java, Spring", "Handles user interactions")
-  Container(Database, "Database", "PostgreSQL", "Stores user data")
+  Container(UserService, "User Service", "Java, Spring", "Сервис обработки данных пользователей")
+  Container(Database, "Database", "PostgreSQL", "Хранение данных пользователя")
 }
 
 Container(UserService, "Web Application", "Java, Spring") {
-  Component(AuthController, "AuthController", "Handles authentication and authorization")
-  Component(UserController, "UserController", "Manages user profiles")
-  Component(KafkaListener, "KafkaListener", "Listen for new device registration events")
-  Component(ServiceLayer, "Service Layer", "Business logic")
-  Component(RepositoryLayer, "Repository Layer", "Data access logic")
+  Component(AuthController, "AuthController", "Компонент с функционалом аутентификации и авторизации")
+  Component(UserController, "UserController", "Управлением профилем пользователя")
+  Component(KafkaListener, "KafkaListener", "Получение событий привязки устройства к пользователю")
+  Component(ServiceLayer, "Service Layer", "Слой бизнес логики")
+  Component(RepositoryLayer, "Repository Layer", "Слой доступа к данным")
 }
 
-Rel(AuthController,ServiceLayer,"Calls auth business logic")
-Rel(UserController,ServiceLayer,"Calls user business logic")
-Rel(ServiceLayer,RepositoryLayer,"Reads/Writes data")
-Rel(KafkaListener,RepositoryLayer,"Reads/Writes data")
-Rel(RepositoryLayer,Database,"Reads/Writes user data")
+Rel(AuthController,ServiceLayer,"Вызов бизнес логики аутентификации и авторизации")
+Rel(UserController,ServiceLayer,"Вызов пользовательской бизнес логики")
+Rel(ServiceLayer,RepositoryLayer,"Чтение/запись данных")
+Rel(KafkaListener,RepositoryLayer,"Чтение/запись данных")
+Rel(RepositoryLayer,Database,"Чтение/запись данных")
 @enduml
