@@ -3,7 +3,6 @@
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
 
 allow_mixing
-skinparam classFontSize 13
 
 Container_Boundary(devices, "User Devices Controller") {
     class UserDevicesController {
