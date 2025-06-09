@@ -1,0 +1,82 @@
+@startuml
+top to bottom direction
+
+!includeurl https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+' === Основные доменные сущности и логика ===
+class Rule {
+  +String id
+  +Condition condition
+  +List<Action> actions
+}
+
+class Condition {
+  +String type
+  +Map<String, Any> parameters
+  +boolean evaluate(Event event)
+}
+
+class Action {
+  +String type
+  +Map<String, Any> parameters
+  +void execute()
+}
+
+class Event {
+  +String deviceId
+  +String type
+  +Map<String, Any> payload
+}
+
+' === Парсер и валидация ===
+class RuleParser {
+  +Rule parse(String json)
+  +List<ValidationError> validate(Rule rule)
+}
+
+class ValidationError {
+  +String field
+  +String message
+}
+
+' === Исполнение правил ===
+class RuleEngine {
+  +void onEvent(Event e)
+  +void process(Rule rule, Event e)
+}
+
+class ConditionEvaluator {
+  +boolean evaluate(Condition condition, Event event)
+}
+
+class ActionExecutor {
+  +void executeActions(List<Action> actions)
+}
+
+' === Хранилище и зависимости ===
+class RuleRepository {
+  +List<Rule> getActiveRules()
+  +void saveRule(Rule rule)
+}
+
+class NotificationClient {
+  +void send(String message)
+}
+
+' === Отношения между классами ===
+RuleEngine --> RuleRepository : uses
+RuleEngine --> ConditionEvaluator : uses
+RuleEngine --> ActionExecutor : uses
+RuleEngine --> Rule : processes
+
+ConditionEvaluator --> Condition : evaluates
+ConditionEvaluator --> Event : uses
+
+ActionExecutor --> Action : executes
+ActionExecutor --> NotificationClient : uses
+
+RuleParser --> Rule : creates
+RuleParser --> ValidationError : returns
+Rule --> Condition : has
+Rule --> Action : has
+@enduml

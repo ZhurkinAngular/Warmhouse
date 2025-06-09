@@ -1,0 +1,108 @@
+asyncapi: 3.0.0
+info:
+  title: Rule Engine Messaging API
+  version: 1.0.0
+  description: Асинхронный обмен сообщениями для обработки правил и уведомлений
+servers:
+  kafkaBroker:
+    host: 'kafka.iot.local:9092'
+    protocol: kafka
+  mqttBroker:
+    host: 'mqtt.iot.local:1883'
+    protocol: mqtt
+channels:
+  device.telemetry:
+    address: device.telemetry
+    messages:
+      subscribe.message:
+        name: TelemetryInput
+        payload:
+          type: object
+          properties:
+            device_id:
+              type: string
+              description: Идентификатор устройства
+            metric:
+              type: string
+              description: 'Тип метрики (например, температура)'
+            value:
+              type: number
+              description: Значение метрики
+            timestamp:
+              type: string
+              format: date-time
+              description: Время снятия показаний
+    description: Входящий поток телеметрии с устройств
+  rules.triggers:
+    address: rules.triggers
+    messages:
+      publish.message:
+        name: RuleTriggered
+        payload:
+          type: object
+          properties:
+            rule_id:
+              type: string
+              description: Идентификатор правила
+            event:
+              type: string
+              description: Описание события
+            device_id:
+              type: string
+              description: 'Идентификатор устройства, к которому относится событие'
+            value:
+              type: number
+              description: 'Значение, вызвавшее срабатывание'
+            timestamp:
+              type: string
+              format: date-time
+              description: Время срабатывания правила
+    description: События срабатывания правил
+  notifications.commands:
+    address: notifications.commands
+    messages:
+      publish.message:
+        name: NotificationCommand
+        payload:
+          type: object
+          properties:
+            recipient:
+              type: string
+              description: 'Идентификатор получателя (например, email или userId)'
+            type:
+              type: string
+              enum:
+                - email
+                - push
+                - sms
+              description: Тип уведомления
+            message:
+              type: string
+              description: Текст сообщения
+            timestamp:
+              type: string
+              format: date-time
+              description: Время отправки уведомления
+    description: Канал для отправки уведомлений пользователям
+operations:
+  device.telemetry.subscribe:
+    action: send
+    channel:
+      $ref: '#/channels/device.telemetry'
+    summary: Подписка на телеметрию от устройств
+    messages:
+      - $ref: '#/channels/device.telemetry/messages/subscribe.message'
+  rules.triggers.publish:
+    action: receive
+    channel:
+      $ref: '#/channels/rules.triggers'
+    summary: Публикация событий срабатывания правил
+    messages:
+      - $ref: '#/channels/rules.triggers/messages/publish.message'
+  notifications.commands.publish:
+    action: receive
+    channel:
+      $ref: '#/channels/notifications.commands'
+    summary: Отправка команд уведомления от правила
+    messages:
+      - $ref: '#/channels/notifications.commands/messages/publish.message'

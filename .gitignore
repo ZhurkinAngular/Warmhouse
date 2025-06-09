@@ -189,6 +189,11 @@ build/
 ### Mac OS ###
 .DS_Store
 
+### Python ###
+__pycache__/
+poetry.lock
 
 tmp/
 task-*
+
+settings.json

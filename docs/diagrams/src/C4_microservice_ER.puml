@@ -1,0 +1,57 @@
+@startuml
+title ER-диаграмма — Платформа "Тёплый дом"
+!define primaryKey(x) <b>x</b>
+!define foreignKey(x) <i>x</i>
+
+entity "User" as user {
+  primaryKey(id): UUID
+  email: string
+  name: string
+  phone: string
+}
+
+entity "House" as house {
+  primaryKey(id): UUID
+  foreignKey(user_id): UUID
+  name: string
+  address: string
+}
+
+entity "Module" as module {
+  primaryKey(id): UUID
+  name: string
+  description: string
+  version: string
+}
+
+entity "DeviceType" as devicetype {
+  primaryKey(id): UUID
+  name: string
+  category: string
+}
+
+entity "Device" as device {
+  primaryKey(id): UUID
+  foreignKey(house_id): UUID
+  foreignKey(type_id): UUID
+  foreignKey(module_id): UUID
+  serial_number: string
+  status: string
+}
+
+entity "TelemetryData" as telemetry {
+  primaryKey(id): UUID
+  foreignKey(device_id): UUID
+  timestamp: datetime
+  metric: string
+  value: float
+}
+
+' === Связи ===
+user ||--o{ house : "owns"
+house ||--o{ device : "contains"
+device }o--|| devicetype : "has type"
+device }o--|| module : "based on"
+device ||--o{ telemetry : "generates"
+
+@enduml

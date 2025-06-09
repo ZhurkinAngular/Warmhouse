@@ -1,0 +1,51 @@
+@startuml
+!includeurl https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+Person(user, "Пользователь", "Управляет системой умного дома через веб или мобильное приложение")
+Person(support, "Служба поддержки", "Помогает пользователям с настройкой и проблемами")
+System_Ext(devices, "IoT устройства", "Датчики, реле, камеры и т.п., передающие данные и принимающие команды")
+
+System_Boundary(c1, "Платформа «Тёплый дом»") {
+
+    Container(gateway, "API Gateway", "NGINX", "Маршрутизация запросов, аутентификация")
+    
+    Container(auth, "Auth Service", "Go + Postgres", "Аутентификация и авторизация пользователей")
+    Container(users, "User Service", "Go + Postgres", "Управление аккаунтами и домами пользователей")
+    Container(devicesvc, "Device Registry Service", "Go + Postgres", "Учёт подключённых устройств, статусы")
+    Container(control, "Control Service", "Go", "Отправка команд управления на устройства")
+    Container(telemetry, "Telemetry Service", "Go + TSDB", "Приём и хранение данных с устройств")
+    Container(rules, "Rule Engine Service", "Go + Redis", "Сценарии автоматизации и триггеры")
+    Container(catalog, "Module Catalog Service", "Go + Postgres", "Каталог доступных модулей и комплектов")
+    Container(notify, "Notification Service", "Go", "Уведомления: email, push, SMS")
+    Container(supportsvc, "Support Service", "Go + Postgres", "Обработка обращений пользователей")
+
+    ContainerDb(pg, "PostgreSQL", "Хранение данных пользователей, устройств, поддержки и пр.")
+    ContainerDb(tsdb, "TimescaleDB / InfluxDB", "Хранение телеметрии")
+    ContainerQueue(broker, "Message Broker", "Kafka / MQTT", "Обмен сообщениями между сервисами и устройствами")
+}
+
+Rel(user, gateway, "Использует", "HTTPS")
+Rel(support, gateway, "Взаимодействует", "HTTPS")
+
+Rel(gateway, auth, "Аутентификация")
+Rel(gateway, users, "Запросы пользователей")
+Rel(gateway, devicesvc, "Регистрация и управление устройствами")
+Rel(gateway, catalog, "Просмотр доступных модулей")
+Rel(gateway, control, "Отправка команд")
+Rel(gateway, rules, "Управление сценариями")
+Rel(gateway, supportsvc, "Обращения в поддержку")
+
+Rel(devices, broker, "Отправка телеметрии / получение команд", "MQTT/Kafka")
+Rel(telemetry, broker, "Получает телеметрию", "sub")
+Rel(control, broker, "Публикует команды", "pub")
+Rel(rules, broker, "Подписан на события", "sub")
+
+Rel(auth, pg, "Читает/пишет")
+Rel(users, pg, "Читает/пишет")
+Rel(devicesvc, pg, "Читает/пишет")
+Rel(rules, pg, "Читает/пишет правила")
+Rel(catalog, pg, "Читает/пишет")
+Rel(supportsvc, pg, "Читает/пишет")
+Rel(telemetry, tsdb, "Сохраняет телеметрию")
+Rel(rules, notify, "Отправляет уведомления")
+@enduml

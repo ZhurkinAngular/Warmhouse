@@ -1,0 +1,135 @@
+openapi: 3.0.3
+info:
+  title: Rule Engine API
+  version: 1.0.0
+  description: REST API для управления сценариями автоматизации (правилами)
+paths:
+  /rules:
+    get:
+      summary: Получить список всех сценариев
+      responses:
+        '200':
+          description: Список правил
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Rule'
+    post:
+      summary: Создать новый сценарий
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RuleInput'
+      responses:
+        '201':
+          description: Правило успешно создано
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Rule'
+
+  /rules/{id}:
+    get:
+      summary: Получить сценарий по ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Правило найдено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Rule'
+        '404':
+          description: Правило не найдено
+    put:
+      summary: Обновить существующий сценарий
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RuleInput'
+      responses:
+        '200':
+          description: Правило обновлено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Rule'
+        '404':
+          description: Правило не найдено
+    delete:
+      summary: Удалить сценарий по ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Правило удалено успешно
+        '404':
+          description: Правило не найдено
+
+components:
+  schemas:
+    Rule:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Уникальный идентификатор правила
+        name:
+          type: string
+          description: Название правила
+        condition:
+          type: string
+          description: Условие срабатывания правила (например, на основе телеметрии)
+        action:
+          type: string
+          description: Действие, выполняемое при срабатывании правила
+        enabled:
+          type: boolean
+          description: Флаг активности правила
+      required:
+        - id
+        - name
+        - condition
+        - action
+        - enabled
+
+    RuleInput:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Название правила
+        condition:
+          type: string
+          description: Условие срабатывания правила
+        action:
+          type: string
+          description: Действие при срабатывании
+        enabled:
+          type: boolean
+          description: Включено ли правило
+      required:
+        - name
+        - condition
+        - action

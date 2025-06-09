@@ -1,0 +1,25 @@
+@startuml
+!includeurl https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+Container_Boundary(c1, "Rule Engine Service") {
+    
+    Component(parser, "Rule Parser", "Go", "Анализирует и валидирует правила автоматизации, заданные пользователями")
+    Component(engine, "Rule Execution Engine", "Go", "Выполняет правила, реагирует на события и условия")
+    Component(trigger, "Event Trigger Listener", "Go", "Подписан на события с брокера и инициирует проверку правил")
+    Component(store, "Rule Repository", "PostgreSQL", "Хранит правила и сценарии пользователей")
+    Component(notifier, "Notifier Adapter", "Go", "Отправляет уведомления через Notification Service")
+
+    Component_Ext(broker, "Message Broker", "Kafka / MQTT", "Источники событий от устройств")
+    Component_Ext(notify, "Notification Service", "Go", "Отправка уведомлений")
+    Component_Ext(pg, "PostgreSQL", "Централизованная база данных платформы")
+}
+
+Rel(trigger, broker, "Подписка на события", "MQTT / Kafka")
+Rel(trigger, engine, "Передаёт событие для обработки")
+Rel(engine, parser, "Использует для анализа условий")
+Rel(engine, store, "Читает/записывает правила", "SQL")
+Rel(engine, notifier, "Отправляет уведомления")
+Rel(notifier, notify, "HTTP API")
+Rel(store, pg, "Хранение правил", "SQL")
+
+@enduml
