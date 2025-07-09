@@ -7,22 +7,38 @@
     },
     "item": [
         {
-            "name": "Health Check",
+            "name": "Health Check - Smart Home",
             "request": {
                 "method": "GET",
                 "header": [],
                 "url": {
-                    "raw": "http://localhost:8080/health",
-                    "protocol": "http",
+                    "raw": "{{baseUrl}}/health",
                     "host": [
-                        "localhost"
+                        "{{baseUrl}}"
                     ],
-                    "port": "8080",
                     "path": [
                         "health"
                     ]
                 },
-                "description": "Check if the API is running"
+                "description": "Check if the Smart Home API is running"
+            },
+            "response": []
+        },
+        {
+            "name": "Health Check - Temperature API",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{temperatureApiUrl}}/health",
+                    "host": [
+                        "{{temperatureApiUrl}}"
+                    ],
+                    "path": [
+                        "health"
+                    ]
+                },
+                "description": "Check if the Temperature API is running"
             },
             "response": []
         },
@@ -32,19 +48,17 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                    "raw": "http://localhost:8080/api/v1/sensors",
-                    "protocol": "http",
+                    "raw": "{{baseUrl}}/api/v1/sensors",
                     "host": [
-                        "localhost"
+                        "{{baseUrl}}"
                     ],
-                    "port": "8080",
                     "path": [
                         "api",
                         "v1",
                         "sensors"
                     ]
                 },
-                "description": "Retrieve all sensors"
+                "description": "Retrieve all sensors with real-time temperature data"
             },
             "response": []
         },
@@ -54,20 +68,18 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                    "raw": "http://localhost:8080/api/v1/sensors/1",
-                    "protocol": "http",
+                    "raw": "{{baseUrl}}/api/v1/sensors/{{sensorId}}",
                     "host": [
-                        "localhost"
+                        "{{baseUrl}}"
                     ],
-                    "port": "8080",
                     "path": [
                         "api",
                         "v1",
                         "sensors",
-                        "1"
+                        "{{sensorId}}"
                     ]
                 },
-                "description": "Retrieve a specific sensor by ID"
+                "description": "Retrieve a specific sensor by ID with real-time data"
             },
             "response": []
         },
@@ -86,12 +98,10 @@
                     "raw": "{\n    \"name\": \"Living Room Temperature\",\n    \"type\": \"temperature\",\n    \"location\": \"Living Room\",\n    \"unit\": \"°C\"\n}"
                 },
                 "url": {
-                    "raw": "http://localhost:8080/api/v1/sensors",
-                    "protocol": "http",
+                    "raw": "{{baseUrl}}/api/v1/sensors",
                     "host": [
-                        "localhost"
+                        "{{baseUrl}}"
                     ],
-                    "port": "8080",
                     "path": [
                         "api",
                         "v1",
@@ -99,6 +109,64 @@
                     ]
                 },
                 "description": "Create a new sensor"
+            },
+            "response": []
+        },
+        {
+            "name": "Create Bedroom Sensor",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n    \"name\": \"Bedroom Temperature\",\n    \"type\": \"temperature\",\n    \"location\": \"Bedroom\",\n    \"unit\": \"°C\"\n}"
+                },
+                "url": {
+                    "raw": "{{baseUrl}}/api/v1/sensors",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "sensors"
+                    ]
+                },
+                "description": "Create a bedroom temperature sensor"
+            },
+            "response": []
+        },
+        {
+            "name": "Create Kitchen Sensor",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n    \"name\": \"Kitchen Temperature\",\n    \"type\": \"temperature\",\n    \"location\": \"Kitchen\",\n    \"unit\": \"°C\"\n}"
+                },
+                "url": {
+                    "raw": "{{baseUrl}}/api/v1/sensors",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "sensors"
+                    ]
+                },
+                "description": "Create a kitchen temperature sensor"
             },
             "response": []
         },
@@ -114,46 +182,21 @@
                 ],
                 "body": {
                     "mode": "raw",
-                    "raw": "{\n    \"name\": \"Updated Living Room Temperature\",\n    \"type\": \"temperature\",\n    \"location\": \"Living Room\",\n    \"unit\": \"°C\"\n}"
+                    "raw": "{\n    \"name\": \"Updated Living Room Temperature\",\n    \"type\": \"temperature\",\n    \"location\": \"Living Room\",\n    \"unit\": \"°C\",\n    \"status\": \"active\"\n}"
                 },
                 "url": {
-                    "raw": "http://localhost:8080/api/v1/sensors/1",
-                    "protocol": "http",
+                    "raw": "{{baseUrl}}/api/v1/sensors/{{sensorId}}",
                     "host": [
-                        "localhost"
+                        "{{baseUrl}}"
                     ],
-                    "port": "8080",
                     "path": [
                         "api",
                         "v1",
                         "sensors",
-                        "1"
+                        "{{sensorId}}"
                     ]
                 },
                 "description": "Update an existing sensor"
-            },
-            "response": []
-        },
-        {
-            "name": "Delete Sensor",
-            "request": {
-                "method": "DELETE",
-                "header": [],
-                "url": {
-                    "raw": "http://localhost:8080/api/v1/sensors/1",
-                    "protocol": "http",
-                    "host": [
-                        "localhost"
-                    ],
-                    "port": "8080",
-                    "path": [
-                        "api",
-                        "v1",
-                        "sensors",
-                        "1"
-                    ]
-                },
-                "description": "Delete a sensor"
             },
             "response": []
         },
@@ -172,21 +215,154 @@
                     "raw": "{\n    \"value\": 22.5,\n    \"status\": \"active\"\n}"
                 },
                 "url": {
-                    "raw": "http://localhost:8080/api/v1/sensors/1/value",
-                    "protocol": "http",
+                    "raw": "{{baseUrl}}/api/v1/sensors/{{sensorId}}/value",
                     "host": [
-                        "localhost"
+                        "{{baseUrl}}"
                     ],
-                    "port": "8080",
                     "path": [
                         "api",
                         "v1",
                         "sensors",
-                        "1",
+                        "{{sensorId}}",
                         "value"
                     ]
                 },
-                "description": "Update a sensor's value and status"
+                "description": "Update a sensor's value and status manually"
+            },
+            "response": []
+        },
+        {
+            "name": "Get Temperature by Location - Living Room",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{baseUrl}}/api/v1/sensors/temperature/Living Room",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "sensors",
+                        "temperature",
+                        "Living Room"
+                    ]
+                },
+                "description": "Get temperature data for Living Room from external API"
+            },
+            "response": []
+        },
+        {
+            "name": "Get Temperature by Location - Bedroom",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{baseUrl}}/api/v1/sensors/temperature/Bedroom",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "sensors",
+                        "temperature",
+                        "Bedroom"
+                    ]
+                },
+                "description": "Get temperature data for Bedroom from external API"
+            },
+            "response": []
+        },
+        {
+            "name": "Get Temperature by Location - Kitchen",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{baseUrl}}/api/v1/sensors/temperature/Kitchen",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "sensors",
+                        "temperature",
+                        "Kitchen"
+                    ]
+                },
+                "description": "Get temperature data for Kitchen from external API"
+            },
+            "response": []
+        },
+        {
+            "name": "Temperature API - Get by Location",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{temperatureApiUrl}}/temperature?location=Living Room",
+                    "host": [
+                        "{{temperatureApiUrl}}"
+                    ],
+                    "path": [
+                        "temperature"
+                    ],
+                    "query": [
+                        {
+                            "key": "location",
+                            "value": "Living Room"
+                        }
+                    ]
+                },
+                "description": "Direct call to Temperature API with location parameter"
+            },
+            "response": []
+        },
+        {
+            "name": "Temperature API - Get by Sensor ID",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{temperatureApiUrl}}/temperature?sensorId=1",
+                    "host": [
+                        "{{temperatureApiUrl}}"
+                    ],
+                    "path": [
+                        "temperature"
+                    ],
+                    "query": [
+                        {
+                            "key": "sensorId",
+                            "value": "1"
+                        }
+                    ]
+                },
+                "description": "Direct call to Temperature API with sensor ID parameter"
+            },
+            "response": []
+        },
+        {
+            "name": "Delete Sensor",
+            "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                    "raw": "{{baseUrl}}/api/v1/sensors/{{sensorId}}",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "sensors",
+                        "{{sensorId}}"
+                    ]
+                },
+                "description": "Delete a sensor"
             },
             "response": []
         }
@@ -215,6 +391,16 @@
         {
             "key": "baseUrl",
             "value": "http://localhost:8080",
+            "type": "string"
+        },
+        {
+            "key": "temperatureApiUrl",
+            "value": "http://localhost:8090",
+            "type": "string"
+        },
+        {
+            "key": "sensorId",
+            "value": "1",
             "type": "string"
         }
     ]

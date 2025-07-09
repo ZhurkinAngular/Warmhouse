@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 	"time"
 )
 
@@ -15,13 +16,13 @@ type TemperatureService struct {
 
 // TemperatureResponse represents the response from the temperature API
 type TemperatureResponse struct {
+	Temperature float64   `json:"temperature"`
 	Value       float64   `json:"value"`
-	Unit        string    `json:"unit"`
-	Timestamp   time.Time `json:"timestamp"`
 	Location    string    `json:"location"`
+	SensorID    string    `json:"sensorId"`
+	Timestamp   time.Time `json:"timestamp"`
+	Unit        string    `json:"unit"`
 	Status      string    `json:"status"`
-	SensorID    string    `json:"sensor_id"`
-	SensorType  string    `json:"sensor_type"`
 	Description string    `json:"description"`
 }
 
@@ -37,9 +38,9 @@ func NewTemperatureService(baseURL string) *TemperatureService {
 
 // GetTemperature fetches temperature data for a specific location
 func (s *TemperatureService) GetTemperature(location string) (*TemperatureResponse, error) {
-	url := fmt.Sprintf("%s/temperature?location=%s", s.BaseURL, location)
+	requestURL := fmt.Sprintf("%s/temperature?location=%s", s.BaseURL, url.QueryEscape(location))
 
-	resp, err := s.HTTPClient.Get(url)
+	resp, err := s.HTTPClient.Get(requestURL)
 	if err != nil {
 		return nil, fmt.Errorf("error fetching temperature data: %w", err)
 	}
@@ -59,9 +60,9 @@ func (s *TemperatureService) GetTemperature(location string) (*TemperatureRespon
 
 // GetTemperatureByID fetches temperature data for a specific sensor ID
 func (s *TemperatureService) GetTemperatureByID(sensorID string) (*TemperatureResponse, error) {
-	url := fmt.Sprintf("%s/temperature/%s", s.BaseURL, sensorID)
+	requestURL := fmt.Sprintf("%s/temperature?sensorId=%s", s.BaseURL, url.QueryEscape(sensorID))
 
-	resp, err := s.HTTPClient.Get(url)
+	resp, err := s.HTTPClient.Get(requestURL)
 	if err != nil {
 		return nil, fmt.Errorf("error fetching temperature data: %w", err)
 	}

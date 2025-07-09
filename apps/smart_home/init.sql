@@ -1,6 +1,4 @@
--- Create the database if it doesn't exist
-CREATE DATABASE smarthome;
-
+-- Database is already created by docker-compose
 -- Connect to the database
 \c smarthome;
 
