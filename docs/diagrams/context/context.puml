@@ -1,0 +1,15 @@
+@startuml C4-HeatingSystem
+!includeurl https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+
+Person(user, "Пользователь", "Пользуется системой")
+Person(technician, "Специалист", "Подключает новые устройства")
+
+System(backend, "Теплый дом", "Монолит с Web-интерфейсом и интеграцией системами отопления")
+System(heating, "Система отопления", "Совместимая система отопления")
+
+Rel(user, backend, "Просматривает температуру и включает/выключает отопление в доме через WEB UI")
+Rel(technician, backend, "Регистрирует новое устройство через WEB UI")
+Rel(backend, heating, "Запрашивает температуру с датчиков")
+Rel(backend, heating, "Включает/выключает отопление")
+
+@enduml
