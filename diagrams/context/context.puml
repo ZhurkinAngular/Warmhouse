@@ -1,5 +1,6 @@
-@startuml C4-HeatingSystem
-!includeurl https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+@startuml
+
+!include <C4/C4_Context>
 
 Person(user, "Пользователь", "Пользуется системой")
 Person(technician, "Специалист", "Подключает новые устройства")

@@ -27,12 +27,20 @@ jobs:
       - name: Install PlantUML
         run: sudo apt-get install plantuml
 
+      - name: Set up C4 PlantUML stdlib
+        run: |
+          mkdir -p ~/.plantuml/stdlib/C4
+          curl -sL https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4.puml -o ~/.plantuml/stdlib/C4/C4.puml
+          curl -sL https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml -o ~/.plantuml/stdlib/C4/C4_Context.puml
+          curl -sL https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml -o ~/.plantuml/stdlib/C4/C4_Container.puml
+          curl -sL https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml -o ~/.plantuml/stdlib/C4/C4_Component.puml
+
       - name: Generate Diagrams
         run: |
-          plantuml diagrams/context/*.puml
-          plantuml diagrams/container/*.puml
-          plantuml diagrams/component/*.puml
-          plantuml diagrams/code/*.puml
+          plantuml -I diagrams/includes diagrams/context/*.puml
+          plantuml -I diagrams/includes diagrams/container/*.puml
+          plantuml -I diagrams/includes diagrams/component/*.puml
+          plantuml -I diagrams/includes diagrams/code/*.puml
 
       - name: Commit Diagrams
         run: |
