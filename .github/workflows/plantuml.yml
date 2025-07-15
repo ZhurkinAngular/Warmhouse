@@ -5,10 +5,6 @@ on:
     branches:
       - main
       - warmhouse
-  pull_request:
-    branches:
-      - main
-      - warmhouse
 
 jobs:
   generate-diagrams:
@@ -45,5 +41,5 @@ jobs:
           git config --local user.name "github-actions[bot]"
           git add diagrams/**/*.png
           git commit -m "Automated diagram generation"
-          git push origin main
+          git push origin ${GITHUB_REF#refs/heads/}
         if: success()
