@@ -32,6 +32,7 @@ jobs:
 
       - name: Generate Diagrams
         run: |
+          shopt -s globstar
           plantuml -tpng docs/diagrams/**/*.puml
 
       - name: Commit Diagrams
