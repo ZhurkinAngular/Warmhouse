@@ -1,6 +1,4 @@
 @startuml
-!theme plain
-
 class TelemetryListener {
   +start()
   -handler: MessageHandler

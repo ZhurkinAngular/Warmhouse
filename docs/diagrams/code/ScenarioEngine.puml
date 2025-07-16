@@ -1,6 +1,4 @@
 @startuml
-!theme plain
-
 class ScenarioEngine {
   +executeScenario(event: Event)
   +runScheduledScenarios()
