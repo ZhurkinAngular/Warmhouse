@@ -32,14 +32,17 @@ jobs:
 
       - name: Generate Diagrams
         run: |
-          shopt -s globstar
-          plantuml -tpng docs/diagrams/**/*.puml
+          find docs/diagrams -name '*.puml'
+          find docs/diagrams -name '*.puml' -exec plantuml -tpng {} \;
+
+      - name: Show PNGs
+        run: find docs/diagrams -name '*.png'
 
       - name: Commit Diagrams
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git add docs/diagrams/**/*.png
+          git add $(find docs/diagrams -name '*.png')
           
           if git diff --cached --quiet; then
             echo "No changes to commit"
