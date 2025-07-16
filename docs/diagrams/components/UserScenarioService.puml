@@ -2,7 +2,6 @@
 !include <C4/C4_Component>
 
 Container_Boundary(userScenarios, "User Scenarios Service") {
-
   Component(apiController, "API Controller", "Go", "Обрабатывает REST-запросы от API Gateway")
   Component(authClient, "Auth Client", "Go", "Проверяет права пользователя через Auth Service")
   Component(scenarioEngine, "Scenario Engine", "Go", "Выполняет сценарии по расписанию и событиям")
@@ -11,25 +10,25 @@ Container_Boundary(userScenarios, "User Scenarios Service") {
   Component(commandDispatcher, "Command Dispatcher", "Go", "Отправляет команды управления устройствами")
 }
 
-Component_Ext(apiGatewayExt, "API Gateway", "Nginx", "Маршрутизатор входящих HTTP-запросов")
-Component_Ext(authServiceExt, "Auth Service", "Go", "Аутентификация и роли")
-Component_Ext(messageBrokerExt, "Message Broker (RabbitMQ)", "AMQP", "События и команды")
-Component_Ext(deviceControlExt, "Device Control Service", "Go", "Микросервис управления устройствами")
-Component_Ext(scenariosDbExt, "Scenarios DB", "PostgreSQL", "Хранилище сценариев")
+Container(apiGateway, "API Gateway", "Nginx", "Маршрутизатор входящих HTTP-запросов")
+Container(authService, "Auth Service", "Go", "Аутентификация и роли")
+Container(messageBroker, "Message Broker (RabbitMQ)", "AMQP", "События и команды")
+Container(deviceControl, "Device Control Service", "Go", "Микросервис управления устройствами")
+ContainerDb(scenariosDb, "Scenarios DB", "PostgreSQL", "Хранилище сценариев")
 
-Rel(apiGatewayExt, apiController, "REST/HTTPS")
+Rel(apiGateway, apiController, "REST/HTTPS")
 Rel(apiController, authClient, "Проверка токена")
 Rel(apiController, scenarioRepo, "Чтение/запись сценариев")
 Rel(apiController, scenarioEngine, "Создание/запуск сценария")
 Rel(scenarioEngine, triggerListener, "Устанавливает подписку")
-Rel(triggerListener, messageBrokerExt, "Подписка на события", "AMQP")
+Rel(triggerListener, messageBroker, "Подписка на события", "AMQP")
 Rel(triggerListener, scenarioEngine, "Передаёт событие")
 
 Rel(scenarioEngine, commandDispatcher, "Отдаёт команду на выполнение")
-Rel(commandDispatcher, deviceControlExt, "REST или AMQP")
+Rel(commandDispatcher, deviceControl, "REST или AMQP")
 
-Rel(scenarioRepo, scenariosDbExt, "SQL")
+Rel(scenarioRepo, scenariosDb, "SQL")
 
-Rel(authClient, authServiceExt, "JWT проверка")
+Rel(authClient, authService, "JWT проверка")
 
 @enduml

@@ -2,7 +2,7 @@
 !include <C4/C4_Container>
 
 Person(user, "Пользователь", "Управляет системой через Web-интерфейс")
-Person(technician, "Техспециалист", "Помогает подключать устройства, диагностирует проблемы")
+Person(admin, "Техспециалист", "Помогает подключать устройства, диагностирует проблемы")
 System_Ext(device, "Клиентские устройства", "Датчики, реле, камеры и другие IoT-устройства")
 
 System_Boundary(s1, "Экосистема 'Тёплый дом'") {
@@ -31,7 +31,7 @@ System_Boundary(s1, "Экосистема 'Тёплый дом'") {
 }
 
 Rel(user, webApp, "Использует")
-Rel(technician, webApp, "Подключает и диагностирует через")
+Rel(admin, webApp, "Подключает и диагностирует через")
 Rel(webApp, apiGateway, "HTTP/HTTPS")
 
 Rel(apiGateway, userManagement, "REST")

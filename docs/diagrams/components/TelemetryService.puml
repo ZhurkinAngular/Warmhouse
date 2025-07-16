@@ -2,7 +2,6 @@
 !include <C4/C4_Component>
 
 Container_Boundary(telemetry, "Telemetry Service") {
-
   Component(telemetryListener, "Telemetry Listener", "Go", "Получает телеметрию из брокера (RabbitMQ)")
   Component(telemetryValidator, "Telemetry Validator", "Go", "Проверяет валидность входящих данных")
   Component(telemetryProcessor, "Telemetry Processor", "Go", "Фильтрация, агрегирование, нормализация")
@@ -11,21 +10,20 @@ Container_Boundary(telemetry, "Telemetry Service") {
   Component(eventPublisher, "Event Publisher", "Go", "Публикует события при аномалиях")
 }
 
-Component_Ext(messageBrokerExt, "Message Broker (RabbitMQ)", "AMQP", "Источник телеметрии")
-Component_Ext(apiGatewayExt, "API Gateway", "Nginx", "REST-запросы от Web App")
-Component_Ext(telemetryDbExt, "Telemetry DB", "TimeSeries DB", "Хранилище телеметрии")
-Component_Ext(userScenariosExt, "User Scenarios Service", "Go", "Подписчик на события телеметрии")
+Container(messageBroker, "Message Broker (RabbitMQ)", "AMQP", "Источник телеметрии")
+Container(apiGateway, "API Gateway", "Nginx", "REST-запросы от Web App")
+ContainerDb(telemetryDb, "Telemetry DB", "TimeSeries DB", "Хранилище телеметрии")
 
-Rel(messageBrokerExt, telemetryListener, "AMQP (телеметрия)")
+Rel(messageBroker, telemetryListener, "AMQP (телеметрия)")
 Rel(telemetryListener, telemetryValidator, "Передаёт данные")
 Rel(telemetryValidator, telemetryProcessor, "Передаёт валидные данные")
 Rel(telemetryProcessor, telemetryRepo, "Сохраняет")
 Rel(telemetryProcessor, eventPublisher, "Генерирует события")
-Rel(eventPublisher, messageBrokerExt, "AMQP (события)")
+Rel(eventPublisher, messageBroker, "AMQP (события)")
 
-Rel(apiGatewayExt, telemetryApi, "REST/HTTPS")
+Rel(apiGateway, telemetryApi, "REST/HTTPS")
 Rel(telemetryApi, telemetryRepo, "Читает текущие и исторические данные")
 
-Rel(telemetryRepo, telemetryDbExt, "TimeSeries-запись")
+Rel(telemetryRepo, telemetryDb, "TimeSeries-запись")
 
 @enduml
