@@ -1,0 +1,30 @@
+@startuml
+!include <C4/C4_Component>
+
+Container_Boundary(deviceControl, "Device Control Service") {
+
+  Component(apiController, "API Controller", "Go", "Обрабатывает REST-запросы от API Gateway")
+  Component(authClient, "Auth Client", "Go", "Проверяет права пользователя через Auth Service")
+  Component(commandHandler, "Command Handler", "Go", "Обрабатывает команды управления")
+  Component(stateManager, "Device State Manager", "Go", "Следит за текущим состоянием устройств")
+  Component(deviceRepo, "Device Repository", "Go", "Работает с базой данных устройств")
+  Component(commandPublisher, "Command Publisher", "Go", "Отправляет команды в RabbitMQ")
+}
+
+Component_Ext(apiGatewayExt, "API Gateway", "Nginx", "Маршрутизатор входящих HTTP-запросов")
+Component_Ext(authServiceExt, "Auth Service", "Go", "Проверка прав доступа")
+Component_Ext(messageBrokerExt, "Message Broker (RabbitMQ)", "AMQP", "Передаёт команды в адаптер")
+Component_Ext(deviceDbExt, "Device DB", "PostgreSQL", "Хранилище устройств")
+
+Rel(apiGatewayExt, apiController, "REST/HTTPS")
+Rel(apiController, authClient, "Проверка токена")
+Rel(apiController, commandHandler, "Передаёт команды")
+Rel(commandHandler, deviceRepo, "Чтение данных об устройстве")
+Rel(commandHandler, stateManager, "Обновляет состояние устройства")
+Rel(commandHandler, commandPublisher, "Публикует команду")
+
+Rel(deviceRepo, deviceDbExt, "SQL")
+Rel(commandPublisher, messageBrokerExt, "AMQP")
+Rel(authClient, authServiceExt, "JWT проверка")
+
+@enduml

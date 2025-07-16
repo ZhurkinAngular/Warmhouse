@@ -1,0 +1,66 @@
+@startuml
+!theme plain
+
+class ScenarioEngine {
+  +executeScenario(event: Event)
+  +runScheduledScenarios()
+}
+
+class Scenario {
+  -id: string
+  -name: string
+  -trigger: Trigger
+  -conditions: List<Condition>
+  -actions: List<Action>
+  +isTriggeredBy(event: Event): bool
+  +canRun(): bool
+}
+
+interface Trigger {
+  +isMatch(event: Event): bool
+}
+
+class TimeTrigger {
+  +cronExpression: string
+  +isMatch(event: Event): bool
+}
+
+class EventTrigger {
+  +eventType: string
+  +isMatch(event: Event): bool
+}
+
+interface Condition {
+  +evaluate(): bool
+}
+
+interface Action {
+  +execute(): void
+}
+
+class CommandAction {
+  +deviceId: string
+  +command: string
+  +execute(): void
+}
+
+class ScenarioRepository {
+  +getActiveScenarios(): List<Scenario>
+}
+
+class CommandDispatcher {
+  +sendCommand(deviceId: string, command: string): void
+}
+
+ScenarioEngine --> ScenarioRepository : uses
+ScenarioEngine --> CommandDispatcher : uses
+ScenarioEngine --> Scenario : executes
+
+Scenario --> Trigger : 1
+Scenario --> Condition : *
+Scenario --> Action : *
+
+Trigger <|-- TimeTrigger
+Trigger <|-- EventTrigger
+Action <|-- CommandAction
+@enduml

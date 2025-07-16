@@ -1,0 +1,60 @@
+@startuml
+!include <C4/C4_Container>
+
+Person(user, "Пользователь", "Управляет системой через Web-интерфейс")
+Person(technician, "Техспециалист", "Помогает подключать устройства, диагностирует проблемы")
+System_Ext(device, "Клиентские устройства", "Датчики, реле, камеры и другие IoT-устройства")
+
+System_Boundary(s1, "Экосистема 'Тёплый дом'") {
+
+  Container(webApp, "Web App", "React/Vue", "Веб-интерфейс для пользователей и специалистов")
+  Container(apiGateway, "API Gateway", "Nginx", "Обрабатывает HTTP-запросы и перенаправляет во внутренние сервисы")
+
+  Container(authService, "Auth Service", "Go + JWT", "Аутентификация и авторизация пользователей и специалистов")
+  Container(userManagement, "User Management Service", "Go", "Регистрация и управление аккаунтами пользователей")
+
+  Container(deviceReg, "Device Registration Service", "Go", "Регистрация и привязка устройств")
+  Container(deviceControl, "Device Control Service", "Go", "Управление подключёнными устройствами")
+  Container(deviceAdapter, "Device Adapter", "Go/MQTT", "Связь с физическими устройствами")
+  Container(telemetry, "Telemetry Service", "Go", "Обработка телеметрических данных")
+  Container(userScenarios, "User Scenarios Service", "Go", "Создание и выполнение пользовательских сценариев")
+
+  Container(debugService, "Debug Service", "Go", "Техническая поддержка, логирование и отладка")
+
+  Container(messageBroker, "Message Broker", "RabbitMQ", "Асинхронная передача команд и телеметрии")
+
+  ContainerDb(userDb, "User DB", "PostgreSQL", "Данные пользователей и специалистов")
+  ContainerDb(deviceDb, "Device DB", "PostgreSQL", "Сведения об устройствах")
+  ContainerDb(telemetryDb, "Telemetry DB", "TimeSeries DB", "История телеметрии")
+  ContainerDb(scenariosDb, "Scenarios DB", "PostgreSQL", "Сценарии пользователей")
+  ContainerDb(debugDb, "Debug DB", "ElasticSearch", "Логи, отладочная информация")
+}
+
+Rel(user, webApp, "Использует")
+Rel(technician, webApp, "Подключает и диагностирует через")
+Rel(webApp, apiGateway, "HTTP/HTTPS")
+
+Rel(apiGateway, userManagement, "REST")
+Rel(apiGateway, authService, "REST")
+Rel(apiGateway, deviceReg, "REST")
+Rel(apiGateway, deviceControl, "REST")
+Rel(apiGateway, telemetry, "REST")
+Rel(apiGateway, userScenarios, "REST")
+Rel(apiGateway, debugService, "REST")
+
+Rel(userManagement, userDb, "Чтение/запись")
+Rel(authService, userDb, "Чтение")
+Rel(deviceReg, deviceDb, "Чтение/запись")
+Rel(deviceControl, deviceDb, "Чтение")
+Rel(userScenarios, scenariosDb, "Чтение/запись")
+Rel(telemetry, telemetryDb, "Запись")
+Rel(debugService, debugDb, "Чтение/запись")
+
+Rel(deviceControl, messageBroker, "Публикует команды", "AMQP")
+Rel(deviceAdapter, messageBroker, "Получает команды", "AMQP")
+Rel(deviceAdapter, messageBroker, "Публикует телеметрию", "AMQP")
+Rel(telemetry, messageBroker, "Получает телеметрию", "AMQP")
+
+Rel(deviceAdapter, device, "MQTT/Zigbee/HTTP")
+
+@enduml

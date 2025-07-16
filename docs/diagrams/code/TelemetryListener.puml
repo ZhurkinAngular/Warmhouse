@@ -1,0 +1,54 @@
+@startuml
+!theme plain
+
+class TelemetryListener {
+  +start()
+  -handler: MessageHandler
+}
+
+interface MessageHandler {
+  +handle(msg: TelemetryMessage): void
+}
+
+class TelemetryMessage {
+  +deviceId: string
+  +timestamp: datetime
+  +payload: map<string, any>
+}
+
+class TelemetryValidator {
+  +isValid(msg: TelemetryMessage): bool
+}
+
+class TelemetryProcessor {
+  +process(msg: TelemetryMessage): void
+}
+
+class DeadLetterQueue {
+  +store(msg: TelemetryMessage, reason: string): void
+}
+
+class Logger {
+  +info(msg: string): void
+  +warn(msg: string): void
+  +error(msg: string): void
+}
+
+TelemetryListener --> MessageHandler : uses
+TelemetryListener --> Logger : logs
+
+MessageHandler <|.. TelemetryHandlerImpl
+
+class TelemetryHandlerImpl {
+  -validator: TelemetryValidator
+  -processor: TelemetryProcessor
+  -dlq: DeadLetterQueue
+  +handle(msg: TelemetryMessage): void
+}
+
+TelemetryHandlerImpl --> TelemetryValidator : validates
+TelemetryHandlerImpl --> TelemetryProcessor : processes
+TelemetryHandlerImpl --> DeadLetterQueue : stores invalid
+TelemetryHandlerImpl --> Logger : logs
+
+@enduml

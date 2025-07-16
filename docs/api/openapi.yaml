@@ -1,0 +1,207 @@
+openapi: 3.0.3
+info:
+  title: Warmhouse API
+  version: 1.0.0
+  description: API системы "Тёплый дом"
+
+servers:
+  - url: https://api.smart-village.local
+
+paths:
+
+  /api/v1/devices/{deviceId}/commands:
+    post:
+      summary: Отправка команды на устройство
+      parameters:
+        - name: deviceId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                command:
+                  type: string
+                parameters:
+                  type: object
+                  additionalProperties: true
+              required: [command]
+            example:
+              command: "turn_on"
+              parameters:
+                duration: 3600
+      responses:
+        '200':
+          description: Команда поставлена в очередь
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  deviceId:
+                    type: string
+                  commandId:
+                    type: string
+              example:
+                status: "queued"
+                deviceId: "abc123"
+                commandId: "cmd789"
+        '400':
+          description: Неверный запрос
+        '404':
+          description: Устройство не найдено
+
+  /api/v1/scenarios:
+    post:
+      summary: Создание пользовательского сценария
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                enabled:
+                  type: boolean
+                conditions:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      deviceId:
+                        type: string
+                      key:
+                        type: string
+                      operator:
+                        type: string
+                      value:
+                        type: string
+                actions:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      deviceId:
+                        type: string
+                      command:
+                        type: string
+              required: [name, conditions, actions]
+            example:
+              name: "Night mode"
+              enabled: true
+              conditions:
+                - deviceId: "abc123"
+                  key: "temperature"
+                  operator: "<"
+                  value: "20"
+              actions:
+                - deviceId: "abc123"
+                  command: "turn_on"
+      responses:
+        '201':
+          description: Сценарий создан
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  status:
+                    type: string
+              example:
+                id: "scn001"
+                status: "created"
+        '400':
+          description: Неверный запрос
+
+  /api/v1/devices/{deviceId}/telemetry:
+    get:
+      summary: Получение телеметрии устройства
+      parameters:
+        - name: deviceId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: key
+          in: query
+          schema:
+            type: string
+        - name: from
+          in: query
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: Список телеметрии
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    timestamp:
+                      type: string
+                      format: date-time
+                    value:
+                      type: number
+              example:
+                - timestamp: "2023-07-01T12:00:00Z"
+                  value: 22.5
+                - timestamp: "2023-07-01T12:05:00Z"
+                  value: 22.7
+        '404':
+          description: Устройство не найдено
+
+  /api/v1/users:
+    post:
+      summary: Регистрация пользователя
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  format: password
+                name:
+                  type: string
+              required: [email, password, name]
+            example:
+              email: "user@example.com"
+              password: "securepassword"
+              name: "Ivan"
+      responses:
+        '201':
+          description: Пользователь зарегистрирован
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  email:
+                    type: string
+              example:
+                id: "user-abc123"
+                email: "user@example.com"
+        '409':
+          description: Email уже зарегистрирован

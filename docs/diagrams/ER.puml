@@ -1,0 +1,78 @@
+@startuml
+
+entity User {
+  * id: UUID
+  --
+  email: string
+  passwordHash: string
+  name: string
+}
+
+entity House {
+  * id: UUID
+  --
+  address: string
+  ownerId: UUID
+}
+
+entity Device {
+  * id: UUID
+  --
+  serialNumber: string
+  typeId: UUID
+  houseId: UUID
+  status: string
+}
+
+entity DeviceType {
+  * id: UUID
+  --
+  name: string
+  description: string
+}
+
+entity TelemetryData {
+  * id: UUID
+  --
+  deviceId: UUID
+  timestamp: datetime
+  key: string
+  value: float
+}
+
+entity Scenario {
+  * id: UUID
+  --
+  name: string
+  userId: UUID
+  enabled: boolean
+}
+
+entity ScenarioCondition {
+  * id: UUID
+  --
+  scenarioId: UUID
+  deviceId: UUID
+  key: string
+  operator: string
+  value: string
+}
+
+entity ScenarioAction {
+  * id: UUID
+  --
+  scenarioId: UUID
+  deviceId: UUID
+  command: string
+  parameters: JSON
+}
+
+User "1" --> "0..*" House : owns
+House "1" --> "0..*" Device : has
+DeviceType "1" --> "0..*" Device : typed
+Device "1" --> "0..*" TelemetryData : generates
+User "1" --> "0..*" Scenario : defines
+Scenario "1" --> "0..*" ScenarioCondition : has condition
+Scenario "1" --> "0..*" ScenarioAction : has action
+
+@enduml

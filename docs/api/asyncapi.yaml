@@ -1,0 +1,81 @@
+asyncapi: 2.6.0
+info:
+  title: Warmhouse Async API
+  version: 1.0.0
+  description: Асинхронное взаимодействие микросервисов через RabbitMQ
+
+servers:
+  rabbitmq:
+    url: rabbitmq.smart-village.local
+    protocol: amqp
+
+channels:
+
+  telemetry.data.received:
+    description: Устройство публикует телеметрию
+    subscribe:
+      operationId: receiveTelemetry
+      summary: Приём телеметрии устройствами
+      message:
+        name: TelemetryData
+        payload:
+          type: object
+          properties:
+            deviceId:
+              type: string
+            timestamp:
+              type: string
+              format: date-time
+            key:
+              type: string
+              example: temperature
+            value:
+              type: number
+              example: 21.7
+
+  telemetry.events.triggered:
+    description: Событие, опубликованное TelemetryProcessor (например, превышение порога)
+    publish:
+      operationId: publishEvent
+      summary: Отправка события на которое могут реагировать сценарии
+      message:
+        name: TelemetryEvent
+        payload:
+          type: object
+          properties:
+            eventType:
+              type: string
+              example: temperature_below_threshold
+            deviceId:
+              type: string
+            timestamp:
+              type: string
+              format: date-time
+            payload:
+              type: object
+              example:
+                key: temperature
+                value: 18.4
+
+  device.commands:
+    description: Команды, отправленные от микросервиса управления к устройствам
+    publish:
+      operationId: sendDeviceCommand
+      summary: Отправка команды в очередь на исполнение
+      message:
+        name: DeviceCommand
+        payload:
+          type: object
+          properties:
+            commandId:
+              type: string
+            deviceId:
+              type: string
+            command:
+              type: string
+              example: turn_on
+            parameters:
+              type: object
+              additionalProperties: true
+              example:
+                duration: 3600
