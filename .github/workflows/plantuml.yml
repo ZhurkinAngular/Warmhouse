@@ -3,8 +3,7 @@ name: PlantUML Diagrams
 on:
   push:
     branches:
-      - main
-      - warmhouse
+      - '**'
 
 jobs:
   generate-diagrams:
@@ -21,7 +20,7 @@ jobs:
           java-version: '11'
 
       - name: Install PlantUML
-        run: sudo apt-get install plantuml
+        run: sudo apt-get install -y plantuml
 
       - name: Set up C4 PlantUML stdlib
         run: |
@@ -33,13 +32,19 @@ jobs:
 
       - name: Generate Diagrams
         run: |
-          plantuml diagrams/context/*.puml
+          plantuml -tpng docs/diagrams/**/*.puml
 
       - name: Commit Diagrams
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git add diagrams/**/*.png
+          git add docs/diagrams/**/*.png
+          
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+
           git commit -m "Automated diagram generation"
           git push origin ${GITHUB_REF#refs/heads/}
         if: success()
