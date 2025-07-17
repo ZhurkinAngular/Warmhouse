@@ -97,5 +97,5 @@ AsyncAPI
 
 ### 2. Документация API
 
-[REST API](docs/api/openapi.yaml)
-[Async API](docs/api/asyncapi.yaml)
+•	[REST API](docs/api/openapi.yaml)
+•	[Async API](docs/api/asyncapi.yaml)
