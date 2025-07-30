@@ -1,30 +1,23 @@
-# See https://aka.ms/customizecontainer to learn how to customize your debug container and how Visual Studio uses this Dockerfile to build your images for faster debugging.
+# SDK для сборки
+FROM mcr.microsoft.com/dotnet/sdk:9.0-alpine AS build
+WORKDIR /src
 
-# This stage is used when running from VS in fast mode (Default for Debug configuration)
-FROM mcr.microsoft.com/dotnet/aspnet:8.0-alpine AS base
-USER app
+# Копируем всё и публикуем
+COPY . .
+RUN dotnet publish -c Release -o /app /p:UseAppHost=false
+
+# Runtime-слой
+FROM mcr.microsoft.com/dotnet/aspnet:9.0-alpine
 WORKDIR /app
-EXPOSE 8080
+
+# Устанавливаем переменную окружения для прослушивания всех интерфейсов
+ENV ASPNETCORE_URLS=http://+:8081
+
+# Копируем опубликованное приложение
+COPY --from=build /app .
+
+# Документируем порт
 EXPOSE 8081
 
-
-# This stage is used to build the service project
-FROM mcr.microsoft.com/dotnet/sdk:8.0-alpine AS build
-ARG BUILD_CONFIGURATION=Release
-WORKDIR /src
-COPY ["temperature-api.csproj", "."]
-RUN dotnet restore "./temperature-api.csproj"
-COPY . .
-WORKDIR "/src/."
-RUN dotnet build "./temperature-api.csproj" -c $BUILD_CONFIGURATION -o /app/build
-
-# This stage is used to publish the service project to be copied to the final stage
-FROM build AS publish
-ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./temperature-api.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
-
-# This stage is used in production or when running from VS in regular mode (Default when not using the Debug configuration)
-FROM base AS final
-WORKDIR /app
-COPY --from=publish /app/publish .
+# Запускаем
 ENTRYPOINT ["dotnet", "temperature-api.dll"]

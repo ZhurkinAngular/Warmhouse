@@ -1,6 +1,0 @@
-services:
-  temperature-api:
-    build: .
-    container_name: smart_home
-    ports:
-      - "5000:8081"
