@@ -11,6 +11,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./smart_home/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ~/.nuget/packages:/root/.nuget/packages:ro
     ports:
       - "5432:5432"
     healthcheck:
