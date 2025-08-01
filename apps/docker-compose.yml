@@ -26,6 +26,9 @@ services:
     build:
       context: ./temperature-api
       dockerfile: Dockerfile
+      args:
+        BUILD_CONFIGURATION: Debug
+        DOTNET_ARCH: x64    
     container_name: temperature-api
     ports:
       - "8081:8081"
