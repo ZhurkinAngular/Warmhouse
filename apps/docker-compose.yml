@@ -35,6 +35,10 @@ services:
     environment:
       - ASPNETCORE_URLS=http://+:8081
       - ASPNETCORE_ENVIRONMENT=Development
+      - DATABASE_URL=postgres://postgres:postgres@postgres:5432/smarthome
+
+    depends_on:
+      - postgres
     restart: unless-stopped
     networks:
       - smarthome-network

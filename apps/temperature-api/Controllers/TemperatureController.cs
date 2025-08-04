@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using temperature_api.Context;
 using temperature_api.Models;
 
 namespace temperature_api.Controllers
@@ -9,12 +11,17 @@ namespace temperature_api.Controllers
     [ApiController]
     public class SensorsController : ControllerBase
     {
-
         [HttpGet]
         [Route("temperature")]
-        public IActionResult GetLocationTemperature(string sensorId, string location)
+        public IActionResult GetLocationTemperature(string? sensorId=null, string? location = null)
         {
-            if (location == "")
+            if (string.IsNullOrEmpty(sensorId)
+                && string.IsNullOrEmpty(location))
+            {
+                return BadRequest();
+            }
+
+            if (!string.IsNullOrEmpty(sensorId))
             {
                 location = sensorId switch
                 {
@@ -25,7 +32,7 @@ namespace temperature_api.Controllers
                 };
             }
 
-            if (sensorId == "")
+            if (!string.IsNullOrEmpty(location))
             {
                 sensorId = location switch
                 {
@@ -36,23 +43,45 @@ namespace temperature_api.Controllers
                 };
             }
 
-            if (string.IsNullOrEmpty(sensorId)
-                && string.IsNullOrEmpty(location))
-            {
-                return BadRequest();
-            }
-
             var rnd = new Random();
-            var temp =(double)rnd.Next(0, 40);
+            var temp = (double)rnd.Next(0, 40);
 
-            var data = new TemperatureData(){
+            var data = new TemperatureData()
+            {
                 Value = temp,
                 Location = location,
                 SensorID = sensorId,
-                Description=$"temperature sensor at {location}"
-                };
+                Description = $"temperature sensor at {location}"
+            };
 
             return Ok(data);
         }
+
+        [HttpGet]
+        [Route("getAllSensors")]
+        public IActionResult GetAllSensors()
+        {
+            var result = new List<Sensor>();
+
+            using (SmarthomeContext context = new SmarthomeContext())
+            {
+                result = context.Sensors.ToList();
+            }
+
+            return Ok(result);
+        }
+
+        [HttpPost]
+        [Route("createSensor")]
+        public IActionResult CreateSensor(Sensor sensor)
+        {
+            using (SmarthomeContext context = new SmarthomeContext())
+            {
+                 context.Sensors.Add(sensor);
+            }
+
+            return Created();
+        }
     }
+
 }

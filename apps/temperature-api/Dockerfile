@@ -1,6 +1,6 @@
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 
-ARG BUILD_CONFIGURATION=Debug
+ARG BUILD_CONFIGURATION=Release
 ARG DOTNET_ARCH=amd64
 
 WORKDIR /src
@@ -10,7 +10,7 @@ RUN --mount=type=cache,id=nuget,target=/root/.nuget/packages \
     dotnet restore
 
 RUN --mount=type=cache,id=nuget,target=/root/.nuget/packages \
-    dotnet publish -c ${BUILD_CONFIGURATION} --self-contained true -r linux-${DOTNET_ARCH} -o /app
+    dotnet publish -c ${BUILD_CONFIGURATION} --self-contained true -r linux-x64 -o /app
 
 WORKDIR /src
 RUN dotnet new tool-manifest --force
