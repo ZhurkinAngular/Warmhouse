@@ -1,0 +1,301 @@
+asyncapi: 3.0.0
+info:
+  title: Система Умного Дома
+  version: 1.0.0
+  description: >
+    Асинхронное API для системы Умного Дома
+
+    Описаны все сервисы, которые общаются через 
+    Kafka
+servers:
+  kafka:
+    host: 'kafka:9092'
+    protocol: kafka
+    description: Брокер Kafka
+channels:
+  device.command:
+    address: device.command
+    messages:
+      publish.message:
+        $ref: '#/components/messages/DeviceCommand'
+      subscribe.message:
+        $ref: '#/components/messages/DeviceCommand'
+    description: Канал для отправки команд на устройства
+  device.sensor.update.event:
+    address: device.sensor.update.event
+    messages:
+      publish.message:
+        $ref: '#/components/messages/DeviceSensorUpdateEvent'
+      subscribe.message:
+        $ref: '#/components/messages/DeviceSensorUpdateEvent'
+    description: 'Канал для событий, содержащих данные датчиков от устройств'
+  device.sensor.update.command:
+    address: device.sensor.update.command
+    messages:
+      publish.message:
+        $ref: '#/components/messages/DeviceSensorUpdateCommand'
+    description: Канал для отправки команды устройству на обновление данных его датчика
+  home.event:
+    address: home.event
+    messages:
+      publish.message.0:
+        $ref: '#/components/messages/HomeCreatedEvent'
+      publish.message.1:
+        $ref: '#/components/messages/HomeUpdatedEvent'
+      publish.message.2:
+        $ref: '#/components/messages/DeviceAddedEvent'
+      publish.message.3:
+        $ref: '#/components/messages/ModuleCreatedEvent'
+      publish.message.4:
+        $ref: '#/components/messages/DeviceAttachedToUserEvent'
+      publish.message.5:
+        $ref: '#/components/messages/DeviceDetachedFromUserEvent'
+      publish.message.6:
+        $ref: '#/components/messages/UserSubscriptionUpdatedEvent'
+      publish.message.7:
+        $ref: '#/components/messages/UserSuspendedEvent'
+    description: 'Канал для событий, связанных с управлением домом'
+  user.event:
+    address: user.event
+    messages:
+      publish.message.0:
+        $ref: '#/components/messages/UserRegisteredEvent'
+      publish.message.1:
+        $ref: '#/components/messages/UserSuspendedEvent'
+      subscribe.message:
+        $ref: '#/components/messages/UserActivatedEvent'
+    description: 'Канал для событий, связанных с управлением пользователями'
+  user.command:
+    address: user.command
+    messages:
+      subscribe.message:
+        $ref: '#/components/messages/UserActivateCommand'
+    description: 'Канал для команд, связанных с управлением пользователями'
+operations:
+  device.command.publish:
+    action: receive
+    channel:
+      $ref: '#/channels/device.command'
+    summary: |
+      Любой сервис может опубликовать команду для устройства
+      Известные издатели: CommandService, ProgrammingService
+    messages:
+      - $ref: '#/channels/device.command/messages/publish.message'
+  device.command.subscribe:
+    action: send
+    channel:
+      $ref: '#/channels/device.command'
+    summary: >-
+      DeviceMessagingService подписывается на этот канал для пересылки команд
+      устройствам
+    messages:
+      - $ref: '#/channels/device.command/messages/subscribe.message'
+  device.sensor.update.event.publish:
+    action: receive
+    channel:
+      $ref: '#/channels/device.sensor.update.event'
+    summary: DeviceMessagingService публикует данные датчиков от устройств
+    messages:
+      - $ref: '#/channels/device.sensor.update.event/messages/publish.message'
+  device.sensor.update.event.subscribe:
+    action: send
+    channel:
+      $ref: '#/channels/device.sensor.update.event'
+    summary: >-
+      TelemetryService подписывается на этот канал для обработки и хранения
+      данных датчиков
+    messages:
+      - $ref: '#/channels/device.sensor.update.event/messages/subscribe.message'
+  device.sensor.update.command.publish:
+    action: receive
+    channel:
+      $ref: '#/channels/device.sensor.update.command'
+    summary: >-
+      TelemetryService может отправить команду устройству на обновление данных
+      его датчика
+    messages:
+      - $ref: '#/channels/device.sensor.update.command/messages/publish.message'
+  home.event.publish:
+    action: receive
+    channel:
+      $ref: '#/channels/home.event'
+    summary: >-
+      HomeService публикует события, связанные с домами, устройствами и
+      модулями
+    messages:
+      - $ref: '#/channels/home.event/messages/publish.message.0'
+      - $ref: '#/channels/home.event/messages/publish.message.1'
+      - $ref: '#/channels/home.event/messages/publish.message.2'
+      - $ref: '#/channels/home.event/messages/publish.message.3'
+      - $ref: '#/channels/home.event/messages/publish.message.4'
+      - $ref: '#/channels/home.event/messages/publish.message.5'
+      - $ref: '#/channels/home.event/messages/publish.message.6'
+      - $ref: '#/channels/home.event/messages/publish.message.7'
+  user.event.publish:
+    action: receive
+    channel:
+      $ref: '#/channels/user.event'
+    summary: >-
+      UserService публикует события при регистрации или блокировке
+      пользователей
+    messages:
+      - $ref: '#/channels/user.event/messages/publish.message.0'
+      - $ref: '#/channels/user.event/messages/publish.message.1'
+  user.event.subscribe:
+    action: send
+    channel:
+      $ref: '#/channels/user.event'
+    summary: UserService подписывается на события для активации пользователей
+    messages:
+      - $ref: '#/channels/user.event/messages/subscribe.message'
+  user.command.subscribe:
+    action: send
+    channel:
+      $ref: '#/channels/user.command'
+    summary: UserService подписывается на команды для активации пользователей
+    messages:
+      - $ref: '#/channels/user.command/messages/subscribe.message'
+components:
+  messages:
+    DeviceCommand:
+      name: DeviceCommand
+      title: Команда устройству
+      summary: Команда для выполнения устройством
+      payload:
+        type: object
+        properties:
+          deviceId:
+            type: string
+            format: uuid
+            description: ID устройства для отправки команды
+          command:
+            type: string
+            description: Команда для выполнения
+          parameters:
+            type: object
+            description: Параметры для команды
+    DeviceSensorUpdateEvent:
+      name: DeviceSensorUpdateEvent
+      title: Событие обновления данных датчика
+      summary: 'Событие, содержащее данные датчика от устройства'
+      payload:
+        type: object
+        properties:
+          deviceId:
+            type: string
+            format: uuid
+            description: ID устройства
+          sensorType:
+            type: string
+            description: 'Тип датчика (например, температура, влажность)'
+          value:
+            type: number
+            description: Значение показания датчика
+          timestamp:
+            type: string
+            format: date-time
+            description: Время снятия показания датчика
+    DeviceSensorUpdateCommand:
+      name: DeviceSensorUpdateCommand
+      title: Команда обновления данных датчика
+      summary: Команда для устройства обновить данные своего датчика
+      payload:
+        type: object
+        properties:
+          deviceId:
+            type: string
+            format: uuid
+            description: ID устройства
+    HomeCreatedEvent:
+      payload:
+        type: object
+        properties:
+          homeId:
+            type: string
+            format: uuid
+    HomeUpdatedEvent:
+      payload:
+        type: object
+        properties:
+          homeId:
+            type: string
+            format: uuid
+    DeviceAddedEvent:
+      payload:
+        type: object
+        properties:
+          deviceId:
+            type: string
+            format: uuid
+          homeId:
+            type: string
+            format: uuid
+    ModuleCreatedEvent:
+      payload:
+        type: object
+        properties:
+          moduleId:
+            type: string
+            format: uuid
+          homeId:
+            type: string
+            format: uuid
+    DeviceAttachedToUserEvent:
+      payload:
+        type: object
+        properties:
+          deviceId:
+            type: string
+            format: uuid
+          userId:
+            type: string
+            format: uuid
+    DeviceDetachedFromUserEvent:
+      payload:
+        type: object
+        properties:
+          deviceId:
+            type: string
+            format: uuid
+          userId:
+            type: string
+            format: uuid
+    UserSubscriptionUpdatedEvent:
+      payload:
+        type: object
+        properties:
+          userId:
+            type: string
+            format: uuid
+          subscriptionType:
+            type: string
+    UserSuspendedEvent:
+      payload:
+        type: object
+        properties:
+          userId:
+            type: string
+            format: uuid
+    UserRegisteredEvent:
+      payload:
+        type: object
+        properties:
+          userId:
+            type: string
+            format: uuid
+          email:
+            type: string
+    UserActivatedEvent:
+      payload:
+        type: object
+        properties:
+          userId:
+            type: string
+            format: uuid
+    UserActivateCommand:
+      payload:
+        type: object
+        properties:
+          userId:
+            type: string
+            format: uuid

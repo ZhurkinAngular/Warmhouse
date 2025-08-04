@@ -1,0 +1,38 @@
+openapi: 3.0.0
+info:
+  title: API Сервиса Телеметрии
+  version: 1.0.0
+  description: API для получения данных телеметрии от устройств
+
+paths:
+  /telemetry/{deviceId}:
+    get:
+      summary: Получить данные телеметрии для конкретного устройства
+      parameters:
+        - name: deviceId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Последние данные телеметрии для устройства
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TelemetryData'
+
+components:
+  schemas:
+    TelemetryData:
+      type: object
+      properties:
+        deviceId:
+          type: string
+          format: uuid
+        timestamp:
+          type: string
+          format: date-time
+        data:
+          type: object
+          additionalProperties: true

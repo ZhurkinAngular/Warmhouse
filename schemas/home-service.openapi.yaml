@@ -1,0 +1,392 @@
+openapi: 3.0.0
+info:
+  title: API Сервиса Домов
+  version: 1.0.0
+  description: API для управления домами, устройствами и модулями в системе Умного Дома
+
+paths:
+  /homes:
+    get:
+      summary: Получить список всех домов
+      responses:
+        '200':
+          description: Список домов
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Home'
+    post:
+      summary: Создать новый дом
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Home'
+      responses:
+        '201':
+          description: Дом успешно создан
+
+  /homes/{homeId}:
+    get:
+      summary: Получить данные о конкретном доме
+      parameters:
+        - name: homeId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Запрошенный дом
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Home'
+    put:
+      summary: Обновить данные о конкретном доме
+      parameters:
+        - name: homeId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Home'
+      responses:
+        '200':
+          description: Данные о доме успешно обновлены
+    delete:
+      summary: Удалить конкретный дом
+      parameters:
+        - name: homeId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Дом успешно удален
+
+  /homes/{homeId}/devices:
+    get:
+      summary: Получить список устройств в доме
+      parameters:
+        - name: homeId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Список устройств
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Device'
+
+  /homes/{homeId}/modules:
+    get:
+      summary: Получить список модулей в доме
+      parameters:
+        - name: homeId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Список модулей
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Module'
+
+  /devices:
+    post:
+      summary: Создать новое устройство
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Device'
+      responses:
+        '201':
+          description: Устройство успешно создано
+
+  /devices/{deviceId}:
+    get:
+      summary: Получить данные о конкретном устройстве
+      parameters:
+        - name: deviceId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Запрошенное устройство
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceDetails'
+    put:
+      summary: Обновить данные о конкретном устройстве
+      parameters:
+        - name: deviceId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Device'
+      responses:
+        '200':
+          description: Данные об устройстве успешно обновлены
+    delete:
+      summary: Удалить конкретное устройство
+      parameters:
+        - name: deviceId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Устройство успешно удалено
+
+  /devices/{deviceId}/modules:
+    post:
+      summary: Привязать модуль к устройству
+      parameters:
+        - name: deviceId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                moduleId:
+                  type: string
+                  format: uuid
+      responses:
+        '200':
+          description: Модуль успешно привязан
+
+  /devices/{deviceId}/modules/{moduleId}:
+    delete:
+      summary: Отвязать модуль от устройства
+      parameters:
+        - name: deviceId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: moduleId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Модуль успешно отвязан
+
+  /devices/by-token/{token}:
+    get:
+      summary: Получить ID устройства и дома по токену
+      parameters:
+        - name: token
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ID устройства и дома
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceHomeInfo'
+
+  /modules:
+    get:
+      summary: Получить список всех модулей
+      responses:
+        '200':
+          description: Список модулей
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Module'
+    post:
+      summary: Создать новый модуль
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Module'
+      responses:
+        '201':
+          description: Модуль успешно создан
+
+  /modules/{moduleId}:
+    get:
+      summary: Получить данные о конкретном модуле
+      parameters:
+        - name: moduleId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Запрошенный модуль
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ModuleDetails'
+    put:
+      summary: Обновить данные о конкретном модуле
+      parameters:
+        - name: moduleId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Module'
+      responses:
+        '200':
+          description: Данные о модуле успешно обновлены
+    delete:
+      summary: Удалить конкретный модуль
+      parameters:
+        - name: moduleId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Модуль успешно удален
+
+components:
+  schemas:
+    Home:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        address:
+          type: string
+    Device:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        home_id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        type:
+          type: string
+        status:
+          type: string
+          enum: [ACTIVE, INACTIVE, PROBLEM]
+    DeviceDetails:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        home:
+          $ref: '#/components/schemas/Home'
+        name:
+          type: string
+        type:
+          type: string
+        status:
+          type: string
+          enum: [ACTIVE, INACTIVE, PROBLEM]
+        modules:
+          type: array
+          items:
+            $ref: '#/components/schemas/Module'
+    DeviceHomeInfo:
+      type: object
+      properties:
+        deviceId:
+          type: string
+          format: uuid
+        homeId:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+    Module:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        home_id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        type:
+          type: string
+        status:
+          type: string
+          enum: [ACTIVE, INACTIVE, PROBLEM]
+    ModuleDetails:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        home_id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        type:
+          type: string
+        status:
+          type: string
+          enum: [ACTIVE, INACTIVE, PROBLEM]
+        device:
+          $ref: '#/components/schemas/Device'

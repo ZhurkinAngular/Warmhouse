@@ -1,0 +1,63 @@
+openapi: 3.0.0
+info:
+  title: API Сервиса Пользователей
+  version: 1.0.0
+  description: API для управления пользователями, включая регистрацию и аутентификацию
+
+paths:
+  /register:
+    post:
+      summary: Зарегистрировать нового пользователя
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRegistration'
+      responses:
+        '201':
+          description: Пользователь успешно зарегистрирован
+  /login:
+    post:
+      summary: Аутентифицировать пользователя
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserLogin'
+      responses:
+        '200':
+          description: Аутентификация прошла успешно
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthToken'
+
+components:
+  schemas:
+    UserRegistration:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+    UserLogin:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+    AuthToken:
+      type: object
+      properties:
+        token:
+          type: string
+        token_type:
+          type: string
+          default: "Bearer"
