@@ -77,9 +77,9 @@
 
 ### 2. Документация API
 
-![после сборки контейнера здесь будет файл документации ](http://localhost:8081/swagger/v1/swagger.json)
-![а тут интерфейс для протестировать ручки](http://localhost:8081/swagger/index.html)
-![если используется постман коллекция для тестирования тут](apps/temperature-api/test)
+после сборки контейнера здесь будет файл документации: http://localhost:8081/swagger/v1/swagger.json
+а тут интерфейс для протестировать ручки: http://localhost:8081/swagger/index.html
+если используется постман коллекция для тестирования тут: apps/temperature-api/test
 
 # Задание 5. Работа с docker и docker-compose
 
