@@ -1,0 +1,111 @@
+{
+	"info": {
+		"_postman_id": "fff5f17d-8a39-4855-837b-fe305802d061",
+		"name": "temperature API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "20276961"
+	},
+	"item": [
+		{
+			"name": "Get All Sensors",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/api/v1/sensors",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"v1",
+						"sensors"
+					]
+				},
+				"description": "Retrieve all sensors"
+			},
+			"response": []
+		},
+		{
+			"name": "Get Temperature",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8081/api/v1/temperature?sensorId=1&location=kitchen&",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"api",
+						"v1",
+						"temperature"
+					],
+					"query": [
+						{
+							"key": "sensorId",
+							"value": "1"
+						},
+						{
+							"key": "location",
+							"value": "kitchen"
+						},
+						{
+							"key": "",
+							"value": null
+						}
+					]
+				},
+				"description": "Retrieve a specific sensor by ID"
+			},
+			"response": []
+		},
+		{
+			"name": "Create Sensor",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Living Room Temperature\",\n    \"type\": \"temperature\",\n    \"location\": \"Living Room\",\n    \"unit\": \"°C\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/v1/sensors",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"v1",
+						"sensors"
+					]
+				},
+				"description": "Create a new sensor"
+			},
+			"response": []
+		}
+	]
+}
