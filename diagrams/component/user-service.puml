@@ -1,0 +1,62 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+
+skinparam wrapWidth 250
+skinparam monochrome false
+LAYOUT_WITH_LEGEND()
+LAYOUT_TOP_DOWN()
+
+title
+        <b>Диаграмма компонентов контейнера UserService</b>
+end title
+
+Person(user, "Пользователь", "Пользователь системы умного дома")
+
+Boundary(Frontend, "Фронтенд", "domain") {
+        Container(spa, "Веб-приложение", "Typescript/React", "Single Page Application для управления умным домом")
+}
+
+Boundary(Commons, "Общая инфраструктура", "domain") {
+        Container(api_gw, "API Gateway", "Kong/Nginx", "Маршрутизация и балансировка запросов")
+        SystemQueue(message_bus, "Шина событий", "Kafka", "Асинхронная коммуникация между сервисами")
+}
+
+Boundary(UserService, "Сервис пользователей", "domain") {
+        Component(RegistrationController, "Регистрация", "Spring Boot", "Обработка регистрации новых пользователей")
+        Component(AuthenticationController, "Аутентификация", "Spring Security", "Вход пользователей в систему")
+        ComponentDb(UserDatabase, "База данных", "PostgreSQL", "Хранение данных пользователей")
+        
+        Rel_D(RegistrationController, UserDatabase, "Сохранение данных", "JDBC")
+        Rel_D(AuthenticationController, UserDatabase, "Проверка учетных данных", "JDBC")
+        
+        Rel_D(RegistrationController, message_bus, "Публикация", "UserRegisteredEvent")
+        Component(ActivationHandler, "Обработчик активации", "Spring Listener", "Обработка событий активации пользователей")
+
+        Rel_D(message_bus, ActivationHandler, "Доставка события", "UserActivatedEvent")
+        Rel_D(ActivationHandler, UserDatabase, "Обновление статуса", "JDBC")
+}
+
+Rel_D(user, spa, "Взаимодействие", "HTTPS")
+Rel_D(spa, api_gw, "API запросы", "HTTPS/JSON")
+Rel_D(api_gw, RegistrationController, "Регистрация", "HTTP/JSON")
+Rel_D(api_gw, AuthenticationController, "Аутентификация", "HTTP/JSON")
+
+note right of UserDatabase
+        Хранит:
+        - Учетные данные
+        - Профили пользователей
+        - Статусы аккаунтов
+        - Журнал действий
+end note
+
+note bottom of message_bus
+        Основные события:
+        1. UserRegisteredEvent
+        2. UserSuspendedEvent
+        3. UserActivatedEvent
+        Основные команды:
+        1. UserActivateCommand
+end note
+@enduml

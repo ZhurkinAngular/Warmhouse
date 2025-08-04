@@ -192,3 +192,7 @@ build/
 
 tmp/
 task-*
+diagrams/**/*.png
+
+apps/temperature-api/node_modules/
+apps/temperature-api/dist/

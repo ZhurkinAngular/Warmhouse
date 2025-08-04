@@ -1,0 +1,63 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+
+skinparam wrapWidth 300
+LAYOUT_WITH_LEGEND()
+LAYOUT_TOP_DOWN()
+
+title
+        <b>Диаграмма компонентов контейнера HomeService</b>
+end title
+
+Person(user, "Пользователь", "Пользователь системы умного дома")
+
+Boundary(Frontend, "Пользовательские приложения", "domain") {
+        Container(spa, "SPA", "Typescript/React", "Реализует WEB-интерфейс управления умным домом")
+}
+
+Boundary(Commons, "Внутрисервисная коммуникация", "domain") {
+        Container(api_gw, "API Gateway", "Kong/Nginx", "Маршрутизация и балансировка запросов")
+        SystemQueue(message_bus, "Шина сообщений", "Kafka", "Асинхронная коммуникация между сервисами")
+}
+
+Boundary(DeviceMessaging, "Домен коммуникации с устройствами", "domain"){
+        Container(DeviceMessagingService, "Сервис коммуникации с устройствами", "Java/Spring", "Двусторонняя связь с устройствами через протоколы IoT")
+}
+
+Boundary(HomeService, "HomeService", "service") {
+        Component(HomeController, "Home Controller", "Spring Boot", "Управление домами, модулями и устройствами. Валидация токенов устройств.")
+        ComponentDb(HomeDB, "Home Database", "PostgreSQL", "Хранит данные о домах, модулях и устройствах")
+        SystemDb(DeviceCache, "Кэш", "Redis", "Распределённый кэш данных")
+
+        Rel_R(HomeController, HomeDB, "Чтение/запись", "JDBC")
+        Rel_D(HomeController, message_bus, "Публикует события", "HomeUpdated, DeviceUpdated итд.")
+        Rel_U(HomeController, DeviceCache, "Кэширование", "Данные о привязке устройств к пользователям (key: token, value: device_id, home_id, user_id)")
+}
+
+Rel_D(user, spa, "Управление домом", "HTTPS")
+Rel_D(spa, api_gw, "API запросы", "HTTPS/JSON")
+Rel_D(api_gw, HomeController, "CRUD операции для домов, модулей и устройств", "HTTP/JSON")
+Rel(DeviceMessagingService, HomeController, "Запрашивает ID устройства, дома и пользователя по токену", "REST/JSON")
+
+
+note right of HomeDB
+        Хранит:
+        - Информацию о домах
+        - Информацию о модулях
+        - Информацию об устройствах
+end note
+
+note left of message_bus
+        Основные события:
+        1. HomeCreatedEvent
+        2. HomeUpdatedEvent
+        3. DeviceAddedEvent
+        4. ModuleCreatedEvent
+	    5. DeviceAttachedToUserEvent
+        6. DeviceDetachedFromUserEvent
+        7. UserSubscriptionUpdatedEvent
+        8. UserSuspendedEvent
+end note
+@enduml

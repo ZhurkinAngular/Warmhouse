@@ -1,0 +1,36 @@
+openapi: 3.0.0
+info:
+  title: API Сервиса Команд
+  version: 1.0.0
+  description: API для отправки команд на устройства
+
+paths:
+  /commands/{deviceId}:
+    post:
+      summary: Отправить команду на устройство
+      parameters:
+        - name: deviceId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeviceCommand'
+      responses:
+        '202':
+          description: Команда принята к доставке
+
+components:
+  schemas:
+    DeviceCommand:
+      type: object
+      properties:
+        command:
+          type: string
+        parameters:
+          type: object
+          additionalProperties: true

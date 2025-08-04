@@ -1,0 +1,192 @@
+openapi: 3.0.0
+info:
+  title: API Сервиса Программирования
+  version: 1.0.0
+  description: API для управления расписаниями и сценариями для автоматизации устройств
+
+paths:
+  /schedules:
+    get:
+      summary: Получить список всех расписаний
+      responses:
+        '200':
+          description: Список расписаний
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Schedule'
+    post:
+      summary: Создать новое расписание
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Schedule'
+      responses:
+        '201':
+          description: Расписание успешно создано
+
+  /schedules/{scheduleId}:
+    get:
+      summary: Получить данные о конкретном расписании
+      parameters:
+        - name: scheduleId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Запрошенное расписание
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Schedule'
+    put:
+      summary: Обновить данные о конкретном расписании
+      parameters:
+        - name: scheduleId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Schedule'
+      responses:
+        '200':
+          description: Данные о расписании успешно обновлены
+    delete:
+      summary: Удалить конкретное расписание
+      parameters:
+        - name: scheduleId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Расписание успешно удалено
+
+  /scripts:
+    get:
+      summary: Получить список всех сценариев
+      responses:
+        '200':
+          description: Список сценариев
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Script'
+    post:
+      summary: Создать новый сценарий
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Script'
+      responses:
+        '201':
+          description: Сценарий успешно создан
+
+  /scripts/{scriptId}:
+    get:
+      summary: Получить данные о конкретном сценарии
+      parameters:
+        - name: scriptId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Запрошенный сценарий
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Script'
+    put:
+      summary: Обновить данные о конкретном сценарии
+      parameters:
+        - name: scriptId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Script'
+      responses:
+        '200':
+          description: Сценарий успешно обновлен
+    delete:
+      summary: Удалить конкретный сценарий
+      parameters:
+        - name: scriptId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Сценарий успешно удален
+
+components:
+  schemas:
+    Schedule:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        cronExpression:
+          type: string
+        target:
+          oneOf:
+            - $ref: '#/components/schemas/DeviceTarget'
+            - $ref: '#/components/schemas/ModuleTarget'
+        command:
+          type: string
+        parameters:
+          type: object
+          additionalProperties: true
+    Script:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        body:
+          type: string
+    DeviceTarget:
+      type: object
+      properties:
+        deviceId:
+          type: string
+          format: uuid
+      required:
+        - deviceId
+    ModuleTarget:
+      type: object
+      properties:
+        moduleId:
+          type: string
+          format: uuid
+      required:
+        - moduleId

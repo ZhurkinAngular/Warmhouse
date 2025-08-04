@@ -1,0 +1,47 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+
+skinparam wrapWidth 250
+LAYOUT_WITH_LEGEND()
+LAYOUT_TOP_DOWN()
+
+title
+        <b>Компонентная диаграмма сервиса CommandService</b>
+end title
+
+Person(user, "Пользователь", "Пользователь системы умного дома")
+
+Boundary(Frontend, "Клиентский интерфейс", "domain") {
+        Container(spa, "Веб-приложение", "TypeScript/React", "Интерфейс управления устройствами и модулями")
+}
+
+Boundary(Infrastructure, "Инфраструктура", "domain") {
+        Container(api_gw, "API Gateway", "Kong/Nginx", "Маршрутизация и балансировка запросов")
+        SystemQueue(message_bus, "Шина сообщений", "Kafka", "Асинхронная коммуникация между сервисами")
+}
+
+Boundary(UserManagement, "Домен управления пользовательскими данными", "domain") {
+        Container(ModuleService, "ModuleService", "Java / Spring", "Реализует управление модулями и привязкой к ним устройств")
+}
+
+Boundary(DeviceMessaging, "Домен коммуникации с устройствами", "domain"){
+        Container(DeviceMessagingService, "Сервис коммуникации с устройствами", "Java/Spring", "Двусторонняя связь с устройствами через протоколы IoT")
+}
+Boundary(DeviceManagement, "Управление устройствами", "domain"){
+        Boundary(Command, "Сервис отправки команд", "service") {
+                Component(CommandController, "Command Controller", "Spring Boot", "Контроллер отправки команд на устройства и модули")
+                
+                Rel_U(CommandController, ModuleService, "Запрашивает", "Связь модуля с устройствами")
+                Rel_U(CommandController, message_bus, "Публикация", "DeviceCommand")
+        }
+
+}
+
+Rel_D(user, spa, "Просмотр данных от устройств", "HTTPS")
+Rel_D(spa, api_gw, "API запросы", "REST/JSON")
+Rel_D(api_gw, CommandController, "API запросы", "REST/JSON")
+Rel_D(DeviceMessagingService, message_bus, "Подписка", "DeviceCommand")
+
+@enduml

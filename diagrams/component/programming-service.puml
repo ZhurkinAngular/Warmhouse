@@ -1,0 +1,50 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+
+skinparam wrapWidth 250
+skinparam monochrome false
+LAYOUT_WITH_LEGEND()
+LAYOUT_TOP_DOWN()
+
+title
+        <b>Диаграмма компонентов контейнера ProgrammingService</b>
+end title
+
+Person(user, "Пользователь", "Пользователь системы умного дома")
+
+Boundary(Frontend, "Фронтенд", "domain") {
+        Container(spa, "Веб-приложение", "Typescript/React", "Single Page Application для управления умным домом")
+}
+
+Boundary(Commons, "Общая инфраструктура", "domain") {
+        Container(api_gw, "API Gateway", "Kong/Nginx", "Маршрутизация и балансировка запросов")
+        SystemQueue(message_bus, "Шина событий", "Kafka", "Асинхронная коммуникация между сервисами")
+}
+
+Boundary(ProgrammingService, "Сервис программирования", "domain") {
+        Component(ScheduleController, "Контроллер расписаний", "Spring Boot", "Обработка запросов на создание и управление расписаниями")
+        Component(ScriptingController, "Контроллер сценариев", "Spring Boot", "Обработка запросов на создание и управление сценариями")
+        ComponentDb(ProgrammingDatabase, "База данных", "PostgreSQL", "Хранение расписаний и сценариев")
+        Component(JobScheduler, "Планировщик задач", "Quartz", "Выполнение запланированных команд")
+
+        Rel_D(ScheduleController, ProgrammingDatabase, "Сохранение/чтение данных", "JDBC")
+        Rel_D(ScriptingController, ProgrammingDatabase, "Сохранение/чтение данных", "JDBC")
+        Rel_D(JobScheduler, ProgrammingDatabase, "Чтение расписаний", "JDBC")
+        Rel_D(JobScheduler, message_bus, "Отправка команд", "DeviceCommand")
+}
+
+Rel_D(user, spa, "Взаимодействие", "HTTPS")
+Rel_D(spa, api_gw, "API запросы", "HTTPS/JSON")
+Rel_D(api_gw, ScheduleController, "Управление расписаниями", "HTTP/JSON")
+Rel_D(api_gw, ScriptingController, "Управление сценариями", "HTTP/JSON")
+
+note right of ProgrammingDatabase
+        Хранит:
+        - Расписания (Schedules)
+        - Сценарии (Scripts)
+        - Задачи (Jobs)
+end note
+
+@enduml

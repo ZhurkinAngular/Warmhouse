@@ -1,0 +1,46 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+
+skinparam wrapWidth 200
+skinparam monochrome false
+LAYOUT_WITH_LEGEND()
+LAYOUT_TOP_DOWN()
+
+title Диаграмма кода для DeviceCommandService
+
+SystemQueue(message_bus, "Шина сообщений", "Kafka", "Транспорт для команд устройствам")
+
+Boundary(DeviceCommandServiceContainer, "Контейнер DeviceCommandService", "Spring Boot") {
+        
+        Boundary(ApiLayer, "API layer") {
+                Component(CommandController, "CommandController", "RestController", "Обрабатывает входящие запросы на команды от клиентов")
+        }
+        
+        Boundary(ServiceLayer, "Service layer") {
+                Component(CommandService, "CommandService", "Service", "Бизнес-логика для обработки и отправки команд")
+        }
+        
+        Boundary(DtoLayer, "DTO Layer") {
+                Component(DeviceCommandDto, "DeviceCommandDto", "DTO", "DTO для команд устройствам")
+        }
+}
+
+Rel(CommandController, CommandService, "Использует", "processCommand()")
+Rel(CommandService, message_bus, "Публикует", "")
+
+Rel(CommandController, DeviceCommandDto, "Принимает", "")
+Rel(CommandService, DeviceCommandDto, "Обрабатывает", "")
+
+note top of CommandService
+        <b>Основные операции:</b>
+        - processCommand(DeviceCommandDto)
+        - validateCommand(DeviceCommandDto)
+end note
+
+note right of CommandService
+        <b>Публикуемые сообщения:</b>
+        - DeviceCommand
+end note
+
+@enduml
