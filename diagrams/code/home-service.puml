@@ -1,0 +1,88 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+
+skinparam wrapWidth 250
+skinparam monochrome false
+LAYOUT_WITH_LEGEND()
+LAYOUT_TOP_DOWN()
+
+title Диаграмма кода для HomeService
+
+Boundary(HomeServiceContainer, "HomeService Container", "Spring Boot Application") {
+
+        Boundary(ApiLayer, "API Layer") {
+                Component(HomeController, "HomeController", "RestController", "Управление домами, модулями и устройствами")
+        }
+
+        Boundary(ServiceLayer, "Service Layer") {
+                Component(HomeService, "HomeService", "Service", "Бизнес-логика для управления домами")
+                Component(ModuleService, "ModuleService", "Service", "Бизнес-логика для управления модулями")
+                Component(DeviceService, "DeviceService", "Service", "Бизнес-логика для управления устройствами")
+        }
+
+        Boundary(DataLayer, "Data Access Layer") {
+                Component(HomeRepository, "HomeRepository", "JpaRepository", "Репозиторий для домов")
+                Component(ModuleRepository, "ModuleRepository", "JpaRepository", "Репозиторий для модулей")
+                Component(DeviceRepository, "DeviceRepository", "JpaRepository", "Репозиторий для устройств")
+        }
+
+        Boundary(DomainModel, "Domain Model") {
+                Component(Home, "Home", "Entity", "Доменная модель дома")
+                Component(Module, "Module", "Entity", "Доменная модель модуля")
+                Component(Device, "Device", "Entity", "Доменная модель устройства")
+        }
+
+        Boundary(DtoLayer, "DTO Layer") {
+                Component(HomeDto, "HomeDto", "DTO", "Данные для создания/обновления дома")
+                Component(ModuleDto, "ModuleDto", "DTO", "Данные для создания/обновления модуля")
+                Component(DeviceDto, "DeviceDto", "DTO", "Данные для регистрации/обновления устройства")
+        }
+
+        ComponentDb(HomeDatabase, "PostgreSQL", "Home Database", "База данных HomeService")
+}
+
+SystemQueue(message_bus, "Kafka", "Message Bus", "Шина сообщений")
+
+Rel(HomeController, HomeService, "uses", "")
+Rel(HomeController, ModuleService, "uses", "")
+Rel(HomeController, DeviceService, "uses", "")
+
+Rel(HomeService, HomeRepository, "uses", "")
+Rel(ModuleService, ModuleRepository, "uses", "")
+Rel(DeviceService, DeviceRepository, "uses", "")
+
+Rel(HomeService, message_bus, "publishes to", "HomeUpdatedEvent")
+Rel(ModuleService, message_bus, "publishes to", "ModuleUpdatedEvent")
+Rel(DeviceService, message_bus, "publishes to", "DeviceUpdatedEvent")
+
+Rel(HomeRepository, HomeDatabase, "queries", "JDBC")
+Rel(ModuleRepository, HomeDatabase, "queries", "JDBC")
+Rel(DeviceRepository, HomeDatabase, "queries", "JDBC")
+
+Rel(HomeController, HomeDto, "uses", "")
+Rel(HomeController, ModuleDto, "uses", "")
+Rel(HomeController, DeviceDto, "uses", "")
+
+Rel(Home, Module, "1-n", "has modules")
+Rel(Home, Device, "1-n", "has devices")
+Rel(Module, Device, "n-n", "has devices")
+
+note top of HomeService
+        <b>Основные операции:</b>
+        * createHome(HomeDto)
+        * getHomeById(Long id)
+        * updateUserHome(Long id, HomeDto)
+        * deleteHome(Long id)
+end note
+
+note bottom of HomeDatabase
+        <b>Схема базы данных:</b>
+        * homes (id, user_id, name)
+        * modules (id, home_id, name, description)
+        * devices (id, home_id, name, type, status)
+        * module_devices (module_id, device_id)
+end note
+
+@enduml

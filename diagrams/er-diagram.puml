@@ -1,0 +1,155 @@
+@startuml
+!define ENTITY_COLOR #D2E5FF
+!define RELATION_COLOR #2C3E50
+
+
+skinparam defaultFontName "Verdana"
+skinparam defaultFontSize 12
+skinparam roundcorner 20
+
+skinparam class {
+        BackgroundColor ENTITY_COLOR
+        ArrowColor RELATION_COLOR
+        BorderColor RELATION_COLOR
+}
+
+enum UserStatus {
+        PENDING
+        ACTIVE
+        INACTIVE        
+}
+
+entity User {
+        + id: uuid [PK]
+        --
+
+        email: varchar
+        password_hash: varchar
+        first_name: varchar
+        last_name: varchar
+        status: UserStatus
+}
+
+entity Home {
+        + id: uuid [PK]
+        --
+        user_id: uuid
+        name: varchar
+}
+
+enum DeviceStatus {
+        ACTIVE
+        INACTIVE
+        PROBLEM
+}
+
+entity Device {
+        + id: uuid [PK]
+        --
+        home_id: uuid
+        name: varchar
+        type: varchar
+        status: DeviceStatus
+}
+
+entity Module {
+        + id: uuid [PK]
+        --
+        home_id: uuid
+        name: varchar
+        description: varchar
+}
+
+entity ModuleDevice {
+        + module_id: uuid [PK, FK]
+        + device_id: uuid [PK, FK]
+}
+
+entity Subscription {
+        + id: uuid [PK]
+        --
+        user_id: uuid
+        plan_type: varchar
+        start_date: timestamp
+        end_date: timestamp
+}
+
+enum PaymentStatus {
+        PENDING
+        PROCESSING
+        SUCCEEDED
+        FAILED
+        CANCELED
+        REQUIRES_ACTION
+        REFUNDED
+}
+
+entity Payment {
+        + id: uuid [PK]
+        --
+        user_id: uuid
+        subscription_id: uuid
+        amount: decimal
+        payment_date: timestamp
+        status: PaymentStatus
+}
+
+entity Schedule {
+        + id: uuid [PK]
+        --
+        name: varchar
+        cron_expression: varchar
+}
+
+enum ScriptType {
+        JAVASCRIPT
+        GROOVY
+}
+
+entity Script {
+        + id: uuid [PK]
+        --
+        name: varchar
+        body: text
+        script_type: ScriptType
+}
+
+entity Command {
+        + id: uuid [PK]
+        --
+        device_id: uuid
+        command_type: varchar
+        payload: json
+        timestamp: timestamp
+}
+
+entity Telemetry {
+        + id: uuid [PK]
+        --
+        device_id: uuid
+        data: json
+        timestamp: timestamp
+}
+
+User ||--o{ Home
+Home ||--o{ Device
+Home ||--o{ Module
+User ||--o{ Subscription
+User ||--o{ Payment
+Subscription ||--o{ Payment
+
+User -- UserStatus : has
+Device -- DeviceStatus : has
+Payment -- PaymentStatus : has
+Script -- ScriptType : has
+
+
+Module ||--|{ ModuleDevice
+Device ||--|{ ModuleDevice
+
+Device ||--o{ Command
+Device ||--o{ Telemetry
+
+Schedule ||--o{ Command
+
+@enduml

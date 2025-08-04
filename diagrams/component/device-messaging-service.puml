@@ -1,0 +1,36 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+
+skinparam wrapWidth 250
+LAYOUT_WITH_LEGEND()
+LAYOUT_TOP_DOWN()
+
+title
+        <b>Компонентная диаграмма сервиса DeviceMessagingService</b>
+end title
+
+Boundary(Infrastructure, "Инфраструктура", "domain") {
+        SystemQueue(message_bus, "Шина сообщений", "Kafka", "Асинхронная коммуникация между сервисами")
+}
+
+Boundary(UserManagement, "Домен управления пользовательскими данными", "domain") {
+        Container(HomeService, "HomeService", "Java / Spring", "Реализует управление домами, устройствами и модулями")
+}
+
+Boundary(DeviceMessaging, "Сервис коммуникации с устройствами", "domain") {
+        Component(EventHandler, "EventHandler", "Spring Kafka", "Обработчик событий")
+        
+        Rel_U(EventHandler, message_bus, "Подписка", "DeviceCommand\nDeviceSensorUpdateCommand")
+        Rel_U(EventHandler, message_bus, "Публикация", "DeviceSensorUpdateEvent")
+}
+
+Boundary(Home, "Умный дом", "domain") {
+        Container(Device, "Устройство пользователя")
+}
+
+BiRel(DeviceMessaging, Device, "Обмен сообщениями", "по протоколам IoT (AMQP, XMPP, MQTT, LwM2M, WebSocket итд)")
+Rel(DeviceMessaging, HomeService, "Запрашивает ID устройства, дома и пользователя по токену", "REST/JSON")
+
+@enduml

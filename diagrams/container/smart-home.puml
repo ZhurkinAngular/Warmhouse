@@ -1,0 +1,78 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+
+skinparam wrapWidth 300
+LAYOUT_WITH_LEGEND()
+LAYOUT_TOP_DOWN()
+
+title
+        <b>Диаграмма контейнеров системы управления умным домом</b>
+end title
+
+Person(user, "Пользователь")
+Person(admin, "Администратор")
+
+System_Boundary(smart_home_management, "Система управления умным домом"){
+        Boundary(Frontend, "Пользовательские приложения", "domain") {
+                Container(spa, "SPA", "Реализует WEB-интерфейс управления умным домом", "Typescript / React")
+                Container(admin_spa, "Admin SPA", "Реализует WEB-интерфейс для администрирования системы", "Typescript / React")
+        }
+
+        Boundary(Commons, "Внутрисервисная коммуникация", "domain") {
+                Container(api_gw, "API Gateway", "Kong/Nginx", "Маршрутизация API-запросов")
+                SystemQueue(message_bus, "Шина сообщений", "Kafka", "Асинхронная коммуникация между сервисами")
+                SystemDb(cache, "Кэш", "Redis", "Распределённый кэш данных")
+        }
+
+        Boundary(UserManagement, "Управление пользовательскими данными", "domain"){
+                Container(user_service, "UserService", "Java / Spring", "Реализует управление пользователями")
+                Container(subscription_service, "SubscriptionService", "Java / Spring", "Реализует управление тарифными планами пользователей")
+                Container(home_service, "HomeService", "Java / Spring", "Реализует управление домами, устройствами и модулями")
+                Container(payment_service, "PaymentService", "Java / Spring", "Реализует управление платежами пользователей")
+        }
+
+        Boundary(DeviceManagement, "Управление устройствами", "domain"){
+
+                Container(telemetry_service, "TelemetryService", "Java / Spring", "Реализует получение показаний датчиков с устройств пользователей")
+                Container(command_service, "CommandService", "Java / Spring", "Реализует отправку команд на изменение параметров пользовательских модулей и отдельных устройств")
+
+                Container(programming_service, "DeviceProgrammingService", "Java / Spring", "Реализует задание простых (расписание) и сложных (скрипты) сценариев работы устройств")
+
+        }
+
+        Boundary(DeviceMessaging, "Коммуникация с устройствами", "domain"){
+                Container(device_messaging_service, "DeviceMessagingService", "Java / Spring", "Реализует коммуникацию с пользовательскими устройствами, аутентификация происходит через токены, генерируемые сервисом устройств")
+        }
+        
+        Boundary(Audit, "Аудит и консистентность", "domain") {
+                Container(audit_service, "AuditService", "Java / Spring", "Обеспечивает консистентность данных между базами данных микросервисов")
+        }
+
+
+        Rel(user, spa, "Управляет умным домом используя HTTPS")
+        Rel(spa, api_gw, "Отправляет запросы в API используя HTTPS")
+        
+        Rel(admin, admin_spa, "Администрирует систему используя HTTPS")
+        Rel(admin_spa, api_gw, "Отправляет запросы в API используя HTTPS")
+
+
+        Rel(api_gw, user_service, "Управляет пользователями используя JSON/HTTP")
+        Rel(api_gw, subscription_service, "Управляет тарифными планами пользователей используя JSON/HTTP")
+        Rel(api_gw, home_service, "Управляет домами, устройствами и модулями используя JSON/HTTP")
+
+        Rel(api_gw, telemetry_service, "Получает показания датчиков с устройств пользователей используя JSON/HTTP")
+        Rel(api_gw, command_service, "Отправляет команды на изменение параметров пользовательских устройств используя JSON/HTTP")
+        Rel(api_gw, programming_service, "Задаёт сценарии работы пользовательских устройств и модулей используя JSON/HTTP")
+
+        Rel(programming_service, command_service, "Отправляет команды на изменение параметров пользовательских устройств используя JSON/HTTP")
+        Rel(audit_service, message_bus, "Подписывается на события изменения данных", "Kafka")
+
+}
+
+System_Boundary(smart_home, "Умный дом"){
+        Container(device, "Device", "Пользовательское устройство")
+}
+
+BiRel_D(device, device_messaging_service, "Обмениваются сообщениями по протоколам IoT (AMQP, XMPP, MQTT, LwM2M, WebSocket итд)")
+@enduml

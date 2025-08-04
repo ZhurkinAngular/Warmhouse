@@ -1,0 +1,138 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+
+skinparam wrapWidth 200
+skinparam monochrome false
+LAYOUT_WITH_LEGEND()
+LAYOUT_TOP_DOWN()
+
+title Диаграмма кода для UserService
+
+Boundary(UserServiceContainer, "UserService Container", "Spring Boot Application") {
+        
+        Boundary(ApiLayer, "API Layer") {
+                Component(RegistrationController, "RegistrationController", "RestController", "Обработка регистрации пользователей")
+                Component(AuthenticationController, "AuthenticationController", "RestController", "Управление аутентификацией")
+        }
+        
+        Boundary(ServiceLayer, "Service Layer") {
+                Component(UserService, "UserService", "Service", "Основная бизнес-логика пользователей")
+                Component(AuthenticationService, "AuthenticationService", "Service", "Логика аутентификации")
+                Component(EventPublishingService, "EventPublishingService", "Service", "Публикация доменных событий")
+                Component(ValidationService, "ValidationService", "Service", "Валидация пользовательских данных")
+        }
+        
+        Boundary(EventHandlers, "Event Handlers") {
+                Component(UserSuspendCommandHandler, "UserSuspendCommandHandler", "EventHandler", "Обработка команд блокировки из шины сообщений")
+                Component(UserActivatedEventHandler, "UserActivatedEventHandler", "EventHandler", "Обработка событий активации пользователей")
+                Component(UserActivateCommandHandler, "UserActivateCommandHandler", "EventHandler", "Обработка команд активации из шины сообщений")
+        }
+        
+        Boundary(SecurityLayer, "Security Layer") {
+                Component(PasswordEncoder, "PasswordEncoder", "BCryptPasswordEncoder", "Хеширование паролей")
+                Component(JwtTokenProvider, "JwtTokenProvider", "JWT Utility", "Работа с JWT токенами")
+                Component(SecurityContextHolder, "SecurityContextHolder", "Spring Security", "Контекст безопасности")
+        }
+        
+        Boundary(DataLayer, "Data Access Layer") {
+                Component(UserRepository, "UserRepository", "JpaRepository", "Репозиторий пользователей")
+                Component(UserSessionRepository, "UserSessionRepository", "JpaRepository", "Репозиторий сессий")
+                Component(AuditLogRepository, "AuditLogRepository", "JpaRepository", "Репозиторий аудита")
+        }
+        
+        Boundary(DomainModel, "Domain Model") {
+                Component(User, "User", "Entity", "Доменная модель пользователя")
+                Component(UserSession, "UserSession", "Entity", "Модель пользовательской сессии")
+                Component(AuditLog, "AuditLog", "Entity", "Модель записи аудита")
+                Component(UserStatus, "UserStatus", "Enum", "Статусы пользователя")
+        }
+        
+        Boundary(DtoLayer, "DTO Layer") {
+                Component(UserRegistrationDto, "UserRegistrationDto", "DTO", "Данные для регистрации")
+                Component(UserLoginDto, "UserLoginDto", "DTO", "Данные для входа")
+                Component(UserProfileDto, "UserProfileDto", "DTO", "Профиль пользователя")
+                Component(AuthTokenDto, "AuthTokenDto", "DTO", "Токен аутентификации")
+        }
+        
+        ComponentDb(UserDatabase, "PostgreSQL", "User Database", "База данных UserService")
+        
+}
+SystemQueue(message_bus, "Kafka", "Message Bus", "Шина сообщений")
+
+Rel(RegistrationController, UserService, "uses", "registerUser()")
+Rel(RegistrationController, ValidationService, "uses", "validateRegistration()")
+Rel(AuthenticationController, AuthenticationService, "uses", "authenticate()")
+
+Rel(UserService, UserRepository, "uses", "save(), findById()")
+Rel(UserService, AuditLogRepository, "uses", "save()")
+Rel(UserService, EventPublishingService, "uses", "publishEvent()")
+Rel(AuthenticationService, UserRepository, "uses", "findByEmail()")
+Rel(AuthenticationService, UserSessionRepository, "uses", "save(), findActive()")
+Rel(AuthenticationService, PasswordEncoder, "uses", "encode(), matches()")
+Rel(AuthenticationService, JwtTokenProvider, "uses", "generateToken()")
+
+Rel(UserSuspendCommandHandler, UserService, "uses", "suspendUser()")
+Rel(UserActivatedEventHandler, UserService, "uses", "activateUser()")
+Rel(UserActivateCommandHandler, UserService, "uses", "activateUser()")
+Rel(message_bus, UserSuspendCommandHandler, "delivers", "UserSuspendCommand")
+Rel(message_bus, UserActivatedEventHandler, "delivers", "UserActivatedEvent")
+Rel(message_bus, UserActivateCommandHandler, "delivers", "UserActivateCommand")
+
+Rel(UserRepository, User, "manages", "")
+Rel(UserSessionRepository, UserSession, "manages", "")
+Rel(AuditLogRepository, AuditLog, "manages", "")
+Rel(UserRepository, UserDatabase, "queries", "JDBC")
+Rel(UserSessionRepository, UserDatabase, "queries", "JDBC")
+Rel(AuditLogRepository, UserDatabase, "queries", "JDBC")
+
+Rel(RegistrationController, UserRegistrationDto, "uses", "")
+Rel(AuthenticationController, UserLoginDto, "uses", "")
+Rel(AuthenticationController, UserProfileDto, "returns", "")
+Rel(AuthenticationController, AuthTokenDto, "returns", "")
+
+Rel(User, UserStatus, "has", "")
+Rel(UserSession, User, "belongs to", "")
+Rel(AuditLog, User, "tracks", "")
+
+Rel(EventPublishingService, message_bus, "publishes to", "UserRegisteredEvent, UserSuspendedEvent, UserSuspendCommand, UserActivateCommand")
+
+Rel(AuthenticationController, SecurityContextHolder, "uses", "getContext()")
+Rel(JwtTokenProvider, SecurityContextHolder, "sets", "authentication")
+
+note top of UserService
+        <b>Основные операции:</b>
+        • registerUser(UserRegistrationDto)
+        • getUserProfile(Long userId)  
+        • suspendUser(Long userId)
+        • activateUser(Long userId)
+        • updateUserProfile(UserProfileDto)
+end note
+
+note top of AuthenticationService
+        <b>Методы аутентификации:</b>
+        • authenticate(UserLoginDto)
+        • refreshToken(String token)
+        • logout(String token)
+        • validateSession(String token)
+end note
+
+note bottom of UserDatabase
+        <b>Схема базы данных:</b>
+        • users (id, email, password_hash, first_name, last_name, status, created_at)
+        • user_sessions (id, user_id, token_hash, expires_at, created_at)
+        • audit_log (id, user_id, action, details, timestamp)
+end note
+
+note right of message_bus
+        <b>Публикуемые события и команды:</b>
+        • UserRegisteredEvent
+        • UserSuspendedEvent  
+        • UserActivatedEvent
+        • UserProfileUpdateEvent
+        • UserSuspendCommand
+        • UserActivateCommand
+end note
+
+@enduml

@@ -1,0 +1,94 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+
+skinparam wrapWidth 250
+skinparam monochrome false
+LAYOUT_WITH_LEGEND()
+LAYOUT_TOP_DOWN()
+
+title Диаграмма кода для ProgrammingService
+
+Boundary(ProgrammingServiceContainer, "ProgrammingService Container", "Spring Boot Application") {
+
+        Boundary(ApiLayer, "API Layer") {
+                Component(ScheduleController, "ScheduleController", "RestController", "Управление расписаниями")
+                Component(ScriptingController, "ScriptingController", "RestController", "Управление сценариями")
+        }
+
+        Boundary(ServiceLayer, "Service Layer") {
+                Component(SchedulingService, "SchedulingService", "Service", "Бизнес-логика для управления расписаниями")
+                Component(ScriptingService, "ScriptingService", "Service", "Бизнес-логика для управления сценариями")
+                Component(JobExecutionService, "JobExecutionService", "Service", "Выполнение запланированных задач")
+        }
+
+        Boundary(DataLayer, "Data Access Layer") {
+                Component(ScheduleRepository, "ScheduleRepository", "JpaRepository", "Репозиторий для расписаний")
+                Component(ScriptRepository, "ScriptRepository", "JpaRepository", "Репозиторий для сценариев")
+                Component(JobRepository, "JobRepository", "JpaRepository", "Репозиторий для задач")
+        }
+
+        Boundary(DomainModel, "Domain Model") {
+                Component(Schedule, "Schedule", "Entity", "Доменная модель расписания")
+                Component(Script, "Script", "Entity", "Доменная модель сценария")
+                Component(Job, "Job", "Entity", "Доменная модель задачи")
+                Component(Trigger, "Trigger", "Value Object", "Условие срабатывания")
+        }
+
+        Boundary(DtoLayer, "DTO Layer") {
+                Component(ScheduleDto, "ScheduleDto", "DTO", "Данные для создания/обновления расписания")
+                Component(ScriptDto, "ScriptDto", "DTO", "Данные для создания/обновления сценария")
+        }
+
+        ComponentDb(ProgrammingDatabase, "PostgreSQL", "Programming Database", "База данных ProgrammingService")
+}
+
+SystemQueue(message_bus, "Kafka", "Message Bus", "Шина сообщений")
+
+Rel(ScheduleController, SchedulingService, "uses", "create/update/delete/get")
+Rel(ScriptingController, ScriptingService, "uses", "create/update/delete/get")
+
+Rel(SchedulingService, ScheduleRepository, "uses", "save, findById, etc.")
+Rel(ScriptingService, ScriptRepository, "uses", "save, findById, etc.")
+Rel(JobExecutionService, JobRepository, "uses", "findDueJobs, save")
+Rel(JobExecutionService, message_bus, "publishes to", "SendCommand")
+
+
+Rel(ScheduleRepository, ProgrammingDatabase, "queries", "JDBC")
+Rel(ScriptRepository, ProgrammingDatabase, "queries", "JDBC")
+Rel(JobRepository, ProgrammingDatabase, "queries", "JDBC")
+
+Rel(ScheduleController, ScheduleDto, "uses", "")
+Rel(ScriptingController, ScriptDto, "uses", "")
+
+Rel(Schedule, Job, "1-n", "has jobs")
+Rel(Script, Job, "1-n", "has jobs")
+Rel(Job, Trigger, "has", "")
+
+
+note top of SchedulingService
+        <b>Основные операции:</b>
+        * createSchedule(ScheduleDto)
+        * getScheduleById(Long id)
+        * updateSchedule(Long id, ScheduleDto)
+        * deleteSchedule(Long id)
+end note
+
+note top of ScriptingService
+        <b>Основные операции:</b>
+        * createScript(ScriptDto)
+        * getScriptById(Long id)
+        * updateScript(Long id, ScriptDto)
+        * deleteScript(Long id)
+end note
+
+note bottom of ProgrammingDatabase
+        <b>Схема базы данных:</b>
+        * schedules (id, name, cron_expression)
+        * scripts (id, name, type, body)
+        * jobs (id, schedule_id, script_id, status)
+        * triggers (id, job_id, type, condition)
+end note
+
+@enduml
