@@ -74,9 +74,7 @@
 
 ### 5. Визуализация контекста системы — диаграмма С4
 
-```markdown
 [Схема C4 PlauntUML](https://github.com/Mkuzya/architecture-warmhouse/blob/main/apps/smart_home/schemas/C4.Visualize_system_context.png)
-```
 
 # Задание 2. Проектирование микросервисной архитектуры
 
