@@ -1,0 +1,18 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+Container(temperatureService, "Temperature Service", "Go", "Обработка данных температуры") {
+
+  Component(apiHandler, "API Handler", "Обработка REST/gRPC запросов от API Gateway")
+  Component(dataValidator, "Data Validator", "Проверка корректности данных с датчиков")
+  Component(dataAggregator, "Data Aggregator", "Агрегация и подготовка данных для анализа")
+  Component(storageClient, "Storage Client", "Сохраняет данные во TimescaleDB")
+  Component(alertManager, "Alert Manager", "Обработка аномалий и генерация алертов")
+
+  Rel(apiHandler, dataValidator, "Передаёт данные на проверку")
+  Rel(dataValidator, dataAggregator, "Передаёт валидные данные")
+  Rel(dataAggregator, storageClient, "Сохраняет агрегированные данные")
+  Rel(dataAggregator, alertManager, "Отправляет на проверку аномалий")
+  Rel(alertManager, apiHandler, "Отправляет алерты или уведомления")
+}
+@enduml
