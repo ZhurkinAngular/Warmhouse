@@ -74,7 +74,7 @@
 
 ### 5. Визуализация контекста системы — диаграмма С4
 
-[Схема C4 PlauntUML](https://github.com/Mkuzya/architecture-warmhouse/blob/main/apps/smart_home/schemas/C4.Visualize_system_context.png)
+[Схема Context](https://github.com/Mkuzya/architecture-warmhouse/blob/main/apps/smart_home/schemas/C4.Visualize_system_context.png)
 
 # Задание 2. Проектирование микросервисной архитектуры
 
@@ -82,25 +82,36 @@
 
 **Диаграмма контейнеров (Containers)**
 
-Добавьте диаграмму.
+[Схема C4 Containers](https://github.com/Mkuzya/architecture-warmhouse/blob/main/apps/smart_home/schemas/C4.Visualize_system_Containers.png)
 
 **Диаграмма компонентов (Components)**
 
-Добавьте диаграмму для каждого из выделенных микросервисов.
+[Схема Components Device Service](https://github.com/Mkuzya/architecture-warmhouse/blob/main/apps/smart_home/schemas/C4.Visualize_system_Components_Device_Service.png)
+[Схема Components Heating Service](https://github.com/Mkuzya/architecture-warmhouse/blob/main/apps/smart_home/schemas/C4.Visualize_system_Components_Heating_Service.png)
+[Схема Components Notification Service](https://github.com/Mkuzya/architecture-warmhouse/blob/main/apps/smart_home/schemas/C4.Visualize_system_Components_Notification_Service.png)
+[Схема Components Temperature Service](https://github.com/Mkuzya/architecture-warmhouse/blob/main/apps/smart_home/schemas/C4.Visualize_system_Components_Temperature_Service.png)
+[Схема Components User Service](https://github.com/Mkuzya/architecture-warmhouse/blob/main/apps/smart_home/schemas/C4.Visualize_system_Components_User_Service.png)
 
 **Диаграмма кода (Code)**
 
-Добавьте одну диаграмму или несколько.
+Возьмём самый критичный микросервис — Heating Service, так как он содержит бизнес-логику управления отоплением, взаимодействует с устройствами и хранит состояние.
+[Схема Components_Heating_Service_sequence](https://github.com/Mkuzya/architecture-warmhouse/blob/main/apps/smart_home/schemas/C4.Visualize_system_Components_Heating_Service_sequence.png)
+[Схема Components_Heating_Service_class](https://github.com/Mkuzya/architecture-warmhouse/blob/main/apps/smart_home/schemas/C4.Visualize_system_Components_Heating_Service_class.png)
 
 # Задание 3. Разработка ER-диаграммы
 
-Добавьте сюда ER-диаграмму. Она должна отражать ключевые сущности системы, их атрибуты и тип связей между ними.
+[Общая ER-диаграмма](https://github.com/Mkuzya/architecture-warmhouse/blob/main/apps/smart_home/schemas/C4.Visualize_system_ER.png)
 
 # Задание 4. Создание и документирование API
 
 ### 1. Тип API
 
-Укажите, какой тип API вы будете использовать для взаимодействия микросервисов. Объясните своё решение.
+REST API. Он хорошо подходит для синхронного взаимодействия, когда клиенту (в данном случае — другому микросервису) нужен немедленный ответ на запрос
+- Все сервисы общаются по синхронным HTTP(S) запросам
+- Запросы — CRUD операции, команды управления, получение статусов и данных
+- Ошибки и ответы обрабатываются сразу, клиент ждёт подтверждения
+- Логирование и мониторинг проще — трассировка цепочек вызовов через HTTP
+- Упрощается отладка и тестирование
 
 ### 2. Документация API
 
