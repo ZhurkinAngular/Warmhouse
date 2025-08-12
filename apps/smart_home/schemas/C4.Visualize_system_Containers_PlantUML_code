@@ -1,0 +1,60 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+Person(user, "Пользователь", "Владелец дома, использующий веб-интерфейс")
+Person(admin, "Администратор", "Управляет ролями и устройствами")
+
+System_Ext(devices, "Физические устройства", "Датчики температуры, контроллеры отопления")
+
+System_Boundary(tolpiyDom, "Тёплый дом - Упрощённая микросервисная архитектура") {
+
+  Container(apiGateway, "API Gateway", "Nginx/Kong", "Точка входа, маршрутизация и аутентификация")
+
+  Container(deviceService, "Device Service", "Go", "Коммуникация с физическими устройствами, получение данных с датчиков, отправка команд управления")
+  ContainerDb(deviceDb, "Device DB", "MongoDB", "Метаданные устройств и их состояния")
+
+  Container(temperatureService, "Temperature Service", "Go", "Обработка, валидация и хранение данных температуры")
+  ContainerDb(temperatureDb, "Temperature DB", "TimescaleDB", "Временные ряды температурных данных")
+
+  Container(heatingService, "Heating Service", "Go", "Управление включением/выключением отопления, расписания, хранение состояния")
+  ContainerDb(heatingDb, "Heating DB", "PostgreSQL", "Данные состояния отопления и расписаний")
+
+  Container(userService, "User Service", "Go", "Регистрация, авторизация, управление аккаунтами")
+  ContainerDb(userDb, "User DB", "PostgreSQL", "Данные пользователей и права доступа")
+
+  Container(notificationService, "Notification Service", "Go", "Отправка уведомлений и алертов")
+  ContainerDb(notificationDb, "Notification DB", "Redis", "Очередь и история уведомлений")
+
+  Container(webUserUI, "Web User Interface", "React", "Пользовательский веб-интерфейс")
+  Container(webAdminUI, "Web Admin Panel", "React", "Админская панель управления")
+}
+
+Rel(user, webUserUI, "Использует")
+Rel(admin, webAdminUI, "Использует")
+
+Rel(webUserUI, apiGateway, "HTTPS")
+Rel(webAdminUI, apiGateway, "HTTPS")
+
+Rel(apiGateway, userService, "REST/gRPC - Авторизация и права доступа")
+Rel(apiGateway, heatingService, "REST/gRPC - Управление отоплением (вкл/выкл, расписания)")
+Rel(apiGateway, temperatureService, "REST/gRPC - Получение данных температуры")
+Rel(apiGateway, deviceService, "REST/gRPC - Управление устройствами и приём данных с датчиков")
+Rel(apiGateway, notificationService, "REST/gRPC - Отправка уведомлений")
+
+Rel(deviceService, deviceDb, "MongoDB - Хранение метаданных устройств и их состояний")
+Rel(temperatureService, temperatureDb, "TimescaleDB - Хранение временных рядов температуры")
+Rel(heatingService, heatingDb, "PostgreSQL - Хранение состояния отопления и расписаний")
+Rel(userService, userDb, "PostgreSQL - Хранение пользователей и прав доступа")
+Rel(notificationService, notificationDb, "Redis - Очередь уведомлений и их история")
+
+Rel(devices, deviceService, "Передаёт данные, получает команды управления")
+Rel(deviceService, devices, "Отправляет команды и получает статусы")
+
+Rel(deviceService, temperatureService, "REST API / Сообщения - Передача данных с датчиков температуры")
+Rel(heatingService, deviceService, "REST API - Отправка команд управления отоплением и получение статусов")
+Rel(deviceService, heatingService, "REST API - Передача статусов устройств и подтверждений команд")
+
+Rel(heatingService, notificationService, "Асинхронные события - аварии и уведомления")
+Rel(temperatureService, notificationService, "Асинхронные события - алерты")
+
+@enduml
