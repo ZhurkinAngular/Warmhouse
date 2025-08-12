@@ -1,0 +1,17 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+Container(notificationService, "Notification Service", "Go", "Отправка уведомлений и алертов") {
+
+  Component(apiHandler, "API Handler", "Приём запросов на отправку уведомлений")
+  Component(queueManager, "Queue Manager", "Очередь уведомлений, управление повторными попытками")
+  Component(notificationSender, "Notification Sender", "Отправляет уведомления (email, SMS, push и т.д.)")
+  Component(templateManager, "Template Manager", "Управление шаблонами сообщений")
+  Component(notificationRepository, "Notification Repository", "Хранит историю отправленных уведомлений и статусы")
+
+  Rel(apiHandler, queueManager, "Ставит уведомления в очередь")
+  Rel(queueManager, notificationSender, "Обрабатывает очередь и отправляет уведомления")
+  Rel(notificationSender, notificationRepository, "Логирует статус отправки")
+  Rel(apiHandler, templateManager, "Использует шаблоны сообщений")
+}
+@enduml
