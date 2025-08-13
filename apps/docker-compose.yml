@@ -1,36 +1,25 @@
-version: '3.8'
-
+version: "3.9"
 services:
-  postgres:
-    image: postgres:16-alpine
-    container_name: smarthome-postgres
-  ## тут нужно добавить настройки
-
   temperature-api:
-  ## тут нужно добавить приложение
-
-  app:
-    build:
-      context: ./smart_home
-      dockerfile: Dockerfile
-    container_name: smarthome-app
-    depends_on:
-      postgres:
-        condition: service_healthy
-      temperature-api:
-        condition: service_started
-    environment:
-      - DATABASE_URL=postgres://postgres:postgres@postgres:5432/smarthome
-      - TEMPERATURE_API_URL=http://temperature-api:8081
+    build: .
     ports:
-      - "8080:8080"
-    restart: unless-stopped
-    networks:
-      - smarthome-network
+      - "8081:8081"
+    depends_on:
+      - postgres
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: smarthome
+      POSTGRES_USER: smarthome
+      POSTGRES_PASSWORD: smarthome
 
-volumes:
-  postgres_data:
-
-networks:
-  smarthome-network:
-    driver: bridge
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: smarthome
+      POSTGRES_PASSWORD: smarthome
+      POSTGRES_DB: smarthome
+    volumes:
+      - ./smart_home/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
