@@ -1,0 +1,32 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+Person(user, "Пользователь", "Владелец дома, использующий веб-интерфейс")
+Person(admin, "Администратор", "Управляет ролями пользователей и устройствами через админ-панель")
+
+System_Boundary(monolith, "Тёплый дом") {
+' Домены и поддомены
+  Container(heatingManagement, "Heating Management", "Включение/выключение отопления, сохранение состояния, связь с устройством")
+  Container(temperatureMonitoring, "Temperature Monitoring", "Запрос показаний с датчика, связь с устройством")
+  Container(deviceParameters, "Device Parameters", "Параметры устройств, расположение, обновление ПО")
+  Container(userManagement, "User Management", "Регистрация, авторизация, управление аккаунтом и просмотр устройств")
+  Container(webUserInterface, "Web Interface (User)", "Пользовательский веб-интерфейс для управления отоплением, мониторингом и аккаунтом")
+  Container(webAdminPanel, "Admin Panel", "Административный интерфейс для управления ролями и устройствами")
+}
+
+' Взаимодействия пользователя и админа с интерфейсами
+Rel(user, webUserInterface, "Использует")
+Rel(admin, webAdminPanel, "Использует")
+
+' Взаимодействия веб-интерфейсов с доменами
+Rel(webUserInterface, heatingManagement, "Управляет отоплением")
+Rel(webUserInterface, temperatureMonitoring, "Просматривает данные температуры")
+Rel(webUserInterface, userManagement, "Авторизуется и управляет аккаунтом, просматривает устройства")
+Rel(webAdminPanel, userManagement, "Управляет ролями пользователей")
+Rel(webAdminPanel, deviceParameters, "Добавляет / редактирует / удаляет устройства")
+
+' Взаимодействия доменов между собой
+Rel(heatingManagement, deviceParameters, "Обменивается данными об устройствах")
+Rel(temperatureMonitoring, deviceParameters, "Запрашивает данные устройств")
+Rel(deviceParameters, userManagement, "Проверяет права доступа пользователей")
+@enduml

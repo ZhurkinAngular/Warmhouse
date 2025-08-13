@@ -1,0 +1,18 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+Container(userService, "User Service", "Go", "Регистрация, авторизация, управление аккаунтами") {
+
+  Component(apiHandler, "API Handler", "Обрабатывает REST/gRPC запросы от API Gateway")
+  Component(authManager, "Authentication Manager", "Обрабатывает логин/логаут, выдачу токенов")
+  Component(userRepository, "User Repository", "Работа с базой данных пользователей и прав доступа")
+  Component(roleManager, "Role Manager", "Управление ролями и правами пользователей")
+  Component(passwordHasher, "Password Hasher", "Хэширование и проверка паролей")
+
+  Rel(apiHandler, authManager, "Обрабатывает аутентификацию")
+  Rel(apiHandler, userRepository, "Запросы к данным пользователей")
+  Rel(apiHandler, roleManager, "Управление ролями и правами")
+  Rel(authManager, passwordHasher, "Хэширует/проверяет пароли")
+  Rel(userRepository, passwordHasher, "Хранит хэшированные пароли")
+}
+@enduml

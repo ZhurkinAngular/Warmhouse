@@ -1,0 +1,22 @@
+@startuml
+actor User
+participant "Web UI"
+participant "API Gateway"
+participant "Heating Service: API Handler"
+participant "Heating Controller"
+participant "DeviceCommClient"
+participant "StateRepository"
+participant "Device Service"
+
+User -> "Web UI" : нажимает 'Включить отопление'
+"Web UI" -> "API Gateway" : POST /heating/on
+"API Gateway" -> "Heating Service: API Handler" : Передаёт запрос
+"Heathing Service: API Handler" -> "Heating Controller" : turnOn()
+"Heathing Controller" -> "DeviceCommClient" : sendCommand(deviceId, ON)
+"DeviceCommClient" -> "Device Service" : REST вызов с командой включения
+"Device Service" -> "DeviceCommClient" : подтверждение выполнения
+"Heating Controller" -> "StateRepository" : saveState(HeatingState(isOn=true))
+"Heating Controller" -> "Heating Controller" : обновляет локальное состояние
+"Heathing Service: API Handler" -> "API Gateway" : 200 OK
+"API Gateway" -> "Web UI" : 200 OK
+"Web UI" -> User : отображает успешное включение отопления

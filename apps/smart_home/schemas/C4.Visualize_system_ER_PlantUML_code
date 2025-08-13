@@ -1,0 +1,138 @@
+@startuml
+package "User Service" {
+  entity "User" as User {
+    *id : UUID <<PK>>
+    --
+    username : VARCHAR
+    email : VARCHAR
+    password_hash : VARCHAR
+    role_id : UUID <<FK>>
+    created_at : TIMESTAMP
+    updated_at : TIMESTAMP
+  }
+
+  entity "Role" as Role {
+    *id : UUID <<PK>>
+    --
+    name : VARCHAR
+  }
+}
+
+package "Device Service" {
+  entity "DeviceType" as DeviceType {
+    *id : UUID <<PK>>
+    --
+    name : VARCHAR
+    description : TEXT
+  }
+
+  entity "House" as House {
+    *id : UUID <<PK>>
+    --
+    user_id : UUID <<FK>>
+    address : VARCHAR
+    name : VARCHAR
+    created_at : TIMESTAMP
+    updated_at : TIMESTAMP
+  }
+
+  entity "Device" as Device {
+    *id : UUID <<PK>>
+    --
+    type_id : UUID <<FK>>
+    house_id : UUID <<FK>>
+    serial_number : VARCHAR
+    status : VARCHAR
+    location_description : VARCHAR
+    created_at : TIMESTAMP
+    updated_at : TIMESTAMP
+  }
+
+  entity "Module" as Module {
+    *id : UUID <<PK>>
+    --
+    device_id : UUID <<FK>>
+    name : VARCHAR
+    firmware_version : VARCHAR
+    status : VARCHAR
+    created_at : TIMESTAMP
+    updated_at : TIMESTAMP
+  }
+}
+
+package "Heating Service" {
+  entity "HeatingState" as HeatingState {
+    *id : UUID <<PK>>
+    --
+    device_id : UUID <<FK>>
+    is_on : BOOLEAN
+    last_changed : TIMESTAMP
+    temperature_target : FLOAT
+    created_at : TIMESTAMP
+    updated_at : TIMESTAMP
+  }
+
+  entity "Schedule" as Schedule {
+    *id : UUID <<PK>>
+    --
+    heating_state_id : UUID <<FK>>
+    start_time : TIME
+    end_time : TIME
+    days_of_week : VARCHAR
+    enabled : BOOLEAN
+    created_at : TIMESTAMP
+    updated_at : TIMESTAMP
+  }
+}
+
+package "Temperature Service" {
+  entity "TelemetryData" as TelemetryData {
+    *id : UUID <<PK>>
+    --
+    device_id : UUID <<FK>>
+    timestamp : TIMESTAMP
+    temperature : FLOAT
+    humidity : FLOAT
+    pressure : FLOAT
+    other_metrics : JSON
+    created_at : TIMESTAMP
+  }
+}
+
+package "Notification Service" {
+  entity "Notification" as Notification {
+    *id : UUID <<PK>>
+    --
+    user_id : UUID <<FK>>
+    template_id : UUID <<FK>>
+    status : VARCHAR
+    sent_at : TIMESTAMP
+    created_at : TIMESTAMP
+  }
+
+  entity "NotificationTemplate" as NotificationTemplate {
+    *id : UUID <<PK>>
+    --
+    name : VARCHAR
+    type : VARCHAR
+    subject : VARCHAR
+    body : TEXT
+    created_at : TIMESTAMP
+    updated_at : TIMESTAMP
+  }
+}
+
+' Связи между сущностями из разных пакетов
+
+Role ||--o{ User : "пользователи имеют роль"
+User ||--o{ House : "пользователь владеет"
+House ||--o{ Device : "дом содержит"
+DeviceType ||--o{ Device : "тип устройства"
+Device ||--o{ Module : "устройство содержит"
+Device ||--o{ HeatingState : "устройство имеет"
+HeatingState ||--o{ Schedule : "содержит"
+Device ||--o{ TelemetryData : "генерирует"
+User ||--o{ Notification : "получает"
+NotificationTemplate ||--o{ Notification : "используется в"
+
+@enduml

@@ -1,0 +1,37 @@
+@startuml
+class HeatingController {
+  +turnOn()
+  +turnOff()
+  +setSchedule(schedule: Schedule)
+  +getState(): HeatingState
+}
+
+class Schedule {
+  -startTime: DateTime
+  -endTime: DateTime
+  -daysOfWeek: List<DayOfWeek>
+  +isActive(now: DateTime): bool
+}
+
+class HeatingState {
+  -isOn: bool
+  -lastChanged: DateTime
+  +getStatus(): string
+}
+
+class DeviceCommClient {
+  +sendCommand(deviceId: String, command: Command): bool
+  +getStatus(deviceId: String): DeviceStatus
+}
+
+class StateRepository {
+  +saveState(state: HeatingState)
+  +loadState(): HeatingState
+  +saveSchedule(schedule: Schedule)
+  +loadSchedule(): Schedule
+}
+
+HeatingController --> StateRepository : сохраняет / загружает состояние и расписания
+HeatingController --> DeviceCommClient : отправляет команды устройствам
+HeatingController --> HeatingState : хранит текущее состояние
+HeatingController --> Schedule : управляет расписанием

@@ -1,0 +1,20 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+Container(heatingService, "Heating Service", "Go", "Управление отоплением") {
+
+  Component(apiHandler, "API Handler", "Обрабатывает REST/gRPC запросы от API Gateway")
+  Component(authzChecker, "Authorization Checker", "Проверяет права доступа пользователя")
+  Component(heatingController, "Heating Controller", "Логика включения/выключения отопления и расписаний")
+  Component(deviceCommClient, "Device Communication Client", "Отправляет команды устройствам через Device Service")
+  Component(scheduleManager, "Schedule Manager", "Управляет расписаниями включения/выключения")
+  Component(stateRepository, "Heating State Repository", "Хранение текущего состояния отопления и расписаний в PostgreSQL")
+
+  Rel(apiHandler, authzChecker, "Проверяет права")
+  Rel(apiHandler, heatingController, "Передаёт команды управления")
+  Rel(heatingController, scheduleManager, "Запрашивает и обновляет расписания")
+  Rel(heatingController, deviceCommClient, "Отправляет команды устройствам")
+  Rel(heatingController, stateRepository, "Читает/сохраняет состояние отопления")
+  Rel(scheduleManager, stateRepository, "Читает/сохраняет расписания")
+}
+@enduml

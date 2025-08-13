@@ -1,0 +1,19 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+Container(deviceService, "Device Service", "Go", "Коммуникация с физическими устройствами") {
+
+  Component(apiHandler, "API Handler", "Обрабатывает REST/gRPC запросы от других сервисов и API Gateway")
+  Component(deviceCommManager, "Device Communication Manager", "Управляет подключениями к физическим устройствам (MQTT, WebSocket, HTTP)")
+  Component(commandProcessor, "Command Processor", "Обрабатывает команды управления устройствами и отправляет на устройства")
+  Component(stateManager, "Device State Manager", "Отслеживает и хранит текущее состояние устройств")
+  Component(metadataRepository, "Metadata Repository", "Работа с базой данных MongoDB — метаданные и конфигурации устройств")
+
+  Rel(apiHandler, commandProcessor, "Передаёт команды управления")
+  Rel(commandProcessor, deviceCommManager, "Отправляет команды на устройства")
+  Rel(deviceCommManager, stateManager, "Получает обновления состояния устройств")
+  Rel(stateManager, metadataRepository, "Читает и сохраняет состояние устройств")
+  Rel(apiHandler, stateManager, "Запрашивает состояние устройств")
+  Rel(apiHandler, metadataRepository, "Читает метаданные устройств")
+}
+@enduml

@@ -1,0 +1,308 @@
+openapi: 3.0.3
+info:
+  title: Smart Home Microservices API
+  version: 1.0.0
+servers:
+  - url: https://api.smarthome.local
+
+paths:
+  /users/{id}:
+    get:
+      summary: Получить данные пользователя
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Данные пользователя
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+              examples:
+                example-1:
+                  value:
+                    id: "uuid-1234"
+                    username: "john_doe"
+                    email: "john@example.com"
+                    role_id: "role-uuid-1"
+                    created_at: "2025-08-12T10:00:00Z"
+                    updated_at: "2025-08-13T12:00:00Z"
+        '404':
+          description: Пользователь не найден
+        '500':
+          description: Ошибка сервера
+
+  /devices/{id}:
+    get:
+      summary: Получить информацию об устройстве
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Информация об устройстве
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Device'
+        '404':
+          description: Устройство не найдено
+        '500':
+          description: Ошибка сервера
+
+  /heating-states/{id}:
+    put:
+      summary: Обновить состояние отопления устройства
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HeatingStateUpdate'
+            examples:
+              example-1:
+                value:
+                  is_on: true
+                  temperature_target: 22.5
+      responses:
+        '200':
+          description: Состояние отопления обновлено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HeatingState'
+        '400':
+          description: Неверный запрос
+        '404':
+          description: Состояние не найдено
+        '500':
+          description: Ошибка сервера
+
+  /telemetry/{device_id}/latest:
+    get:
+      summary: Получить последние данные телеметрии устройства
+      parameters:
+        - in: path
+          name: device_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Последняя запись телеметрии
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TelemetryData'
+        '404':
+          description: Данные не найдены
+        '500':
+          description: Ошибка сервера
+
+  /notifications:
+    post:
+      summary: Создать новое уведомление
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NotificationCreate'
+            examples:
+              example-1:
+                value:
+                  user_id: "user-uuid-1"
+                  template_id: "template-uuid-1"
+                  status: "pending"
+      responses:
+        '201':
+          description: Уведомление создано
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notification'
+        '400':
+          description: Неверный запрос
+        '500':
+          description: Ошибка сервера
+
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        username:
+          type: string
+        email:
+          type: string
+          format: email
+        role_id:
+          type: string
+          format: uuid
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - id
+        - username
+        - email
+        - role_id
+
+    Device:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        type_id:
+          type: string
+          format: uuid
+        house_id:
+          type: string
+          format: uuid
+        serial_number:
+          type: string
+        status:
+          type: string
+          enum:
+            - online
+            - offline
+            - maintenance
+        location_description:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - id
+        - type_id
+        - house_id
+        - serial_number
+
+    HeatingStateUpdate:
+      type: object
+      properties:
+        is_on:
+          type: boolean
+        temperature_target:
+          type: number
+          format: float
+      required:
+        - is_on
+
+    HeatingState:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        device_id:
+          type: string
+          format: uuid
+        is_on:
+          type: boolean
+        temperature_target:
+          type: number
+          format: float
+        last_changed:
+          type: string
+          format: date-time
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - id
+        - device_id
+        - is_on
+
+    TelemetryData:
+      type: object
+      properties:
+        device_id:
+          type: string
+          format: uuid
+        timestamp:
+          type: string
+          format: date-time
+        temperature:
+          type: number
+          format: float
+        humidity:
+          type: number
+          format: float
+        pressure:
+          type: number
+          format: float
+        other_metrics:
+          type: object
+      required:
+        - device_id
+        - timestamp
+
+    NotificationCreate:
+      type: object
+      properties:
+        user_id:
+          type: string
+          format: uuid
+        template_id:
+          type: string
+          format: uuid
+        status:
+          type: string
+      required:
+        - user_id
+        - template_id
+        - status
+
+    Notification:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        user_id:
+          type: string
+          format: uuid
+        template_id:
+          type: string
+          format: uuid
+        status:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+      required:
+        - id
+        - user_id
+        - template_id
+        - status
