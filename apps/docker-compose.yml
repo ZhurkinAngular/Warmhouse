@@ -1,25 +1,24 @@
-version: "3.9"
 services:
+  postgres:
+    image: postgres:15
+    container_name: apps-postgres-1
+    environment:
+      POSTGRES_DB: smarthome
+      POSTGRES_USER: smarthome
+      POSTGRES_PASSWORD: smarthome
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+
   temperature-api:
     build: .
+    container_name: apps-temperature-api-1
     ports:
       - "8081:8081"
     depends_on:
       - postgres
-    environment:
-      POSTGRES_HOST: postgres
-      POSTGRES_PORT: 5432
-      POSTGRES_DB: smarthome
-      POSTGRES_USER: smarthome
-      POSTGRES_PASSWORD: smarthome
 
-  postgres:
-    image: postgres:15
-    environment:
-      POSTGRES_USER: smarthome
-      POSTGRES_PASSWORD: smarthome
-      POSTGRES_DB: smarthome
-    volumes:
-      - ./smart_home/init.sql:/docker-entrypoint-initdb.d/init.sql
-    ports:
-      - "5432:5432"
+volumes:
+  pgdata:
